@@ -1,7 +1,8 @@
 package com.metimol.easybook.api.models.response;
 
 import com.google.gson.annotations.SerializedName;
-import com.metimol.easybook.api.models.Book;
+import com.google.gson.annotations.SerializedName;
+import com.metimol.easybook.api.models.BookWithDate;
 
 import java.util.List;
 
@@ -9,9 +10,9 @@ public class BookListResponse {
     @SerializedName("count")
     private int count;
     @SerializedName("items")
-    private List<Book> items;
+    private List<BookWithDate> items;
 
     // Getters
     public int getCount() { return count; }
-    public List<Book> getItems() { return items; }
+    public List<BookWithDate> getItems() { return items; }
 }

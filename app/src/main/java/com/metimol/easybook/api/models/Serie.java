@@ -2,16 +2,18 @@ package com.metimol.easybook.api.models;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Author {
+public class Serie {
     @SerializedName("id")
     private String id;
+
     @SerializedName("name")
     private String name;
-    @SerializedName("surname")
-    private String surname;
+
+    @SerializedName("booksCount")
+    private int booksCount;
 
     // Getters
     public String getId() { return id; }
     public String getName() { return name; }
-    public String getSurname() { return surname; }
+    public int getBooksCount() { return booksCount; }
 }

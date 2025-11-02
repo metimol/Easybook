@@ -25,9 +25,11 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.metimol.easybook.adapter.BookAdapter;
 import com.metimol.easybook.adapter.CategoryAdapter;
 
 public class MainFragment extends Fragment {
@@ -36,7 +38,8 @@ public class MainFragment extends Fragment {
     public static final String IS_FIRST_START_KEY = "is_first_start";
     private RecyclerView shortCategoriesRecyclerView;
     private MainViewModel mainViewModel;
-    CategoryAdapter categoryAdapter;
+    private CategoryAdapter categoryAdapter;
+    private BookAdapter bookAdapter;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -99,6 +102,11 @@ public class MainFragment extends Fragment {
         setupCategoriesRecyclerView();
         observeCategories();
         mainViewModel.fetchCategories();
+
+        setupBooksRecyclerView();
+        observeBooks();
+        requireView().findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+        mainViewModel.fetchBooks();
     }
 
     @Override
@@ -129,6 +137,32 @@ public class MainFragment extends Fragment {
                 }
 
                 categoryAdapter.submitList(shortList);
+            }
+        });
+    }
+
+    private void setupBooksRecyclerView() {
+        bookAdapter = new BookAdapter();
+        RecyclerView booksRecyclerView = requireView().findViewById(R.id.booksRecyclerView);
+        booksRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
+        booksRecyclerView.setAdapter(bookAdapter);
+        booksRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+                GridLayoutManager layoutManager = (GridLayoutManager) recyclerView.getLayoutManager();
+                if (layoutManager != null && layoutManager.findLastCompletelyVisibleItemPosition() == bookAdapter.getItemCount() - 1) {
+                    mainViewModel.fetchBooks();
+                }
+            }
+        });
+    }
+
+    private void observeBooks() {
+        mainViewModel.getBooks().observe(getViewLifecycleOwner(), books -> {
+            if (books != null) {
+                bookAdapter.submitList(books);
+                requireView().findViewById(R.id.progressBar).setVisibility(View.GONE);
             }
         });
     }

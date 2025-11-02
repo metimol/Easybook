@@ -31,6 +31,12 @@ public class QueryBuilder {
         return String.format(Locale.US, format, offset, count, source, id, sort);
     }
 
+    public static String buildBooksWithDatesQuery(int offset, int count, String sort) {
+        String format = "{booksWithDates(offset:%1$s,count:%2$s,sort:%3$s)" +
+                "{count,items{data" + BOOK_FRAGMENT_FIELDS + "}}}";
+        return String.format(Locale.US, format, offset, count, sort);
+    }
+
     public static final String SOURCE_GENRE = "GENRE";
     public static final String SOURCE_AUTHOR = "AUTHOR";
     public static final String SOURCE_SERIE = "SERIE";
