@@ -5,7 +5,7 @@ import java.util.List;
 
 public class Book {
     @SerializedName("id")
-    private int id;
+    private String id;
     @SerializedName("name")
     private String name;
     @SerializedName("urlName")
@@ -15,7 +15,7 @@ public class Book {
     @SerializedName("serie")
     private Serie serie;
     @SerializedName("serieIndex")
-    private int serieIndex;
+    private String serieIndex;
     @SerializedName("aboutBb")
     private String description;
     @SerializedName("authors")
@@ -38,12 +38,12 @@ public class Book {
     private BookFiles files;
 
     // Getters
-    public int getId() { return id; }
+    public String getId() { return id; }
     public String getName() { return name; }
     public String getUrlName() { return urlName; }
     public Genre getGenre() { return genre; }
     public Serie getSerie() { return serie; }
-    public int getSerieIndex() { return serieIndex; }
+    public String getSerieIndex() { return serieIndex; }
     public String getDescription() { return description; }
     public List<Author> getAuthors() { return authors; }
     public List<Author> getReaders() { return readers; }

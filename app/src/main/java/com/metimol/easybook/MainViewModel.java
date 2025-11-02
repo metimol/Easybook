@@ -1,7 +1,6 @@
 package com.metimol.easybook;
 
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -62,26 +61,29 @@ public class MainViewModel extends ViewModel {
             return;
         }
         isLoading = true;
-        ApiService apiService = ApiClient.getRetrofitInstance().create(ApiService.class);
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
         String query = QueryBuilder.buildBooksWithDatesQuery(currentPage * 60, 60, "NEW");
         Call<ApiResponse<BooksWithDatesData>> call = apiService.getBooksWithDates(query, 1);
-        call.enqueue(new Callback<ApiResponse<BooksWithDatesData>>() {
+        call.enqueue(new Callback<>() {
             @Override
-            public void onResponse(Call<ApiResponse<BooksWithDatesData>> call, Response<ApiResponse<BooksWithDatesData>> response) {
+            public void onResponse(@NonNull Call<ApiResponse<BooksWithDatesData>> call, @NonNull Response<ApiResponse<BooksWithDatesData>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Book> newBooks = new ArrayList<>();
                     response.body().getData().getBooksWithDates().getItems().forEach(bookWithDate -> {
                         newBooks.addAll(bookWithDate.getData());
                     });
+
                     if (newBooks.isEmpty()) {
                         isLastPage = true;
                     } else {
                         List<Book> currentBooks = books.getValue();
-                        if (currentBooks == null) {
-                            currentBooks = new ArrayList<>();
+                        List<Book> updatedBooks = new ArrayList<>();
+                        if (currentBooks != null) {
+                            updatedBooks.addAll(currentBooks);
                         }
-                        currentBooks.addAll(newBooks);
-                        books.setValue(currentBooks);
+                        updatedBooks.addAll(newBooks);
+                        books.setValue(updatedBooks);
+
                         currentPage++;
                     }
                 }
@@ -89,7 +91,7 @@ public class MainViewModel extends ViewModel {
             }
 
             @Override
-            public void onFailure(Call<ApiResponse<BooksWithDatesData>> call, Throwable t) {
+            public void onFailure(@NonNull Call<ApiResponse<BooksWithDatesData>> call, Throwable t) {
                 isLoading = false;
             }
         });

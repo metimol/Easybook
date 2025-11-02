@@ -1,6 +1,7 @@
 package com.metimol.easybook.api;
 import com.metimol.easybook.api.models.response.ApiResponse;
 import com.metimol.easybook.api.models.response.BookData;
+import com.metimol.easybook.api.models.response.BooksWithDatesData;
 import com.metimol.easybook.api.models.response.SearchData;
 import com.metimol.easybook.api.models.response.SourceData;
 

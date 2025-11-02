@@ -13,6 +13,8 @@ import com.bumptech.glide.Glide;
 import com.metimol.easybook.R;
 import com.metimol.easybook.api.models.Book;
 
+import java.util.Objects;
+
 public class BookAdapter extends ListAdapter<Book, BookAdapter.BookViewHolder> {
 
     public BookAdapter() {
@@ -22,12 +24,12 @@ public class BookAdapter extends ListAdapter<Book, BookAdapter.BookViewHolder> {
     private static final DiffUtil.ItemCallback<Book> DIFF_CALLBACK = new DiffUtil.ItemCallback<Book>() {
         @Override
         public boolean areItemsTheSame(@NonNull Book oldItem, @NonNull Book newItem) {
-            return oldItem.getId() == newItem.getId();
+            return oldItem.getId().equals(newItem.getId());
         }
 
         @Override
         public boolean areContentsTheSame(@NonNull Book oldItem, @NonNull Book newItem) {
-            return oldItem.getName().equals(newItem.getName());
+            return Objects.equals(oldItem.getName(), newItem.getName());
         }
     };
 

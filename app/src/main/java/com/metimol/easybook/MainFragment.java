@@ -25,6 +25,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -36,7 +37,6 @@ public class MainFragment extends Fragment {
     EditText search;
     public static final String IS_FIRST_START_KEY = "is_first_start";
     private RecyclerView shortCategoriesRecyclerView;
-    private RecyclerView booksRecyclerView;
     private MainViewModel mainViewModel;
     private CategoryAdapter categoryAdapter;
     private BookAdapter bookAdapter;
@@ -143,7 +143,7 @@ public class MainFragment extends Fragment {
 
     private void setupBooksRecyclerView() {
         bookAdapter = new BookAdapter();
-        booksRecyclerView = requireView().findViewById(R.id.booksRecyclerView);
+        RecyclerView booksRecyclerView = requireView().findViewById(R.id.booksRecyclerView);
         booksRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
         booksRecyclerView.setAdapter(bookAdapter);
         booksRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
