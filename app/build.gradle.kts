@@ -48,7 +48,7 @@ dependencies {
     implementation(libs.cardview)
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
-    implementation(libs.gson)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    implementation(libs.logging.interceptor)
 }

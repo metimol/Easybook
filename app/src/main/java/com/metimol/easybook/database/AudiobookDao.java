@@ -40,7 +40,7 @@ public interface AudiobookDao {
     @Query("SELECT * FROM chapters WHERE bookOwnerId = :bookId ORDER BY chapterIndex ASC")
     List<Chapter> getChaptersForBook(String bookId);
 
-    @Transaction // Гарантирует, что чтение Book и Chapter будет атомарным
+    @Transaction
     @Query("SELECT * FROM books WHERE id = :bookId")
     BookWithChapters getBookWithChapters(String bookId);
 
