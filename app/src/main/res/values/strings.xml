@@ -29,4 +29,30 @@
     <string name="skip">Skip</string>
     <string name="category_image_desc">Category image</string>
     <string name="back">Back</string>
+
+    <string-array name="category_names">
+        <item>Fantasy</item>
+        <item>Thriller</item>
+        <item>Drama</item>
+        <item>Business</item>
+        <item>Biography</item>
+        <item>Children</item>
+        <item>History Culture</item>
+        <item>Classic</item>
+        <item>Health</item>
+        <item>Foreign Language</item>
+        <item>Non-Fiction</item>
+        <item>Education</item>
+        <item>Poetry</item>
+        <item>Adventure</item>
+        <item>Psychology</item>
+        <item>Miscellaneous</item>
+        <item>Ranobe</item>
+        <item>Religion</item>
+        <item>Novel</item>
+        <item>True Crime</item>
+        <item>Horror</item>
+        <item>Esoteric</item>
+        <item>Humor</item>
+    </string-array>
 </resources>

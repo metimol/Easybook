@@ -16,7 +16,7 @@
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:paddingHorizontal="10dp"
         android:paddingVertical="12dp">
 
@@ -28,6 +28,10 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+
+            app:layout_constraintBottom_toTopOf="@+id/categoryName"
+            app:layout_constraintVertical_chainStyle="packed"
+
             app:tint="@color/light_grey"
             tools:src="@drawable/ic_category_fantasy"/>
 
@@ -40,16 +44,14 @@
             android:textStyle="normal"
             android:textColor="@color/light_grey"
             android:textSize="13sp"
-
-            android:maxLines="1"
+            android:maxLines="2"
             android:ellipsize="end"
             android:textAlignment="center"
-
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintTop_toBottomOf="@id/categoryImage"
-            tools:text="Fanrasy" />
+            tools:text="Fantasy" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>
