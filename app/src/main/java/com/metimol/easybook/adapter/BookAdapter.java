@@ -1,5 +1,6 @@
 package com.metimol.easybook.adapter;
 
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,15 +50,24 @@ public class BookAdapter extends ListAdapter<Book, BookAdapter.BookViewHolder> {
     static class BookViewHolder extends RecyclerView.ViewHolder {
         private final ImageView bookCover;
         private final TextView bookTitle;
+        private final TextView bookAuthor;
 
         public BookViewHolder(@NonNull View itemView) {
             super(itemView);
             bookCover = itemView.findViewById(R.id.bookCover);
             bookTitle = itemView.findViewById(R.id.bookTitle);
+            bookAuthor = itemView.findViewById(R.id.bookAuthor);
         }
 
         public void bind(Book book) {
             bookTitle.setText(book.getName());
+
+            if (book.getAuthors() != null && !book.getAuthors().isEmpty()) {
+                String Author = book.getAuthors().get(0).getName() + " " + book.getAuthors().get(0).getSurname();
+                bookAuthor.setText(Author);
+            } else {
+                bookAuthor.setText("");
+            }
             Glide.with(itemView.getContext())
                     .load(book.getDefaultPoster())
                     .into(bookCover);

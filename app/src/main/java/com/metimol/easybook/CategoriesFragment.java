@@ -39,6 +39,8 @@ public class CategoriesFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
         categoriesRecyclerView = view.findViewById(R.id.categoriesRecyclerView);
 
+        viewModel.fetchCategories();
+
         MainViewModel mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
         ConstraintLayout categories_container = view.findViewById(R.id.categories_container);
         ImageView iv_back = view.findViewById(R.id.iv_back);
@@ -56,8 +58,6 @@ public class CategoriesFragment extends Fragment {
 
         setupRecyclerView();
         observeCategories();
-
-        viewModel.fetchCategories();
     }
 
     private void setupRecyclerView() {
