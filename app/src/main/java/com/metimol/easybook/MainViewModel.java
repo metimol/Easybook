@@ -12,6 +12,7 @@ import com.metimol.easybook.api.QueryBuilder;
 import com.metimol.easybook.api.models.Book;
 import com.metimol.easybook.api.models.response.ApiResponse;
 import com.metimol.easybook.api.models.response.BooksWithDatesData;
+import com.metimol.easybook.api.models.response.SearchData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,9 +25,10 @@ public class MainViewModel extends AndroidViewModel {
     private final MutableLiveData<Integer> statusBarHeight = new MutableLiveData<>();
     private final MutableLiveData<List<Category>> categories = new MutableLiveData<>();
     private final MutableLiveData<List<Book>> books = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private int currentPage = 0;
-    private boolean isLoading = false;
     private boolean isLastPage = false;
+    private boolean isSearchActive = false;
 
     public MainViewModel(@NonNull Application application) {
         super(application);
@@ -46,6 +48,10 @@ public class MainViewModel extends AndroidViewModel {
 
     public LiveData<List<Book>> getBooks() {
         return books;
+    }
+
+    public LiveData<Boolean> getIsLoading() {
+        return isLoading;
     }
 
     public void fetchCategories() {
@@ -85,10 +91,10 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void fetchBooks() {
-        if (isLoading || isLastPage) {
+        if (Boolean.TRUE.equals(isLoading.getValue()) || isLastPage || isSearchActive) {
             return;
         }
-        isLoading = true;
+        isLoading.setValue(true);
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
         String query = QueryBuilder.buildBooksWithDatesQuery(currentPage * 60, 60, "NEW");
         Call<ApiResponse<BooksWithDatesData>> call = apiService.getBooksWithDates(query, 1);
@@ -97,9 +103,14 @@ public class MainViewModel extends AndroidViewModel {
             public void onResponse(@NonNull Call<ApiResponse<BooksWithDatesData>> call, @NonNull Response<ApiResponse<BooksWithDatesData>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Book> newBooks = new ArrayList<>();
-                    response.body().getData().getBooksWithDates().getItems().forEach(bookWithDate -> {
-                        newBooks.addAll(bookWithDate.getData());
-                    });
+                    BooksWithDatesData data = response.body().getData();
+                    if (data != null && data.getBooksWithDates() != null && data.getBooksWithDates().getItems() != null) {
+                        data.getBooksWithDates().getItems().forEach(bookWithDate -> {
+                            if (bookWithDate != null && bookWithDate.getData() != null) {
+                                newBooks.addAll(bookWithDate.getData());
+                            }
+                        });
+                    }
 
                     if (newBooks.isEmpty()) {
                         isLastPage = true;
@@ -115,13 +126,68 @@ public class MainViewModel extends AndroidViewModel {
                         currentPage++;
                     }
                 }
-                isLoading = false;
+                isLoading.setValue(false);
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<BooksWithDatesData>> call, Throwable t) {
-                isLoading = false;
+                isLoading.setValue(false);
             }
         });
+    }
+
+    public void searchBooks(String query) {
+        if (query == null || query.trim().isEmpty()) {
+            if (isSearchActive) {
+                resetBookList();
+            }
+            return;
+        }
+
+        isSearchActive = true;
+        isLastPage = true;
+        isLoading.setValue(true);
+        books.setValue(new ArrayList<>());
+
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
+
+        String graphQlQuery = QueryBuilder.buildSearchQuery(0, 50, query);
+
+        Call<ApiResponse<SearchData>> call = apiService.searchBooks(graphQlQuery, 1);
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<SearchData>> call, @NonNull Response<ApiResponse<SearchData>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    List<Book> searchResults = new ArrayList<>();
+                    SearchData data = response.body().getData();
+                    if (data.getBookListResponse() != null && data.getBookListResponse().getItems() != null) {
+                        data.getBookListResponse().getItems().forEach(bookWithDate -> {
+                            if (bookWithDate != null && bookWithDate.getData() != null) {
+                                searchResults.addAll(bookWithDate.getData());
+                            }
+                        });
+                    }
+                    books.setValue(searchResults);
+                } else {
+                    books.setValue(new ArrayList<>());
+                }
+                isLoading.setValue(false);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<SearchData>> call, Throwable t) {
+                books.setValue(new ArrayList<>());
+                isLoading.setValue(false);
+            }
+        });
+    }
+
+    public void resetBookList() {
+        isSearchActive = false;
+        isLoading.setValue(false);
+        isLastPage = false;
+        currentPage = 0;
+        books.setValue(new ArrayList<>());
+        fetchBooks();
     }
 }

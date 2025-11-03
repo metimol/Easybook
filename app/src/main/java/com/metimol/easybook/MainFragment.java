@@ -9,6 +9,8 @@ import java.util.List;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.LayoutInflater;
@@ -40,6 +42,10 @@ public class MainFragment extends Fragment {
     private MainViewModel mainViewModel;
     private CategoryAdapter categoryAdapter;
     private BookAdapter bookAdapter;
+
+    private final long SEARCH_DELAY = 500L;
+    private final Handler searchHandler = new Handler(Looper.getMainLooper());
+    private Runnable searchRunnable;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -80,21 +86,29 @@ public class MainFragment extends Fragment {
 
         search.addTextChangedListener(new TextWatcher() {
             @Override
-            public void afterTextChanged(Editable s) {
-                String currentText = s.toString();
-                if (currentText.isEmpty()) {
-                    clear_search.setVisibility(View.GONE);
-                }
-                else {
-                    clear_search.setVisibility(View.VISIBLE);
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if (searchRunnable != null) {
+                    searchHandler.removeCallbacks(searchRunnable);
                 }
             }
 
             @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) { }
+            public void afterTextChanged(Editable s) {
+                String currentText = s.toString();
+                if (currentText.isEmpty()) {
+                    clear_search.setVisibility(View.GONE);
+                } else {
+                    clear_search.setVisibility(View.VISIBLE);
+                }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) { }
+                searchRunnable = () -> {
+                    mainViewModel.searchBooks(currentText);
+                };
+                searchHandler.postDelayed(searchRunnable, SEARCH_DELAY);
+            }
         });
 
         viewCategories.setOnClickListener(v -> navController.navigate(R.id.action_mainFragment_to_categoriesFragment));
@@ -105,7 +119,11 @@ public class MainFragment extends Fragment {
 
         setupBooksRecyclerView();
         observeBooks();
-        requireView().findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+
+        mainViewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            requireView().findViewById(R.id.progressBar).setVisibility(isLoading ? View.VISIBLE : View.GONE);
+        });
+
         mainViewModel.fetchBooks();
     }
 
@@ -117,25 +135,21 @@ public class MainFragment extends Fragment {
 
     private void setupCategoriesRecyclerView() {
         categoryAdapter = new CategoryAdapter();
-
         shortCategoriesRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
         );
-
         shortCategoriesRecyclerView.setAdapter(categoryAdapter);
     }
 
     private void observeCategories() {
         mainViewModel.getCategories().observe(getViewLifecycleOwner(), categories -> {
             if (categories != null && !categories.isEmpty()) {
-
                 List<Category> shortList;
                 if (categories.size() > 5) {
                     shortList = categories.subList(0, 5);
                 } else {
                     shortList = categories;
                 }
-
                 categoryAdapter.submitList(shortList);
             }
         });
@@ -162,7 +176,6 @@ public class MainFragment extends Fragment {
         mainViewModel.getBooks().observe(getViewLifecycleOwner(), books -> {
             if (books != null) {
                 bookAdapter.submitList(books);
-                requireView().findViewById(R.id.progressBar).setVisibility(View.GONE);
             }
         });
     }
@@ -171,11 +184,9 @@ public class MainFragment extends Fragment {
         if (tvName == null) {
             return;
         }
-
         Calendar calendar = Calendar.getInstance();
         int hourOfDay = calendar.get(Calendar.HOUR_OF_DAY);
         int greetingResId;
-
         if (hourOfDay >= 5 && hourOfDay < 12) {
             greetingResId = R.string.good_morning;
         }
@@ -188,7 +199,6 @@ public class MainFragment extends Fragment {
         else {
             greetingResId = R.string.good_night;
         }
-
         tvName.setText(greetingResId);
     }
 }
