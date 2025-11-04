@@ -179,8 +179,6 @@
             android:id="@+id/booksRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:clipToPadding="false"
-            android:paddingHorizontal="10dp"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:spanCount="3"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"
