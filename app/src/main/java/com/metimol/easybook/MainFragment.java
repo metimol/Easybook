@@ -36,6 +36,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.metimol.easybook.adapter.BookAdapter;
 import com.metimol.easybook.adapter.CategoryAdapter;
+import com.metimol.easybook.api.models.Book;
 import com.metimol.easybook.utils.GridSpacingItemDecoration;
 import com.metimol.easybook.utils.HorizontalSpacingItemDecoration;
 
@@ -52,7 +53,6 @@ public class MainFragment extends Fragment {
     private CardView searchCard;
     private CoordinatorLayout coordinator;
     private View noInternetView;
-    private Button btnRetry;
 
     private final long SEARCH_DELAY = 500L;
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
@@ -75,8 +75,8 @@ public class MainFragment extends Fragment {
         searchCard = view.findViewById(R.id.search_card);
         coordinator = view.findViewById(R.id.coordinator);
         noInternetView = view.findViewById(R.id.no_internet_view);
-        btnRetry = view.findViewById(R.id.btn_retry);
 
+        Button btnRetry = view.findViewById(R.id.btn_retry);
         ImageView clear_search = view.findViewById(R.id.clear_search);
         ConstraintLayout header = view.findViewById(R.id.header);
         TextView viewCategories = view.findViewById(R.id.viewCategories);
@@ -146,7 +146,15 @@ public class MainFragment extends Fragment {
         observeBooks();
 
         mainViewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
-            requireView().findViewById(R.id.progressBar).setVisibility(isLoading ? View.VISIBLE : View.GONE);
+            List<Book> currentBooks = mainViewModel.getBooks().getValue();
+            boolean isListEmpty = (currentBooks == null || currentBooks.isEmpty());
+
+            if (isLoading && isListEmpty) {
+                requireView().findViewById(R.id.progressBar).setVisibility(View.VISIBLE);
+            } else {
+                requireView().findViewById(R.id.progressBar).setVisibility(View.GONE);
+            }
+
             if (!isLoading) {
                 Boolean isError = mainViewModel.getLoadError().getValue();
                 if (isError != null && isError) {
@@ -229,15 +237,6 @@ public class MainFragment extends Fragment {
         mainViewModel.getBooks().observe(getViewLifecycleOwner(), books -> {
             if (books != null) {
                 bookAdapter.submitList(books);
-            }
-        });
-    }
-
-    private void observeLoadError() {
-        mainViewModel.getLoadError().observe(getViewLifecycleOwner(), isError -> {
-            Boolean isLoading = mainViewModel.getIsLoading().getValue();
-            if (isError != null && isError && (isLoading == null || !isLoading)) {
-                showErrorView();
             }
         });
     }
