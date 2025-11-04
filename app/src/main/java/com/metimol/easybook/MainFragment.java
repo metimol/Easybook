@@ -5,7 +5,6 @@ import static com.metimol.easybook.MainActivity.dpToPx;
 
 import java.util.Calendar;
 import java.util.List;
-import java.util.Objects;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -17,13 +16,16 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.cardview.widget.CardView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
@@ -47,6 +49,11 @@ public class MainFragment extends Fragment {
     private CategoryAdapter categoryAdapter;
     private BookAdapter bookAdapter;
 
+    private CardView searchCard;
+    private CoordinatorLayout coordinator;
+    private View noInternetView;
+    private Button btnRetry;
+
     private final long SEARCH_DELAY = 500L;
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
     private Runnable searchRunnable;
@@ -65,6 +72,10 @@ public class MainFragment extends Fragment {
         search = view.findViewById(R.id.search);
         shortCategoriesRecyclerView = requireView().findViewById(R.id.shortCategoriesRecyclerView);
         categoriesHeader = requireView().findViewById(R.id.categories_header);
+        searchCard = view.findViewById(R.id.search_card);
+        coordinator = view.findViewById(R.id.coordinator);
+        noInternetView = view.findViewById(R.id.no_internet_view);
+        btnRetry = view.findViewById(R.id.btn_retry);
 
         ImageView clear_search = view.findViewById(R.id.clear_search);
         ConstraintLayout header = view.findViewById(R.id.header);
@@ -122,6 +133,11 @@ public class MainFragment extends Fragment {
 
         viewCategories.setOnClickListener(v -> navController.navigate(R.id.action_mainFragment_to_categoriesFragment));
 
+        btnRetry.setOnClickListener(v -> {
+            mainViewModel.fetchCategories();
+            mainViewModel.fetchBooks();
+        });
+
         setupCategoriesRecyclerView();
         observeCategories();
         mainViewModel.fetchCategories();
@@ -131,6 +147,18 @@ public class MainFragment extends Fragment {
 
         mainViewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
             requireView().findViewById(R.id.progressBar).setVisibility(isLoading ? View.VISIBLE : View.GONE);
+            if (isLoading) {
+                searchCard.setVisibility(View.GONE);
+                coordinator.setVisibility(View.GONE);
+                noInternetView.setVisibility(View.GONE);
+            } else {
+                Boolean isError = mainViewModel.getLoadError().getValue();
+                if (isError != null && isError) {
+                    showErrorView();
+                } else {
+                    showContent();
+                }
+            }
         });
 
         mainViewModel.fetchBooks();
@@ -207,6 +235,27 @@ public class MainFragment extends Fragment {
                 bookAdapter.submitList(books);
             }
         });
+    }
+
+    private void observeLoadError() {
+        mainViewModel.getLoadError().observe(getViewLifecycleOwner(), isError -> {
+            Boolean isLoading = mainViewModel.getIsLoading().getValue();
+            if (isError != null && isError && (isLoading == null || !isLoading)) {
+                showErrorView();
+            }
+        });
+    }
+
+    private void showContent() {
+        searchCard.setVisibility(View.VISIBLE);
+        coordinator.setVisibility(View.VISIBLE);
+        noInternetView.setVisibility(View.GONE);
+    }
+
+    private void showErrorView() {
+        searchCard.setVisibility(View.GONE);
+        coordinator.setVisibility(View.GONE);
+        noInternetView.setVisibility(View.VISIBLE);
     }
 
     private void setGreetingText() {

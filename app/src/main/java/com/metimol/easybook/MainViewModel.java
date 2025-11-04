@@ -26,6 +26,7 @@ public class MainViewModel extends AndroidViewModel {
     private final MutableLiveData<List<Category>> categories = new MutableLiveData<>();
     private final MutableLiveData<List<Book>> books = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> loadError = new MutableLiveData<>(false);
     private int currentPage = 0;
     private boolean isLastPage = false;
     private boolean isSearchActive = false;
@@ -52,6 +53,10 @@ public class MainViewModel extends AndroidViewModel {
 
     public LiveData<Boolean> getIsLoading() {
         return isLoading;
+    }
+
+    public LiveData<Boolean> getLoadError() {
+        return loadError;
     }
 
     public void fetchCategories() {
@@ -94,7 +99,13 @@ public class MainViewModel extends AndroidViewModel {
         if (Boolean.TRUE.equals(isLoading.getValue()) || isLastPage || isSearchActive) {
             return;
         }
+
         isLoading.setValue(true);
+
+        if (currentPage == 0) {
+            loadError.setValue(false);
+        }
+
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
         String query = QueryBuilder.buildBooksWithDatesQuery(currentPage * 60, 60, "NEW");
         Call<ApiResponse<BooksWithDatesData>> call = apiService.getBooksWithDates(query, 1);
@@ -102,6 +113,8 @@ public class MainViewModel extends AndroidViewModel {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<BooksWithDatesData>> call, @NonNull Response<ApiResponse<BooksWithDatesData>> response) {
                 if (response.isSuccessful() && response.body() != null) {
+                    loadError.setValue(false);
+
                     List<Book> newBooks = new ArrayList<>();
                     BooksWithDatesData data = response.body().getData();
                     if (data != null && data.getBooksWithDates() != null && data.getBooksWithDates().getItems() != null) {
@@ -125,12 +138,20 @@ public class MainViewModel extends AndroidViewModel {
 
                         currentPage++;
                     }
+                } else {
+                    if (currentPage == 0) {
+                        loadError.setValue(true);
+                    }
                 }
+
                 isLoading.setValue(false);
             }
 
             @Override
             public void onFailure(@NonNull Call<ApiResponse<BooksWithDatesData>> call, @NonNull Throwable t) {
+                if (currentPage == 0) {
+                    loadError.setValue(true);
+                }
                 isLoading.setValue(false);
             }
         });
@@ -149,6 +170,8 @@ public class MainViewModel extends AndroidViewModel {
         isLoading.setValue(true);
         books.setValue(new ArrayList<>());
 
+        loadError.setValue(false);
+
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
 
         String graphQlQuery = QueryBuilder.buildSearchQuery(0, 50, query);
@@ -158,6 +181,8 @@ public class MainViewModel extends AndroidViewModel {
             @Override
             public void onResponse(@NonNull Call<ApiResponse<SearchData>> call, @NonNull Response<ApiResponse<SearchData>> response) {
                 if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    loadError.setValue(false);
+
                     List<Book> searchResults = new ArrayList<>();
                     SearchData data = response.body().getData();
                     if (data.getBookListResponse() != null && data.getBookListResponse().getItems() != null) {
@@ -167,6 +192,7 @@ public class MainViewModel extends AndroidViewModel {
                     books.setValue(searchResults);
                 } else {
                     books.setValue(new ArrayList<>());
+                    loadError.setValue(true);
                 }
                 isLoading.setValue(false);
             }
@@ -174,6 +200,7 @@ public class MainViewModel extends AndroidViewModel {
             @Override
             public void onFailure(@NonNull Call<ApiResponse<SearchData>> call, @NonNull Throwable t) {
                 books.setValue(new ArrayList<>());
+                loadError.setValue(true);
                 isLoading.setValue(false);
             }
         });

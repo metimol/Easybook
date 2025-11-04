@@ -22,14 +22,17 @@
     <string name="clear_search">Clear search</string>
     <string name="categories">Categories</string>
     <string name="view_more">View more</string>
+    <string name="try_again">Try again</string>
+    <string name="unknown">Unknown</string>
+    <string name="no_internet_connection">No Internet connection</string>
+    <string name="could_not_load_books">Could not load books</string>
+    <string name="no_internet">No Internet</string>
 
     <!--Categories Screen-->
     <string name="category_icon">Category Icon</string>
     <string name="categories_title">Categories</string>
-    <string name="skip">Skip</string>
     <string name="category_image_desc">Category image</string>
     <string name="back">Back</string>
-    <string name="unknown">Unknown</string>
 
     <string-array name="category_names">
         <item>Fantasy</item>
