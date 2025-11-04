@@ -63,18 +63,25 @@ public class CategoriesFragment extends Fragment {
 
     private void setupRecyclerView() {
         categoryAdapter = new CategoryAdapter(R.layout.category_button_grid);
-
-        categoriesRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
         categoriesRecyclerView.setAdapter(categoryAdapter);
 
-        int spanCount = 3;
-        int spacing = (int) (20 * getResources().getDisplayMetrics().density);
-        boolean includeEdge = false;
-        int edgeSpacing = (int) (3 * getResources().getDisplayMetrics().density);
+        int spanCount = 0;
 
-        categoriesRecyclerView.addItemDecoration(
-                new GridSpacingItemDecoration(spanCount, spacing, includeEdge, edgeSpacing)
-        );
+        RecyclerView.LayoutManager manager = categoriesRecyclerView.getLayoutManager();
+
+        if (manager instanceof GridLayoutManager) {
+            spanCount = ((GridLayoutManager) manager).getSpanCount();
+        }
+
+        if (spanCount > 0) {
+            int spacing = (int) (20 * getResources().getDisplayMetrics().density);
+            boolean includeEdge = false;
+            int edgeSpacing = (int) (3 * getResources().getDisplayMetrics().density);
+
+            categoriesRecyclerView.addItemDecoration(
+                    new GridSpacingItemDecoration(spanCount, spacing, includeEdge, edgeSpacing)
+            );
+        }
     }
 
     private void observeCategories() {

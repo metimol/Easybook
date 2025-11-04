@@ -44,6 +44,7 @@ public class MainFragment extends Fragment {
     TextView tvName;
     EditText search;
     public static final String IS_FIRST_START_KEY = "is_first_start";
+    private ConstraintLayout header;
     private RecyclerView shortCategoriesRecyclerView;
     private ConstraintLayout categoriesHeader;
     private MainViewModel mainViewModel;
@@ -68,6 +69,7 @@ public class MainFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         mainViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+        header = view.findViewById(R.id.header);
         tvName = view.findViewById(R.id.tvName);
         search = view.findViewById(R.id.search);
         shortCategoriesRecyclerView = requireView().findViewById(R.id.shortCategoriesRecyclerView);
@@ -76,9 +78,9 @@ public class MainFragment extends Fragment {
         coordinator = view.findViewById(R.id.coordinator);
         noInternetView = view.findViewById(R.id.no_internet_view);
 
+        ConstraintLayout clMainFragment = view.findViewById(R.id.clMainFragment);
         Button btnRetry = view.findViewById(R.id.btn_retry);
         ImageView clear_search = view.findViewById(R.id.clear_search);
-        ConstraintLayout header = view.findViewById(R.id.header);
         TextView viewCategories = view.findViewById(R.id.viewCategories);
 
         Context context = requireContext();
@@ -89,14 +91,25 @@ public class MainFragment extends Fragment {
             navController.navigate(R.id.action_mainFragment_to_startScreenFragment);
         }
 
-        mainViewModel.getStatusBarHeight().observe(getViewLifecycleOwner(), height -> {
-            header.setPaddingRelative(
-                    header.getPaddingStart(),
-                    height + dpToPx(20, context),
-                    header.getPaddingEnd(),
-                    header.getPaddingBottom()
-            );
-        });
+        if (header!=null) {
+            mainViewModel.getStatusBarHeight().observe(getViewLifecycleOwner(), height -> {
+                header.setPaddingRelative(
+                        header.getPaddingStart(),
+                        height + dpToPx(20, context),
+                        header.getPaddingEnd(),
+                        header.getPaddingBottom()
+                );
+            });
+        } else {
+            mainViewModel.getStatusBarHeight().observe(getViewLifecycleOwner(), height -> {
+                clMainFragment.setPaddingRelative(
+                        clMainFragment.getPaddingStart(),
+                        height,
+                        clMainFragment.getPaddingEnd(),
+                        clMainFragment.getPaddingBottom()
+                );
+            });
+        }
 
         clear_search.setOnClickListener(v -> search.setText(""));
 
@@ -171,7 +184,10 @@ public class MainFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        setGreetingText();
+
+        if (header!=null) {
+            setGreetingText();
+        }
     }
 
     private void setupCategoriesRecyclerView() {
@@ -205,8 +221,12 @@ public class MainFragment extends Fragment {
     private void setupBooksRecyclerView() {
         bookAdapter = new BookAdapter();
         RecyclerView booksRecyclerView = requireView().findViewById(R.id.booksRecyclerView);
+        RecyclerView.LayoutManager layoutManager = booksRecyclerView.getLayoutManager();
 
         int spanCount = 3;
+        if (layoutManager != null) {
+            spanCount = ((GridLayoutManager) layoutManager).getSpanCount();
+        }
 
         int spacingInPixels = dpToPx(12, requireContext());
         int edgeSpacingInPixels = dpToPx(10, requireContext());
