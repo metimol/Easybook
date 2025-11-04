@@ -18,6 +18,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.metimol.easybook.adapter.CategoryAdapter;
+import com.metimol.easybook.utils.GridSpacingItemDecoration;
 
 public class CategoriesFragment extends Fragment {
 
@@ -61,9 +62,19 @@ public class CategoriesFragment extends Fragment {
     }
 
     private void setupRecyclerView() {
-        categoryAdapter = new CategoryAdapter();
+        categoryAdapter = new CategoryAdapter(R.layout.category_button_grid);
+
         categoriesRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), 3));
         categoriesRecyclerView.setAdapter(categoryAdapter);
+
+        int spanCount = 3;
+        int spacing = (int) (20 * getResources().getDisplayMetrics().density);
+        boolean includeEdge = false;
+        int edgeSpacing = (int) (3 * getResources().getDisplayMetrics().density);
+
+        categoriesRecyclerView.addItemDecoration(
+                new GridSpacingItemDecoration(spanCount, spacing, includeEdge, edgeSpacing)
+        );
     }
 
     private void observeCategories() {

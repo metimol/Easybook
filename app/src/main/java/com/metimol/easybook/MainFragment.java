@@ -33,6 +33,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.metimol.easybook.adapter.BookAdapter;
 import com.metimol.easybook.adapter.CategoryAdapter;
+import com.metimol.easybook.utils.HorizontalSpacingItemDecoration;
 
 public class MainFragment extends Fragment {
     TextView tvName;
@@ -140,19 +141,25 @@ public class MainFragment extends Fragment {
     }
 
     private void setupCategoriesRecyclerView() {
-        categoryAdapter = new CategoryAdapter();
+        categoryAdapter = new CategoryAdapter(R.layout.category_button_horizontal);
         shortCategoriesRecyclerView.setLayoutManager(
                 new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
         );
         shortCategoriesRecyclerView.setAdapter(categoryAdapter);
+
+        int spacingInPixels = (int) (8 * getResources().getDisplayMetrics().density);
+
+        shortCategoriesRecyclerView.addItemDecoration(
+                new HorizontalSpacingItemDecoration(spacingInPixels)
+        );
     }
 
     private void observeCategories() {
         mainViewModel.getCategories().observe(getViewLifecycleOwner(), categories -> {
             if (categories != null && !categories.isEmpty()) {
                 List<Category> shortList;
-                if (categories.size() > 5) {
-                    shortList = categories.subList(0, 5);
+                if (categories.size() > 6) {
+                    shortList = categories.subList(0, 6);
                 } else {
                     shortList = categories;
                 }

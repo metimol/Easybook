@@ -15,9 +15,11 @@ import com.metimol.easybook.R;
 import com.metimol.easybook.Category;
 
 public class CategoryAdapter extends ListAdapter<Category, CategoryAdapter.CategoryViewHolder> {
+    private final int layoutId;
 
-    public CategoryAdapter() {
+    public CategoryAdapter(int layoutId) {
         super(DIFF_CALLBACK);
+        this.layoutId = layoutId;
     }
 
     private static final DiffUtil.ItemCallback<Category> DIFF_CALLBACK = new DiffUtil.ItemCallback<Category>() {
@@ -36,7 +38,7 @@ public class CategoryAdapter extends ListAdapter<Category, CategoryAdapter.Categ
     @Override
     public CategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.category_button, parent, false);
+                .inflate(this.layoutId, parent, false);
         return new CategoryViewHolder(view);
     }
 

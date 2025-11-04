@@ -165,13 +165,14 @@
                 android:id="@+id/shortCategoriesRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:clipToPadding="false"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 android:orientation="horizontal"
-                android:layout_marginTop="10dp"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="3dp"
+                android:clipToPadding="false"
                 app:layout_scrollFlags="scroll|enterAlways"
                 tools:orientation="horizontal"
-                tools:listitem="@layout/category_button" />
+                tools:listitem="@layout/category_button_horizontal" />
 
         </com.google.android.material.appbar.AppBarLayout>
 
