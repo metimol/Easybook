@@ -34,6 +34,8 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+
 import com.metimol.easybook.adapter.BookAdapter;
 import com.metimol.easybook.adapter.CategoryAdapter;
 import com.metimol.easybook.api.models.Book;
@@ -49,6 +51,8 @@ public class MainFragment extends Fragment {
     private ConstraintLayout categoriesHeader;
     private MainViewModel mainViewModel;
     private CategoryAdapter categoryAdapter;
+    private RecyclerView booksRecyclerView;
+    private FloatingActionButton fabScrollToTop;
     private BookAdapter bookAdapter;
 
     private CardView searchCard;
@@ -77,6 +81,8 @@ public class MainFragment extends Fragment {
         searchCard = view.findViewById(R.id.search_card);
         coordinator = view.findViewById(R.id.coordinator);
         noInternetView = view.findViewById(R.id.no_internet_view);
+        booksRecyclerView = requireView().findViewById(R.id.booksRecyclerView);
+        fabScrollToTop = view.findViewById(R.id.fab_scroll_to_top);
 
         ConstraintLayout clMainFragment = view.findViewById(R.id.clMainFragment);
         Button btnRetry = view.findViewById(R.id.btn_retry);
@@ -145,6 +151,25 @@ public class MainFragment extends Fragment {
                 searchHandler.postDelayed(searchRunnable, SEARCH_DELAY);
             }
         });
+
+        booksRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
+                super.onScrolled(recyclerView, dx, dy);
+
+                if (dy > 0 && fabScrollToTop.getVisibility() == View.VISIBLE) {
+                    fabScrollToTop.hide();
+                } else if (dy < 0 && fabScrollToTop.getVisibility() != View.VISIBLE) {
+                    fabScrollToTop.show();
+                }
+
+                if (!recyclerView.canScrollVertically(-1) && fabScrollToTop.getVisibility() == View.VISIBLE) {
+                    fabScrollToTop.hide();
+                }
+            }
+        });
+
+        fabScrollToTop.setOnClickListener(v -> booksRecyclerView.smoothScrollToPosition(0));
 
         viewCategories.setOnClickListener(v -> navController.navigate(R.id.action_mainFragment_to_categoriesFragment));
 
@@ -222,7 +247,6 @@ public class MainFragment extends Fragment {
 
     private void setupBooksRecyclerView() {
         bookAdapter = new BookAdapter();
-        RecyclerView booksRecyclerView = requireView().findViewById(R.id.booksRecyclerView);
         RecyclerView.LayoutManager layoutManager = booksRecyclerView.getLayoutManager();
 
         int spanCount = 3;
