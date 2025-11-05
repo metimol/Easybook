@@ -82,6 +82,7 @@ public class MainFragment extends Fragment {
         Button btnRetry = view.findViewById(R.id.btn_retry);
         ImageView clear_search = view.findViewById(R.id.clear_search);
         TextView viewCategories = view.findViewById(R.id.viewCategories);
+        ConstraintLayout nav_item1 = view.findViewById(R.id.nav_item1);
 
         Context context = requireContext();
         SharedPreferences sharedPreferences = context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
@@ -112,6 +113,7 @@ public class MainFragment extends Fragment {
         }
 
         clear_search.setOnClickListener(v -> search.setText(""));
+        nav_item1.setOnClickListener(v -> reloadPage());
 
         search.addTextChangedListener(new TextWatcher() {
             @Override
@@ -293,5 +295,24 @@ public class MainFragment extends Fragment {
             greetingResId = R.string.good_night;
         }
         tvName.setText(greetingResId);
+    }
+
+    public void reloadPage() {
+        RecyclerView booksRecyclerView = requireView().findViewById(R.id.booksRecyclerView);
+        if (booksRecyclerView != null) {
+            booksRecyclerView.scrollToPosition(0);
+        }
+
+        if (shortCategoriesRecyclerView != null) {
+            shortCategoriesRecyclerView.scrollToPosition(0);
+        }
+
+        if (search != null) {
+            search.setText("");
+        }
+
+        if (mainViewModel != null) {
+            mainViewModel.resetBookList();
+        }
     }
 }

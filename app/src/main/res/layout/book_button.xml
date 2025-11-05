@@ -30,7 +30,7 @@
             android:layout_height="match_parent"
             android:contentDescription="@string/category_icon"
             android:scaleType="centerCrop"
-            tools:src="@drawable/witcher"/>
+            tools:src="@drawable/ic_placeholder_book"/>
 
     </androidx.cardview.widget.CardView>
 
