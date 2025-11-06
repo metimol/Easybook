@@ -169,7 +169,26 @@ public class MainFragment extends Fragment {
             }
         });
 
-        fabScrollToTop.setOnClickListener(v -> booksRecyclerView.smoothScrollToPosition(0));
+        fabScrollToTop.setOnClickListener(v -> {
+            RecyclerView.LayoutManager layoutManager = booksRecyclerView.getLayoutManager();
+            LinearLayoutManager linearLayoutManager = (LinearLayoutManager) layoutManager;
+
+            assert linearLayoutManager != null;
+            int firstVisibleItemPosition = linearLayoutManager.findFirstVisibleItemPosition();
+            int scrollThreshold = 30;
+            int jumpToPosition = 10;
+
+            if (firstVisibleItemPosition > scrollThreshold) {
+                booksRecyclerView.scrollToPosition(jumpToPosition);
+
+                booksRecyclerView.post(() -> {
+                    booksRecyclerView.smoothScrollToPosition(0);
+                });
+
+            } else {
+                booksRecyclerView.smoothScrollToPosition(0);
+            }
+        });
 
         viewCategories.setOnClickListener(v -> navController.navigate(R.id.action_mainFragment_to_categoriesFragment));
 
