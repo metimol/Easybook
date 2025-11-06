@@ -14,6 +14,7 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -66,8 +67,12 @@ public class CategoriesFragment extends Fragment {
         categoriesRecyclerView.setAdapter(categoryAdapter);
 
         categoryAdapter.setOnCategoryClickListener(category -> {
-            viewModel.fetchBooksByGenre(category.getId());
-            requireActivity().onBackPressed();
+            Bundle bundle = new Bundle();
+            bundle.putString("categoryId", category.getId());
+            bundle.putString("categoryName", category.getName());
+
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_categoriesFragment_to_booksCollectionFragment, bundle);
         });
 
         int spanCount = 0;

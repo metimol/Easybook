@@ -62,6 +62,10 @@ public class MainViewModel extends AndroidViewModel {
         return loadError;
     }
 
+    public boolean isGenreSearchActive() {
+        return currentGenreId != null;
+    }
+
     public void fetchCategories() {
         List<Category> categoryList = new ArrayList<>();
         String[] categoryNames = getApplication().getResources().getStringArray(R.array.category_names);
@@ -96,6 +100,12 @@ public class MainViewModel extends AndroidViewModel {
         }
 
         categories.setValue(categoryList);
+    }
+
+    public void clearBookList() {
+        books.setValue(new ArrayList<>());
+        currentPage = 0;
+        isLastPage = false;
     }
 
     public void loadMoreBooks() {
@@ -201,9 +211,7 @@ public class MainViewModel extends AndroidViewModel {
     public void fetchBooksByGenre(String genreId) {
         currentGenreId = genreId;
         isSearchActive = false;
-        currentPage = 0;
-        isLastPage = false;
-        books.setValue(new ArrayList<>());
+        clearBookList();
         loadError.setValue(false);
 
         loadMoreBooks();
@@ -220,9 +228,8 @@ public class MainViewModel extends AndroidViewModel {
         isSearchActive = true;
         currentGenreId = null;
         isLastPage = true;
-        currentPage = 0;
         isLoading.setValue(true);
-        books.setValue(new ArrayList<>());
+        clearBookList();
         loadError.setValue(false);
 
         ApiService apiService = ApiClient.getClient().create(ApiService.class);
@@ -260,9 +267,7 @@ public class MainViewModel extends AndroidViewModel {
         isSearchActive = false;
         currentGenreId = null;
         isLoading.setValue(false);
-        isLastPage = false;
-        currentPage = 0;
-        books.setValue(new ArrayList<>());
+        clearBookList();
         loadError.setValue(false);
 
         loadMoreBooks();

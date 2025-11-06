@@ -224,7 +224,11 @@ public class MainFragment extends Fragment {
             }
         });
 
-        mainViewModel.loadMoreBooks();
+        if (mainViewModel.isGenreSearchActive()) {
+            mainViewModel.resetBookList();
+        } else if (mainViewModel.getBooks().getValue() == null || mainViewModel.getBooks().getValue().isEmpty()) {
+            mainViewModel.loadMoreBooks();
+        }
     }
 
     @Override
@@ -248,6 +252,15 @@ public class MainFragment extends Fragment {
         shortCategoriesRecyclerView.addItemDecoration(
                 new HorizontalSpacingItemDecoration(spacingInPixels)
         );
+
+        categoryAdapter.setOnCategoryClickListener(category -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("categoryId", category.getId());
+            bundle.putString("categoryName", category.getName());
+
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_mainFragment_to_booksCollectionFragment, bundle);
+        });
     }
 
     private void observeCategories() {

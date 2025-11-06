@@ -54,7 +54,14 @@
         android:id="@+id/booksCollectionFragment"
         android:name="com.metimol.easybook.BooksCollectionFragment"
         android:label="BooksCollectionFragment"
-        tools:layout="@layout/fragment_books_collection" />
+        tools:layout="@layout/fragment_books_collection" >
+        <argument
+            android:name="categoryId"
+            app:argType="string" />
+        <argument
+            android:name="categoryName"
+            app:argType="string" />
+    </fragment>
 
 </navigation>
 
