@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="com.metimol.easybook" />
+                  <option name="mobileSdkAppId" value="1:1079775351617:android:ef8ce15666747ea0b787c0" />
+                  <option name="projectId" value="easybook-93a5e" />
+                  <option name="projectNumber" value="1079775351617" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

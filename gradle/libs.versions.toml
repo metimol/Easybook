@@ -14,6 +14,8 @@ room = "2.8.2"
 kotlin = "2.0.21"
 ksp = "2.0.21-1.0.27"
 swiperefreshlayout = "1.1.0"
+firebaseBom = "34.4.0"
+googleServices = "4.4.4"
 
 [libraries]
 cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
@@ -31,9 +33,12 @@ retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
 
