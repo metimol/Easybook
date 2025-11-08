@@ -86,7 +86,7 @@ public class BooksCollectionFragment extends Fragment {
         booksCollectionRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
 
         int spacingInPixels = dpToPx(12, requireContext());
-        int edgeSpacingInPixels = dpToPx(10, requireContext());
+        int edgeSpacingInPixels = dpToPx(0, requireContext());
 
         booksCollectionRecyclerView.addItemDecoration(new GridSpacingItemDecoration(
                 spanCount,
