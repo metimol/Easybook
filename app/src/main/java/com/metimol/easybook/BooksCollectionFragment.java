@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -23,7 +24,10 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import com.metimol.easybook.adapter.BookAdapter;
+import com.metimol.easybook.api.models.Book;
 import com.metimol.easybook.utils.GridSpacingItemDecoration;
+
+import java.util.List;
 
 public class BooksCollectionFragment extends Fragment {
     private MainViewModel viewModel;
@@ -32,6 +36,7 @@ public class BooksCollectionFragment extends Fragment {
     private String categoryId;
     private String categoryName;
     private FloatingActionButton fabScrollToTop;
+    private View no_internet_view_collections;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -55,10 +60,13 @@ public class BooksCollectionFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
         booksCollectionRecyclerView = view.findViewById(R.id.booksCollectionRecyclerView);
         fabScrollToTop = view.findViewById(R.id.fab_scroll_to_top_collections);
+        no_internet_view_collections = view.findViewById(R.id.no_internet_view_collections);
 
         ImageView ivBack = view.findViewById(R.id.iv_collection_back);
         TextView tvTitle = view.findViewById(R.id.textViewCollectionTitle);
         ConstraintLayout collections_container = view.findViewById(R.id.collections_container);
+        Button btn_retry_collections = view.findViewById(R.id.btn_retry_collections);
+
         Context context = requireContext();
 
         if (categoryName != null) {
@@ -77,7 +85,26 @@ public class BooksCollectionFragment extends Fragment {
 
         setupRecyclerView();
         observeBooks();
-        // observeLoading(); // TODO: Add progressbar
+
+        viewModel.getIsLoading().observe(getViewLifecycleOwner(), isLoading -> {
+            List<Book> currentBooks = viewModel.getBooks().getValue();
+            boolean isListEmpty = (currentBooks == null || currentBooks.isEmpty());
+
+            if (isLoading && isListEmpty) {
+                requireView().findViewById(R.id.progressBarCollections).setVisibility(View.VISIBLE);
+            } else {
+                requireView().findViewById(R.id.progressBarCollections).setVisibility(View.GONE);
+            }
+
+            if (!isLoading) {
+                Boolean isError = viewModel.getLoadError().getValue();
+                if (isError != null && isError) {
+                    showErrorView();
+                } else {
+                    showContent();
+                }
+            }
+        });
 
         if (categoryId != null) {
             viewModel.fetchBooksByGenre(categoryId);
@@ -120,6 +147,22 @@ public class BooksCollectionFragment extends Fragment {
                 booksCollectionRecyclerView.smoothScrollToPosition(0);
             }
         });
+
+        btn_retry_collections.setOnClickListener(v -> {
+            if (categoryId != null) {
+                viewModel.fetchBooksByGenre(categoryId);
+            }
+        });
+    }
+
+    private void showErrorView() {
+        no_internet_view_collections.setVisibility(View.VISIBLE);
+        booksCollectionRecyclerView.setVisibility(View.GONE);
+    }
+
+    private void showContent() {
+        no_internet_view_collections.setVisibility(View.GONE);
+        booksCollectionRecyclerView.setVisibility(View.VISIBLE);
     }
 
     private void setupRecyclerView() {
