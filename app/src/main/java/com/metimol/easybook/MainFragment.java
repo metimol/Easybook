@@ -64,6 +64,7 @@ public class MainFragment extends Fragment {
     private CardView searchCard;
     private CoordinatorLayout coordinator;
     private View noInternetView;
+    private View not_found_view;
 
     private final long SEARCH_DELAY = 500L;
     private final Handler searchHandler = new Handler(Looper.getMainLooper());
@@ -87,6 +88,7 @@ public class MainFragment extends Fragment {
         searchCard = view.findViewById(R.id.search_card);
         coordinator = view.findViewById(R.id.coordinator);
         noInternetView = view.findViewById(R.id.no_internet_view);
+        not_found_view = view.findViewById(R.id.not_found_view);
         booksRecyclerView = requireView().findViewById(R.id.booksRecyclerView);
         fabScrollToTop = view.findViewById(R.id.fab_scroll_to_top);
 
@@ -370,13 +372,19 @@ public class MainFragment extends Fragment {
                 boolean isSearchActive = search.getText() != null && search.getText().length() > 0;
 
                 if (isSearchActive) {
-                    if (!books.isEmpty()) {
-                        books_header.setVisibility(View.VISIBLE);
-                    } else {
+                    if (books.isEmpty()) {
                         books_header.setVisibility(View.GONE);
+                        not_found_view.setVisibility(View.VISIBLE);
+                        booksRecyclerView.setVisibility(View.GONE);
+                    } else {
+                        books_header.setVisibility(View.VISIBLE);
+                        not_found_view.setVisibility(View.GONE);
+                        booksRecyclerView.setVisibility(View.VISIBLE);
                     }
                 } else {
                     books_header.setVisibility(View.GONE);
+                    not_found_view.setVisibility(View.GONE);
+                    booksRecyclerView.setVisibility(View.VISIBLE);
                 }
             }
         });

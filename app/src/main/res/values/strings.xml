@@ -31,6 +31,8 @@
     <string name="found_in_series">Найдено в сериях</string>
     <string name="found_in_books">Найдено в книгах</string>
     <string name="books_fallback">книг</string>
+    <string name="not_found_hint">По вашему запросу ничего не найдено</string>
+    <string name="not_found">Пусто</string>
 
     <!--Categories Screen-->
     <string name="category_icon">Иконка категории</string>
