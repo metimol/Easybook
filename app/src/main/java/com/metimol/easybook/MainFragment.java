@@ -101,6 +101,7 @@ public class MainFragment extends Fragment {
         ImageView clear_search = view.findViewById(R.id.clear_search);
         TextView viewCategories = view.findViewById(R.id.viewCategories);
         ConstraintLayout nav_main = view.findViewById(R.id.nav_main);
+        ConstraintLayout nav_profile = view.findViewById(R.id.nav_profile);
 
         Context context = requireContext();
         SharedPreferences sharedPreferences = context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
@@ -135,6 +136,7 @@ public class MainFragment extends Fragment {
 
         clear_search.setOnClickListener(v -> search.setText(""));
         nav_main.setOnClickListener(v -> reloadPage());
+        nav_profile.setOnClickListener(v -> navController.navigate(R.id.action_mainFragment_to_profileFragment));
 
         search.addTextChangedListener(new TextWatcher() {
             @Override

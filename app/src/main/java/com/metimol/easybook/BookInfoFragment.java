@@ -53,7 +53,6 @@ public class BookInfoFragment extends Fragment {
         viewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
     }
 
-    @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_book_details, container, false);
