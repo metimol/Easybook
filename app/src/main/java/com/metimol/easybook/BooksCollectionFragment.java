@@ -210,6 +210,13 @@ public class BooksCollectionFragment extends Fragment {
 
         booksCollectionRecyclerView.setAdapter(bookAdapter);
 
+        bookAdapter.setOnBookClickListener(book -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("bookId", book.getId());
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_booksCollectionFragment_to_bookInfoFragment, bundle);
+        });
+
         booksCollectionRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {

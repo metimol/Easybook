@@ -12,6 +12,7 @@ import com.metimol.easybook.api.QueryBuilder;
 import com.metimol.easybook.api.models.Book;
 import com.metimol.easybook.api.models.Serie;
 import com.metimol.easybook.api.models.response.ApiResponse;
+import com.metimol.easybook.api.models.response.BookData;
 import com.metimol.easybook.api.models.response.BooksWithDatesData;
 import com.metimol.easybook.api.models.response.SearchData;
 import com.metimol.easybook.api.models.response.SeriesSearchData;
@@ -35,6 +36,9 @@ public class MainViewModel extends AndroidViewModel {
     private final MutableLiveData<List<Serie>> series = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> loadError = new MutableLiveData<>(false);
+    private final MutableLiveData<Book> selectedBookDetails = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isBookLoading = new MutableLiveData<>(false);
+    private final MutableLiveData<Boolean> bookLoadError = new MutableLiveData<>(false);
     private int currentPage = 0;
     private boolean isLastPage = false;
     private boolean isSearchActive = false;
@@ -72,6 +76,18 @@ public class MainViewModel extends AndroidViewModel {
 
     public LiveData<Boolean> getLoadError() {
         return loadError;
+    }
+
+    public LiveData<Book> getSelectedBookDetails() {
+        return selectedBookDetails;
+    }
+
+    public LiveData<Boolean> getIsBookLoading() {
+        return isBookLoading;
+    }
+
+    public LiveData<Boolean> getBookLoadError() {
+        return bookLoadError;
     }
 
     public boolean isGenreSearchActive() {
@@ -339,6 +355,49 @@ public class MainViewModel extends AndroidViewModel {
         }
     }
 
+    public void fetchBookDetails(String bookId) {
+        isBookLoading.setValue(true);
+        bookLoadError.setValue(false);
+        selectedBookDetails.setValue(null);
+
+        int id;
+        try {
+            id = Integer.parseInt(bookId);
+        } catch (NumberFormatException e) {
+            isBookLoading.setValue(false);
+            bookLoadError.setValue(true);
+            return;
+        }
+
+        String query = QueryBuilder.buildBookDetailsQuery(id);
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
+        Call<ApiResponse<BookData>> call = apiService.getBookDetails(query, 1);
+
+        call.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<ApiResponse<BookData>> call, @NonNull Response<ApiResponse<BookData>> response) {
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                    selectedBookDetails.setValue(response.body().getData().getBook());
+                    bookLoadError.setValue(false);
+                } else {
+                    bookLoadError.setValue(true);
+                }
+                isBookLoading.setValue(false);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<ApiResponse<BookData>> call, @NonNull Throwable t) {
+                bookLoadError.setValue(true);
+                isBookLoading.setValue(false);
+            }
+        });
+    }
+
+    public void clearBookDetails() {
+        selectedBookDetails.setValue(null);
+        bookLoadError.setValue(false);
+        isBookLoading.setValue(false);
+    }
 
     public void resetBookList() {
         isSearchActive = false;

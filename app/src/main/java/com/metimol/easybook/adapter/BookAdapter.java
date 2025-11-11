@@ -23,6 +23,16 @@ public class BookAdapter extends ListAdapter<Book, BookAdapter.BookViewHolder> {
         super(DIFF_CALLBACK);
     }
 
+    public interface OnBookClickListener {
+        void onBookClick(Book book);
+    }
+
+    private OnBookClickListener clickListener;
+
+    public void setOnBookClickListener(OnBookClickListener listener) {
+        this.clickListener = listener;
+    }
+
     private static final DiffUtil.ItemCallback<Book> DIFF_CALLBACK = new DiffUtil.ItemCallback<Book>() {
         @Override
         public boolean areItemsTheSame(@NonNull Book oldItem, @NonNull Book newItem) {
@@ -46,6 +56,12 @@ public class BookAdapter extends ListAdapter<Book, BookAdapter.BookViewHolder> {
     public void onBindViewHolder(@NonNull BookViewHolder holder, int position) {
         Book book = getItem(position);
         holder.bind(book);
+
+        holder.itemView.setOnClickListener(v -> {
+            if (clickListener != null) {
+                clickListener.onBookClick(book);
+            }
+        });
     }
 
     static class BookViewHolder extends RecyclerView.ViewHolder {

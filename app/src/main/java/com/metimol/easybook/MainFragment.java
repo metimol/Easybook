@@ -358,6 +358,14 @@ public class MainFragment extends Fragment {
         }
 
         booksRecyclerView.setAdapter(bookAdapter);
+
+        bookAdapter.setOnBookClickListener(book -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("bookId", book.getId());
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_mainFragment_to_bookInfoFragment, bundle);
+        });
+
         booksRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
