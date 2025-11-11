@@ -16,6 +16,7 @@ ksp = "2.0.21-1.0.27"
 swiperefreshlayout = "1.1.0"
 firebaseBom = "34.4.0"
 googleServices = "4.4.4"
+circleimageview = "3.1.0"
 
 [libraries]
 cardview = { module = "androidx.cardview:cardview", version.ref = "cardview" }
@@ -35,6 +36,7 @@ room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+circleimageview = { module = "de.hdodenhof:circleimageview", version.ref = "circleimageview" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -47,7 +47,7 @@ public class ProfileFragment extends Fragment {
         mainViewModel.getStatusBarHeight().observe(getViewLifecycleOwner(), height -> {
             profile_container.setPaddingRelative(
                     profile_container.getPaddingStart(),
-                    height + dpToPx(20, context),
+                    height,
                     profile_container.getPaddingEnd(),
                     profile_container.getPaddingBottom()
             );

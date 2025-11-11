@@ -67,4 +67,5 @@ dependencies {
     implementation(libs.swiperefreshlayout)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
+    implementation(libs.circleimageview)
 }
