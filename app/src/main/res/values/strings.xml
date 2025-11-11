@@ -18,7 +18,7 @@
     <string name="collection">Коллекция</string>
     <string name="profile">Профиль</string>
     <string name="search_icon">Иконка поиска</string>
-    <string name="search">Поиск книг или авторов</string>
+    <string name="search">Поиск книг или циклов</string>
     <string name="clear_search">Очистить поиск</string>
     <string name="categories">Категории</string>
     <string name="view_more">Смотреть все</string>
@@ -77,4 +77,5 @@
     <string name="episodes">Эпизоды</string>
     <string name="author">Автор:</string>
     <string name="reader">Чтец:</string>
+    <string name="duration">Длительность:</string>
 </resources>

@@ -6,4 +6,18 @@
         <item quantity="many">%d книг</item>
         <item quantity="other">%d книги</item>
     </plurals>
+
+    <plurals name="hours_count">
+        <item quantity="one">%d час</item>
+        <item quantity="few">%d часа</item>
+        <item quantity="many">%d часов</item>
+        <item quantity="other">%d часов</item>
+    </plurals>
+
+    <plurals name="minutes_count">
+        <item quantity="one">%d минута</item>
+        <item quantity="few">%d минуты</item>
+        <item quantity="many">%d минут</item>
+        <item quantity="other">%d минут</item>
+    </plurals>
 </resources>

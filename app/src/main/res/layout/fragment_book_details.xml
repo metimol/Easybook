@@ -214,6 +214,63 @@
                         app:layout_constraintTop_toTopOf="parent"
                         tools:text="Andjey Sapkovskiy" />
                 </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
+
+                    <ImageView
+                        android:id="@+id/ivDuration"
+                        android:layout_width="15dp"
+                        android:layout_height="15dp"
+                        android:src="@drawable/ic_audiobook" app:tint="@color/green"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/textViewDurationLabel"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/sf_pro"
+                        android:text="@string/duration"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:layout_marginStart="5dp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintStart_toEndOf="@id/ivDuration"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/bookDuration"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:fontFamily="@font/sf_pro"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="normal"
+                        android:maxLines="1"
+                        android:ellipsize="end"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toEndOf="@+id/textViewDurationLabel"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="10 ч 30 мин" />
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <TextView
+                    android:id="@+id/bookDescription"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:fontFamily="@font/sf_pro"
+                    android:textColor="@color/black"
+                    android:textSize="15sp"
+                    android:lineSpacingExtra="4dp"
+                    tools:text="I'll be back..."/>
             </LinearLayout>
         </ScrollView>
 
@@ -222,7 +279,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"
-            tools:listitem="@layout/item_episode_placeholder"/>
+            tools:listitem="@layout/item_episode" />
     </FrameLayout>
 
     <ProgressBar
