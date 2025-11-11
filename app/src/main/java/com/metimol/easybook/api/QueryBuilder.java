@@ -28,14 +28,6 @@ public class QueryBuilder {
         return String.format(Locale.US, format, bookId);
     }
 
-    public static String buildFilteredSortQuery(int offset, int count, String source, String id, String sort) {
-        String format = "{booksBySource(offset:%1$s,count:%2$s,source:%3$s,id:%4$s,sort:%5$s)" +
-                "{count,items{id,name,urlName,genre{id,name},serie{id,name,booksCount}," +
-                "serieIndex,authors{id,name,surname},readers{id,name,surname},subgenres{id,name}," +
-                "likes,dislikes,defaultPoster,defaultPosterMain,totalDuration,aboutBb}}}";
-        return String.format(Locale.US, format, offset, count, source, id, sort);
-    }
-
     public static String buildBooksWithDatesQuery(int offset, int count, String sort) {
         String format = "{booksWithDates(offset:%1$s,count:%2$s,sort:%3$s)" +
                 "{count,items{data" + BOOK_FRAGMENT_FIELDS + "}}}";
@@ -69,11 +61,6 @@ public class QueryBuilder {
     }
 
     public static final String SOURCE_GENRE = "GENRE";
-    public static final String SOURCE_AUTHOR = "AUTHOR";
     public static final String SOURCE_SERIE = "SERIE";
-    public static final String SOURCE_READER = "READER";
-
-    public static final String SORT_POPULAR = "POPULAR";
     public static final String SORT_NEW = "NEW";
-    public static final String SORT_LIKES = "LIKES";
 }
