@@ -81,6 +81,8 @@
     <string name="author">Автор:</string>
     <string name="reader">Чтец:</string>
     <string name="duration">Длительность:</string>
+    <string name="mark_as_listened">Отметить прослушанной</string>
+    <string name="remove_from_listened">Удалить из прослушанного</string>
 
     <!--Profile Screen-->
     <string name="edit">Редактировать</string>

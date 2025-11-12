@@ -34,7 +34,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainViewModel extends AndroidViewModel {
-    private enum SourceType { NONE, GENRE, SERIES, FAVORITES }
+    private enum SourceType { NONE, GENRE, SERIES, FAVORITES, LISTENED }
 
     private final MutableLiveData<Integer> statusBarHeight = new MutableLiveData<>();
     private final MutableLiveData<List<Category>> categories = new MutableLiveData<>();
@@ -55,6 +55,7 @@ public class MainViewModel extends AndroidViewModel {
     private final AudiobookDao audiobookDao;
     private final ExecutorService databaseExecutor;
     private LiveData<Boolean> isBookFavorite;
+    private LiveData<Boolean> isBookFinished;
 
     public MainViewModel(@NonNull Application application) {
         super(application);
@@ -113,6 +114,13 @@ public class MainViewModel extends AndroidViewModel {
         return isBookFavorite;
     }
 
+    public LiveData<Boolean> getIsBookFinished(String bookId) {
+        if (isBookFinished == null) {
+            isBookFinished = audiobookDao.isBookFinished(bookId);
+        }
+        return isBookFinished;
+    }
+
     public void toggleFavoriteStatus() {
         Book apiBook = selectedBookDetails.getValue();
         if (apiBook == null) return;
@@ -125,9 +133,9 @@ public class MainViewModel extends AndroidViewModel {
                 com.metimol.easybook.database.Book dbBook = new com.metimol.easybook.database.Book();
                 dbBook.id = bookId;
                 dbBook.isFavorite = true;
+                dbBook.isFinished = false;
                 dbBook.currentChapterId = null;
                 dbBook.currentTimestamp = 0;
-                dbBook.isFinished = false;
                 dbBook.lastListened = 0;
                 audiobookDao.insertBook(dbBook);
             } else {
@@ -137,6 +145,79 @@ public class MainViewModel extends AndroidViewModel {
             }
         });
     }
+
+    public void toggleFinishedStatus() {
+        Book apiBook = selectedBookDetails.getValue();
+        if (apiBook == null) return;
+
+        databaseExecutor.execute(() -> {
+            String bookId = apiBook.getId();
+            boolean bookExists = audiobookDao.bookExists(bookId);
+
+            if (!bookExists) {
+                com.metimol.easybook.database.Book dbBook = new com.metimol.easybook.database.Book();
+                dbBook.id = bookId;
+                dbBook.isFavorite = false;
+                dbBook.isFinished = true;
+                dbBook.currentChapterId = null;
+                dbBook.currentTimestamp = 0;
+                dbBook.lastListened = 0;
+                audiobookDao.insertBook(dbBook);
+            } else {
+                Boolean currentStatus = isBookFinished.getValue();
+                boolean newStatus = (currentStatus == null) ? true : !currentStatus;
+                audiobookDao.updateFinishedStatus(bookId, newStatus);
+            }
+        });
+    }
+
+    public void fetchListenedBooksFromApi() {
+        if (Boolean.TRUE.equals(isLoading.getValue())) return;
+        isLoading.setValue(true);
+        loadError.setValue(false);
+        clearBookList();
+        isLastPage = true;
+        isSearchActive = false;
+        currentSourceType = SourceType.LISTENED;
+
+        databaseExecutor.execute(() -> {
+            try {
+                List<com.metimol.easybook.database.Book> finishedDbBooks = audiobookDao.getFinishedBooksList();
+                if (finishedDbBooks == null || finishedDbBooks.isEmpty()) {
+                    books.postValue(new ArrayList<>());
+                    isLoading.postValue(false);
+                    return;
+                }
+
+                List<Book> apiBooksToShow = new ArrayList<>();
+                ApiService apiService = ApiClient.getClient().create(ApiService.class);
+
+                for (com.metimol.easybook.database.Book dbBook : finishedDbBooks) {
+                    try {
+                        String query = QueryBuilder.buildBookDetailsQuery(Integer.parseInt(dbBook.id));
+                        Call<ApiResponse<BookData>> call = apiService.getBookDetails(query, 1);
+                        Response<ApiResponse<BookData>> response = call.execute();
+
+                        if (response.isSuccessful() && response.body() != null && response.body().getData() != null && response.body().getData().getBook() != null) {
+                            apiBooksToShow.add(response.body().getData().getBook());
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                books.postValue(apiBooksToShow);
+                isLoading.postValue(false);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                books.postValue(new ArrayList<>());
+                loadError.postValue(true);
+                isLoading.postValue(false);
+            }
+        });
+    }
+
 
     public void fetchFavoriteBooksFromApi() {
         if (Boolean.TRUE.equals(isLoading.getValue())) return;
@@ -163,7 +244,6 @@ public class MainViewModel extends AndroidViewModel {
                     try {
                         String query = QueryBuilder.buildBookDetailsQuery(Integer.parseInt(dbBook.id));
                         Call<ApiResponse<BookData>> call = apiService.getBookDetails(query, 1);
-
                         Response<ApiResponse<BookData>> response = call.execute();
 
                         if (response.isSuccessful() && response.body() != null && response.body().getData() != null && response.body().getData().getBook() != null) {
@@ -173,7 +253,6 @@ public class MainViewModel extends AndroidViewModel {
                         e.printStackTrace();
                     }
                 }
-
                 books.postValue(apiBooksToShow);
                 isLoading.postValue(false);
 
@@ -454,6 +533,7 @@ public class MainViewModel extends AndroidViewModel {
         selectedBookDetails.setValue(null);
 
         isBookFavorite = null;
+        isBookFinished = null;
 
         int id;
         try {
@@ -493,6 +573,7 @@ public class MainViewModel extends AndroidViewModel {
         bookLoadError.setValue(false);
         isBookLoading.setValue(false);
         isBookFavorite = null;
+        isBookFinished = null;
     }
 
     public void resetBookList() {

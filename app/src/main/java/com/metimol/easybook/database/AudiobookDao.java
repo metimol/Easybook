@@ -43,6 +43,18 @@ public interface AudiobookDao {
     @Query("SELECT EXISTS(SELECT 1 FROM books WHERE id = :bookId)")
     boolean bookExists(String bookId);
 
+    @Query("SELECT * FROM books WHERE isFavorite = 1")
+    List<Book> getFavoriteBooksList();
+
+    @Query("SELECT isFinished FROM books WHERE id = :bookId")
+    LiveData<Boolean> isBookFinished(String bookId);
+
+    @Query("UPDATE books SET isFinished = :isFinished WHERE id = :bookId")
+    void updateFinishedStatus(String bookId, boolean isFinished);
+
+    @Query("SELECT * FROM books WHERE isFinished = 1")
+    List<Book> getFinishedBooksList();
+
     @Query("SELECT * FROM chapters WHERE bookOwnerId = :bookId ORDER BY chapterIndex ASC")
     List<Chapter> getChaptersForBook(String bookId);
 
@@ -52,9 +64,6 @@ public interface AudiobookDao {
 
     @Query("SELECT * FROM books WHERE isFavorite = 1")
     LiveData<List<Book>> getFavoriteBooks();
-
-    @Query("SELECT * FROM books WHERE isFavorite = 1")
-    List<Book> getFavoriteBooksList();
 
     @Query("SELECT * FROM books WHERE isFinished = 0 AND currentTimestamp > 0 ORDER BY lastListened DESC")
     LiveData<List<Book>> getBooksToContinue();

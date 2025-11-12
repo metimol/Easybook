@@ -49,10 +49,13 @@ public class BooksCollectionFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            // Check for new FAVORITES type
+
             if ("FAVORITES".equals(getArguments().getString("sourceType"))) {
                 sourceType = "FAVORITES";
                 sourceName = getString(R.string.bookmarks);
+            } else if ("LISTENED".equals(getArguments().getString("sourceType"))) {
+                sourceType = "LISTENED";
+                sourceName = getString(R.string.listened);
             } else if (getArguments().containsKey("categoryId")) {
                 sourceType = "GENRE";
                 sourceId = getArguments().getString("categoryId");
@@ -141,6 +144,9 @@ public class BooksCollectionFragment extends Fragment {
             } else if ("FAVORITES".equals(sourceType)) {
                 isPaginationEnabled = false;
                 viewModel.fetchFavoriteBooksFromApi();
+            } else if ("LISTENED".equals(sourceType)) {
+                isPaginationEnabled = false;
+                viewModel.fetchListenedBooksFromApi();
             }
         }
 
@@ -190,6 +196,8 @@ public class BooksCollectionFragment extends Fragment {
                     viewModel.fetchBooksBySeries(sourceId);
                 } else if ("FAVORITES".equals(sourceType)) {
                     viewModel.fetchFavoriteBooksFromApi();
+                } else if ("LISTENED".equals(sourceType)) {
+                    viewModel.fetchListenedBooksFromApi();
                 }
             }
         });

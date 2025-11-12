@@ -5,9 +5,11 @@ import static com.metimol.easybook.MainActivity.dpToPx;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -15,6 +17,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -42,7 +45,10 @@ public class BookInfoFragment extends Fragment {
     private ScrollView infoContentScroll;
     private RecyclerView episodesRecycler;
     private EpisodeAdapter episodeAdapter;
+
     private ImageView ivAddBookToBookmarks;
+
+    private boolean isCurrentlyFinished = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -66,6 +72,7 @@ public class BookInfoFragment extends Fragment {
         ConstraintLayout book_info_main_container = view.findViewById(R.id.book_info_main_container);
         ImageView ivBack = view.findViewById(R.id.iv_collection_back);
         MainViewModel sharedViewModel = new ViewModelProvider(requireActivity()).get(MainViewModel.class);
+        ImageView ivMore = view.findViewById(R.id.iv_more);
 
         bookCover = view.findViewById(R.id.book_cover);
         bookTitle = view.findViewById(R.id.bookTitle);
@@ -112,10 +119,10 @@ public class BookInfoFragment extends Fragment {
         });
 
         observeFavoriteStatus();
+        ivAddBookToBookmarks.setOnClickListener(v -> viewModel.toggleFavoriteStatus());
 
-        ivAddBookToBookmarks.setOnClickListener(v -> {
-            viewModel.toggleFavoriteStatus();
-        });
+        observeFinishedStatus();
+        ivMore.setOnClickListener(v -> showBookOptionsMenu(v));
     }
 
     private void observeFavoriteStatus() {
@@ -127,6 +134,35 @@ public class BookInfoFragment extends Fragment {
             }
         });
     }
+
+    private void observeFinishedStatus() {
+        viewModel.getIsBookFinished(bookID).observe(getViewLifecycleOwner(), isFinished -> {
+            isCurrentlyFinished = (isFinished != null && isFinished);
+        });
+    }
+
+    private void showBookOptionsMenu(View anchorView) {
+        PopupMenu popup = new PopupMenu(requireContext(), anchorView);
+        popup.getMenuInflater().inflate(R.menu.book_options_menu, popup.getMenu());
+
+        MenuItem item = popup.getMenu().findItem(R.id.action_toggle_listened);
+        if (isCurrentlyFinished) {
+            item.setTitle(R.string.remove_from_listened);
+        } else {
+            item.setTitle(R.string.mark_as_listened);
+        }
+
+        popup.setOnMenuItemClickListener(menuItem -> {
+            if (menuItem.getItemId() == R.id.action_toggle_listened) {
+                viewModel.toggleFinishedStatus();
+                return true;
+            }
+            return false;
+        });
+
+        popup.show();
+    }
+
 
     private String formatTotalDuration(int totalSeconds) {
         if (totalSeconds <= 0) {
