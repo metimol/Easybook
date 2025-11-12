@@ -15,6 +15,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -42,6 +43,7 @@ public class BookInfoFragment extends Fragment {
     private ScrollView infoContentScroll;
     private RecyclerView episodesRecycler;
     private EpisodeAdapter episodeAdapter;
+    private ImageView ivAddBookToBookmarks;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -71,12 +73,12 @@ public class BookInfoFragment extends Fragment {
         bookAuthor = view.findViewById(R.id.bookAuthor);
         bookReader = view.findViewById(R.id.bookReader);
         progressBar = view.findViewById(R.id.progressBarBookDetails);
-
         bookDuration = view.findViewById(R.id.bookDuration);
         bookDescription = view.findViewById(R.id.bookDescription);
         tabLayout = view.findViewById(R.id.tabLayout);
         infoContentScroll = view.findViewById(R.id.info_content_scroll);
         episodesRecycler = view.findViewById(R.id.episodes_recycler);
+        ivAddBookToBookmarks = view.findViewById(R.id.iv_add_book_to_bookmarks);
 
         progressDrawable = new CircularProgressDrawable(requireContext());
         Context context = requireContext();
@@ -108,6 +110,22 @@ public class BookInfoFragment extends Fragment {
                     book_info_main_container.getPaddingEnd(),
                     book_info_main_container.getPaddingBottom()
             );
+        });
+
+        observeFavoriteStatus();
+
+        ivAddBookToBookmarks.setOnClickListener(v -> {
+            viewModel.toggleFavoriteStatus();
+        });
+    }
+
+    private void observeFavoriteStatus() {
+        viewModel.getIsBookFavorite(bookID).observe(getViewLifecycleOwner(), isFavorite -> {
+            if (isFavorite != null && isFavorite) {
+                ivAddBookToBookmarks.setImageResource(R.drawable.ic_bookmark_added);
+            } else {
+                ivAddBookToBookmarks.setImageResource(R.drawable.ic_bookmark);
+            }
         });
     }
 

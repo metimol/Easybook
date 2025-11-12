@@ -5,7 +5,7 @@ import androidx.room.Database;
 import androidx.room.Room;
 import androidx.room.RoomDatabase;
 
-@Database(entities = {Book.class, Chapter.class}, version = 1, exportSchema = false)
+@Database(entities = {Book.class, Chapter.class}, version = 2, exportSchema = false) // <-- DB version
 public abstract class AppDatabase extends RoomDatabase {
     public abstract AudiobookDao audiobookDao();
 
@@ -17,6 +17,7 @@ public abstract class AppDatabase extends RoomDatabase {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
                                     AppDatabase.class, "audiobook_database")
+                            .fallbackToDestructiveMigration() // <-- destructive migration
                             .build();
                 }
             }

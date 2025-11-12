@@ -11,15 +11,6 @@ public class Book {
     @NonNull
     public String id;
 
-    public String title;
-
-    public String author;
-
-    @ColumnInfo(name = "coverUrl")
-    public String coverUrl;
-
-    public String description;
-
     @ColumnInfo(name = "isFavorite")
     public boolean isFavorite;
 

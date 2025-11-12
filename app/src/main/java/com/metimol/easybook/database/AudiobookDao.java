@@ -37,6 +37,12 @@ public interface AudiobookDao {
     @Query("SELECT * FROM books WHERE id = :bookId")
     Book getBookById(String bookId);
 
+    @Query("SELECT isFavorite FROM books WHERE id = :bookId")
+    LiveData<Boolean> isBookFavorite(String bookId);
+
+    @Query("SELECT EXISTS(SELECT 1 FROM books WHERE id = :bookId)")
+    boolean bookExists(String bookId);
+
     @Query("SELECT * FROM chapters WHERE bookOwnerId = :bookId ORDER BY chapterIndex ASC")
     List<Chapter> getChaptersForBook(String bookId);
 
