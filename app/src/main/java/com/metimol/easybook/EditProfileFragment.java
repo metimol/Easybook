@@ -30,6 +30,11 @@ import com.bumptech.glide.Glide;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.textfield.TextInputEditText;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import de.hdodenhof.circleimageview.CircleImageView;
 
 public class EditProfileFragment extends Fragment {
@@ -123,7 +128,13 @@ public class EditProfileFragment extends Fragment {
 
     private void saveUserData() {
         String newUsername = etUsername.getText().toString().trim();
-        String newAvatarUriString = (selectedAvatarUri != null) ? selectedAvatarUri.toString() : "";
+        String newAvatarUriString;
+
+        if (selectedAvatarUri != null) {
+            newAvatarUriString = saveImageToInternalStorage(selectedAvatarUri);
+        } else {
+            newAvatarUriString = "";
+        }
 
         if (newUsername.isEmpty()) {
             newUsername = getString(R.string.default_username);
@@ -135,5 +146,30 @@ public class EditProfileFragment extends Fragment {
         editor.apply();
 
         navController.popBackStack();
+    }
+
+    private String saveImageToInternalStorage(Uri uri) {
+        try {
+            InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+
+            File internalFile = new File(getContext().getFilesDir(), "profile_pic.jpg");
+
+            FileOutputStream outputStream = new FileOutputStream(internalFile);
+
+            byte[] buffer = new byte[1024];
+            int length;
+            while ((length = inputStream.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, length);
+            }
+
+            outputStream.close();
+            inputStream.close();
+
+            return internalFile.toURI().toString();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }

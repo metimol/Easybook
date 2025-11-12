@@ -3,6 +3,7 @@ package com.metimol.easybook;
 import static com.metimol.easybook.MainActivity.APP_PREFERENCES;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -42,6 +43,7 @@ public class ProfileFragment extends Fragment {
         ConstraintLayout profile_container = view.findViewById(R.id.profile_container);
         ConstraintLayout nav_main = view.findViewById(R.id.nav_main);
         TextView editInfo = view.findViewById(R.id.edit_info);
+        ConstraintLayout share = view.findViewById(R.id.share);
 
         mainViewModel.getStatusBarHeight().observe(getViewLifecycleOwner(), height -> {
             profile_container.setPaddingRelative(
@@ -53,8 +55,8 @@ public class ProfileFragment extends Fragment {
         });
 
         nav_main.setOnClickListener(v -> navController.navigate(R.id.action_profileFragment_to_mainFragment));
-
         editInfo.setOnClickListener(v -> navController.navigate(R.id.action_profileFragment_to_EditProfileFragment));
+        share.setOnClickListener(v -> shareInfo(context, getString(R.string.share_text)));
     }
 
     @Override
@@ -71,5 +73,15 @@ public class ProfileFragment extends Fragment {
         }
 
         username.setText(sharedPreferences.getString(USERNAME_KEY, ""));
+    }
+
+    private void shareInfo(Context context, String textToShare) {
+        Intent sendIntent = new Intent();
+        sendIntent.setAction(Intent.ACTION_SEND);
+        sendIntent.putExtra(Intent.EXTRA_TEXT, textToShare);
+        sendIntent.setType("text/plain");
+
+        Intent shareIntent = Intent.createChooser(sendIntent, getString(R.string.share_title));
+        context.startActivity(shareIntent);
     }
 }
