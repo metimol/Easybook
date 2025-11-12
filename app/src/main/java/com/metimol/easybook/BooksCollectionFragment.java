@@ -129,24 +129,29 @@ public class BooksCollectionFragment extends Fragment {
         });
 
         viewModel.getLoadError().observe(getViewLifecycleOwner(), isError -> {
-            if (!viewModel.getIsLoading().getValue()) {
+            if (Boolean.FALSE.equals(viewModel.getIsLoading().getValue())) {
                 updateVisibility();
             }
         });
 
         if (sourceType != null) {
-            if ("GENRE".equals(sourceType)) {
-                isPaginationEnabled = true;
-                viewModel.fetchBooksByGenre(sourceId);
-            } else if ("SERIES".equals(sourceType)) {
-                isPaginationEnabled = true;
-                viewModel.fetchBooksBySeries(sourceId);
-            } else if ("FAVORITES".equals(sourceType)) {
-                isPaginationEnabled = false;
-                viewModel.fetchFavoriteBooksFromApi();
-            } else if ("LISTENED".equals(sourceType)) {
-                isPaginationEnabled = false;
-                viewModel.fetchListenedBooksFromApi();
+            switch (sourceType) {
+                case "GENRE" -> {
+                    isPaginationEnabled = true;
+                    viewModel.fetchBooksByGenre(sourceId);
+                }
+                case "SERIES" -> {
+                    isPaginationEnabled = true;
+                    viewModel.fetchBooksBySeries(sourceId);
+                }
+                case "FAVORITES" -> {
+                    isPaginationEnabled = false;
+                    viewModel.fetchFavoriteBooksFromApi();
+                }
+                case "LISTENED" -> {
+                    isPaginationEnabled = false;
+                    viewModel.fetchListenedBooksFromApi();
+                }
             }
         }
 
@@ -190,14 +195,11 @@ public class BooksCollectionFragment extends Fragment {
 
         btn_retry_collections.setOnClickListener(v -> {
             if (sourceType != null) {
-                if ("GENRE".equals(sourceType)) {
-                    viewModel.fetchBooksByGenre(sourceId);
-                } else if ("SERIES".equals(sourceType)) {
-                    viewModel.fetchBooksBySeries(sourceId);
-                } else if ("FAVORITES".equals(sourceType)) {
-                    viewModel.fetchFavoriteBooksFromApi();
-                } else if ("LISTENED".equals(sourceType)) {
-                    viewModel.fetchListenedBooksFromApi();
+                switch (sourceType) {
+                    case "GENRE" -> viewModel.fetchBooksByGenre(sourceId);
+                    case "SERIES" -> viewModel.fetchBooksBySeries(sourceId);
+                    case "FAVORITES" -> viewModel.fetchFavoriteBooksFromApi();
+                    case "LISTENED" -> viewModel.fetchListenedBooksFromApi();
                 }
             }
         });

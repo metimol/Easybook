@@ -140,7 +140,7 @@ public class MainViewModel extends AndroidViewModel {
                 audiobookDao.insertBook(dbBook);
             } else {
                 Boolean currentStatus = isBookFavorite.getValue();
-                boolean newStatus = (currentStatus == null) ? true : !currentStatus;
+                boolean newStatus = currentStatus == null || !currentStatus;
                 audiobookDao.updateFavoriteStatus(bookId, newStatus);
             }
         });
@@ -165,7 +165,7 @@ public class MainViewModel extends AndroidViewModel {
                 audiobookDao.insertBook(dbBook);
             } else {
                 Boolean currentStatus = isBookFinished.getValue();
-                boolean newStatus = (currentStatus == null) ? true : !currentStatus;
+                boolean newStatus = currentStatus == null || !currentStatus;
                 audiobookDao.updateFinishedStatus(bookId, newStatus);
             }
         });
