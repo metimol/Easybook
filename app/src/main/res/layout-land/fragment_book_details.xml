@@ -62,8 +62,8 @@
 
     <ImageView
         android:id="@+id/book_cover"
-        android:layout_width="150dp"
-        android:layout_height="225dp"
+        android:layout_width="130dp"
+        android:layout_height="195dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="16dp"
         android:scaleType="centerCrop"
@@ -71,21 +71,53 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/bookHeaderConstraintLayout" />
 
-    <TextView
-        android:id="@+id/bookTitle"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/book_series_card"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:ellipsize="end"
-        android:fontFamily="@font/sf_pro"
-        android:maxLines="2"
-        android:textColor="@color/black"
-        android:textSize="20sp"
-        android:textStyle="bold"
+        android:layout_marginTop="12dp"
+        android:visibility="gone"
+        android:clickable="true"
+        android:focusable="true"
+        android:foreground="?attr/selectableItemBackground"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp"
         app:layout_constraintEnd_toEndOf="@+id/book_cover"
         app:layout_constraintStart_toStartOf="@+id/book_cover"
-        app:layout_constraintTop_toBottomOf="@+id/book_cover"
-        tools:text="Witcher and the incredibly long title that should wrap correctly" />
+        app:layout_constraintTop_toBottomOf="@id/book_cover"
+        tools:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="12dp">
+
+            <TextView
+                android:id="@+id/book_series_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="@font/sf_pro"
+                android:textStyle="bold"
+                android:textColor="@color/black"
+                android:textSize="15sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="Ведьмак" />
+
+            <TextView
+                android:id="@+id/book_series_count"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:fontFamily="@font/sf_pro"
+                android:textStyle="normal"
+                android:textColor="@color/light_grey"
+                android:textSize="13sp"
+                android:maxLines="1"
+                tools:text="8 книг" />
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
 
 
     <com.google.android.material.tabs.TabLayout
@@ -134,7 +166,29 @@
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+
+                    <TextView
+                        android:id="@+id/bookTitle"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:fontFamily="@font/sf_pro"
+                        android:maxLines="2"
+                        android:textColor="@color/black"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent"
+                        tools:text="Witcher and the incredibly long title that should wrap correctly" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp"
                     android:orientation="horizontal">
 
                     <ImageView
