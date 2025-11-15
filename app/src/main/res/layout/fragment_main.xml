@@ -45,7 +45,7 @@
                 android:layout_marginTop="5dp"
                 android:fontFamily="@font/sf_pro"
                 android:text="@string/have_a_good_day"
-                android:textColor="@color/light_green"
+                android:textColor="@color/super_dark_green"
                 android:textSize="17sp"
                 android:textStyle="normal" />
         </LinearLayout>
