@@ -92,10 +92,11 @@
     <string name="rateUs">Оцените нас</string>
     <string name="bookmarks">Закладки</string>
     <string name="listened">Прослушано</string>
+    <string name="listen">Слушаю</string>
     <string name="share_title">Поделится с помощью</string>
     <string name="share_text">Хватит платить за аудиокниги! 💥\n\nПопробуй EasyBook — тысячи бесплатных аудиокниг в одном удобном приложении. Никаких подписок, просто слушай.\n\nСкачивай здесь: https://github.com/metimol/Easybook</string>
 
-    <!--Profile Screen-->
+    <!--Edit Profile Screen-->
     <string name="information_account">Информация</string>
     <string name="save">Сохранить</string>
     <string name="full_name">Имя пользователя</string>

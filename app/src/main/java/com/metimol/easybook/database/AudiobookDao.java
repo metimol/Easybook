@@ -15,15 +15,11 @@ import java.util.List;
 @Dao
 public interface AudiobookDao {
 
-    // --- Insert Methods ---
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertBook(Book book);
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertChapters(List<Chapter> chapters);
-
-    // --- Update Methods ---
 
     @Update
     void updateBook(Book book);
@@ -55,6 +51,9 @@ public interface AudiobookDao {
     @Query("SELECT * FROM books WHERE isFinished = 1")
     List<Book> getFinishedBooksList();
 
+    @Query("SELECT * FROM books WHERE isFinished = 0 AND currentTimestamp > 0 ORDER BY lastListened DESC")
+    List<Book> getListeningBooksList();
+
     @Query("SELECT * FROM chapters WHERE bookOwnerId = :bookId ORDER BY chapterIndex ASC")
     List<Chapter> getChaptersForBook(String bookId);
 
@@ -67,9 +66,6 @@ public interface AudiobookDao {
 
     @Query("SELECT * FROM books WHERE isFinished = 0 AND currentTimestamp > 0 ORDER BY lastListened DESC")
     LiveData<List<Book>> getBooksToContinue();
-
-
-    // --- Delete Methods ---
 
     @Query("DELETE FROM books WHERE id = :bookId")
     void deleteBook(String bookId);

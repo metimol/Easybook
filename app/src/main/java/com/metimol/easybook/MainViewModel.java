@@ -34,7 +34,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainViewModel extends AndroidViewModel {
-    private enum SourceType { NONE, GENRE, SERIES, FAVORITES, LISTENED }
+    private enum SourceType { NONE, GENRE, SERIES, FAVORITES, LISTENED, LISTENING }
 
     private final MutableLiveData<Integer> statusBarHeight = new MutableLiveData<>();
     private final MutableLiveData<List<Category>> categories = new MutableLiveData<>();
@@ -167,6 +167,53 @@ public class MainViewModel extends AndroidViewModel {
                 Boolean currentStatus = isBookFinished.getValue();
                 boolean newStatus = currentStatus == null || !currentStatus;
                 audiobookDao.updateFinishedStatus(bookId, newStatus);
+            }
+        });
+    }
+
+    public void fetchListeningBooksFromApi() {
+        if (Boolean.TRUE.equals(isLoading.getValue())) return;
+        isLoading.setValue(true);
+        loadError.setValue(false);
+        clearBookList();
+        isLastPage = true;
+        isSearchActive = false;
+        currentSourceType = SourceType.LISTENING;
+
+        databaseExecutor.execute(() -> {
+            try {
+                List<com.metimol.easybook.database.Book> listeningDbBooks = audiobookDao.getListeningBooksList();
+                if (listeningDbBooks == null || listeningDbBooks.isEmpty()) {
+                    books.postValue(new ArrayList<>());
+                    isLoading.postValue(false);
+                    return;
+                }
+
+                List<Book> apiBooksToShow = new ArrayList<>();
+                ApiService apiService = ApiClient.getClient().create(ApiService.class);
+
+                for (com.metimol.easybook.database.Book dbBook : listeningDbBooks) {
+                    try {
+                        String query = QueryBuilder.buildBookDetailsQuery(Integer.parseInt(dbBook.id));
+                        Call<ApiResponse<BookData>> call = apiService.getBookDetails(query, 1);
+                        Response<ApiResponse<BookData>> response = call.execute();
+
+                        if (response.isSuccessful() && response.body() != null && response.body().getData() != null && response.body().getData().getBook() != null) {
+                            apiBooksToShow.add(response.body().getData().getBook());
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                books.postValue(apiBooksToShow);
+                isLoading.postValue(false);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                books.postValue(new ArrayList<>());
+                loadError.postValue(true);
+                isLoading.postValue(false);
             }
         });
     }

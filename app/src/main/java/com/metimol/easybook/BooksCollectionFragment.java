@@ -56,6 +56,9 @@ public class BooksCollectionFragment extends Fragment {
             } else if ("LISTENED".equals(getArguments().getString("sourceType"))) {
                 sourceType = "LISTENED";
                 sourceName = getString(R.string.listened);
+            } else if ("LISTENING".equals(getArguments().getString("sourceType"))) {
+                sourceType = "LISTENING";
+                sourceName = "Слушаю";
             } else if (getArguments().containsKey("categoryId")) {
                 sourceType = "GENRE";
                 sourceId = getArguments().getString("categoryId");
@@ -152,6 +155,10 @@ public class BooksCollectionFragment extends Fragment {
                     isPaginationEnabled = false;
                     viewModel.fetchListenedBooksFromApi();
                 }
+                case "LISTENING" -> {
+                    isPaginationEnabled = false;
+                    viewModel.fetchListeningBooksFromApi();
+                }
             }
         }
 
@@ -200,6 +207,7 @@ public class BooksCollectionFragment extends Fragment {
                     case "SERIES" -> viewModel.fetchBooksBySeries(sourceId);
                     case "FAVORITES" -> viewModel.fetchFavoriteBooksFromApi();
                     case "LISTENED" -> viewModel.fetchListenedBooksFromApi();
+                    case "LISTENING" -> viewModel.fetchListeningBooksFromApi();
                 }
             }
         });
