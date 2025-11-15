@@ -15,7 +15,6 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
@@ -34,6 +33,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Objects;
 
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -55,18 +55,15 @@ public class EditProfileFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         mGetContent = registerForActivityResult(new ActivityResultContracts.GetContent(),
-                new ActivityResultCallback<Uri>() {
-                    @Override
-                    public void onActivityResult(Uri uri) {
-                        if (uri != null) {
-                            selectedAvatarUri = uri;
-                            isNewAvatarSet = true;
-                            Glide.with(requireContext())
-                                    .load(selectedAvatarUri)
-                                    .placeholder(R.drawable.ic_default_avatar)
-                                    .error(R.drawable.ic_default_avatar)
-                                    .into(ivAvatar);
-                        }
+                uri -> {
+                    if (uri != null) {
+                        selectedAvatarUri = uri;
+                        isNewAvatarSet = true;
+                        Glide.with(requireContext())
+                                .load(selectedAvatarUri)
+                                .placeholder(R.drawable.ic_default_avatar)
+                                .error(R.drawable.ic_default_avatar)
+                                .into(ivAvatar);
                     }
                 });
     }
@@ -130,7 +127,7 @@ public class EditProfileFragment extends Fragment {
     }
 
     private void saveUserData() {
-        String newUsername = etUsername.getText().toString().trim();
+        String newUsername = Objects.requireNonNull(etUsername.getText()).toString().trim();
 
         if (newUsername.isEmpty()) {
             newUsername = getString(R.string.default_username);
@@ -159,15 +156,17 @@ public class EditProfileFragment extends Fragment {
 
     private String saveImageToInternalStorage(Uri uri) {
         try {
-            InputStream inputStream = getContext().getContentResolver().openInputStream(uri);
+            InputStream inputStream = requireContext().getContentResolver().openInputStream(uri);
 
-            File internalFile = new File(getContext().getFilesDir(), "profile_pic.jpg");
+            File internalFile = new File(requireContext().getFilesDir(), "profile_pic.jpg");
 
             FileOutputStream outputStream = new FileOutputStream(internalFile);
 
             byte[] buffer = new byte[1024];
             int length;
-            while ((length = inputStream.read(buffer)) > 0) {
+            while (true) {
+                assert inputStream != null;
+                if (!((length = inputStream.read(buffer)) > 0)) break;
                 outputStream.write(buffer, 0, length);
             }
 
