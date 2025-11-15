@@ -48,6 +48,7 @@ public class EditProfileFragment extends Fragment {
 
     private Uri selectedAvatarUri;
     private ActivityResultLauncher<String> mGetContent;
+    private boolean isNewAvatarSet = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,6 +60,7 @@ public class EditProfileFragment extends Fragment {
                     public void onActivityResult(Uri uri) {
                         if (uri != null) {
                             selectedAvatarUri = uri;
+                            isNewAvatarSet = true;
                             Glide.with(requireContext())
                                     .load(selectedAvatarUri)
                                     .placeholder(R.drawable.ic_default_avatar)
@@ -112,6 +114,7 @@ public class EditProfileFragment extends Fragment {
         String avatarUriString = sharedPreferences.getString(AVATAR_KEY, "");
 
         etUsername.setText(username);
+        isNewAvatarSet = false;
 
         if (avatarUriString.isEmpty()) {
             selectedAvatarUri = null;
@@ -128,13 +131,6 @@ public class EditProfileFragment extends Fragment {
 
     private void saveUserData() {
         String newUsername = etUsername.getText().toString().trim();
-        String newAvatarUriString;
-
-        if (selectedAvatarUri != null) {
-            newAvatarUriString = saveImageToInternalStorage(selectedAvatarUri);
-        } else {
-            newAvatarUriString = "";
-        }
 
         if (newUsername.isEmpty()) {
             newUsername = getString(R.string.default_username);
@@ -142,7 +138,20 @@ public class EditProfileFragment extends Fragment {
 
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(USERNAME_KEY, newUsername);
-        editor.putString(AVATAR_KEY, newAvatarUriString);
+
+        if (isNewAvatarSet) {
+            String newAvatarUriString;
+            if (selectedAvatarUri != null) {
+                newAvatarUriString = saveImageToInternalStorage(selectedAvatarUri);
+            } else {
+                newAvatarUriString = "";
+            }
+
+            if (newAvatarUriString != null) {
+                editor.putString(AVATAR_KEY, newAvatarUriString);
+            }
+        }
+
         editor.apply();
 
         navController.popBackStack();
