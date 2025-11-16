@@ -102,6 +102,7 @@ public class MainFragment extends Fragment {
         TextView viewCategories = view.findViewById(R.id.viewCategories);
         ConstraintLayout nav_main = view.findViewById(R.id.nav_main);
         ConstraintLayout nav_profile = view.findViewById(R.id.nav_profile);
+        ConstraintLayout nav_player = view.findViewById(R.id.nav_player);
 
         Context context = requireContext();
         SharedPreferences sharedPreferences = context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
@@ -137,6 +138,10 @@ public class MainFragment extends Fragment {
         clear_search.setOnClickListener(v -> search.setText(""));
         nav_main.setOnClickListener(v -> reloadPage());
         nav_profile.setOnClickListener(v -> navController.navigate(R.id.action_mainFragment_to_profileFragment));
+        nav_player.setOnClickListener(v -> {
+            PlayerBottomSheetFragment playerFragment = new PlayerBottomSheetFragment();
+            playerFragment.show(getParentFragmentManager(), "PlayerBottomSheet");
+        });
 
         search.addTextChangedListener(new TextWatcher() {
             @Override

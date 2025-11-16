@@ -100,4 +100,9 @@
     <string name="information_account">Информация</string>
     <string name="save">Сохранить</string>
     <string name="full_name">Имя пользователя</string>
+
+    <!--Player Screen-->
+    <string name="previous">Назад</string>
+    <string name="play">Играть</string>
+    <string name="next">Дальше</string>
 </resources>
