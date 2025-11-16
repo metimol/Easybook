@@ -18,6 +18,15 @@ import java.util.concurrent.TimeUnit;
 
 public class EpisodeAdapter extends ListAdapter<BookFile, EpisodeAdapter.EpisodeViewHolder> {
 
+    public interface OnEpisodeClickListener {
+        void onEpisodeClick(BookFile episode, int position);
+    }
+    private OnEpisodeClickListener clickListener;
+
+    public void setOnEpisodeClickListener(OnEpisodeClickListener listener) {
+        this.clickListener = listener;
+    }
+
     public EpisodeAdapter() {
         super(DIFF_CALLBACK);
     }
@@ -46,6 +55,11 @@ public class EpisodeAdapter extends ListAdapter<BookFile, EpisodeAdapter.Episode
     public void onBindViewHolder(@NonNull EpisodeViewHolder holder, int position) {
         BookFile episode = getItem(position);
         holder.bind(episode);
+        holder.itemView.setOnClickListener(v -> {
+            if (clickListener != null) {
+                clickListener.onEpisodeClick(episode, holder.getAdapterPosition());
+            }
+        });
     }
 
     static class EpisodeViewHolder extends RecyclerView.ViewHolder {

@@ -29,11 +29,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import com.metimol.easybook.adapter.EpisodeAdapter;
 import com.metimol.easybook.api.models.Author;
 import com.metimol.easybook.api.models.Book;
 import com.metimol.easybook.api.models.Serie;
+import com.metimol.easybook.service.PlaybackService;
 
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
@@ -51,12 +53,14 @@ public class BookInfoFragment extends Fragment {
     private EpisodeAdapter episodeAdapter;
 
     private ImageView ivAddBookToBookmarks;
+    private FloatingActionButton playFab;
 
     private CardView bookSeriesCard;
     private TextView bookSeriesName;
     private TextView bookSeriesCount;
 
     private boolean isCurrentlyFinished = false;
+    private PlaybackService playbackService;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -93,6 +97,7 @@ public class BookInfoFragment extends Fragment {
         infoContentScroll = view.findViewById(R.id.info_content_scroll);
         episodesRecycler = view.findViewById(R.id.episodes_recycler);
         ivAddBookToBookmarks = view.findViewById(R.id.iv_add_book_to_bookmarks);
+        playFab = view.findViewById(R.id.play);
 
         bookSeriesCard = view.findViewById(R.id.book_series_card);
         bookSeriesName = view.findViewById(R.id.book_series_name);
@@ -109,6 +114,10 @@ public class BookInfoFragment extends Fragment {
 
         setupEpisodesRecyclerView();
         setupTabs();
+
+        viewModel.getPlaybackService().observe(getViewLifecycleOwner(), service -> {
+            this.playbackService = service;
+        });
 
         viewModel.getIsBookLoading().observe(getViewLifecycleOwner(), isLoading -> {
             progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
@@ -135,6 +144,14 @@ public class BookInfoFragment extends Fragment {
 
         observeFinishedStatus();
         ivMore.setOnClickListener(this::showBookOptionsMenu);
+
+        playFab.setOnClickListener(v -> {
+            Book book = viewModel.getSelectedBookDetails().getValue();
+            if (playbackService != null && book != null) {
+                playbackService.playBookFromIndex(book, 0);
+                new PlayerBottomSheetFragment().show(getParentFragmentManager(), "PlayerBottomSheet");
+            }
+        });
     }
 
     private void observeFavoriteStatus() {
@@ -275,6 +292,14 @@ public class BookInfoFragment extends Fragment {
         episodeAdapter = new EpisodeAdapter();
         episodesRecycler.setLayoutManager(new LinearLayoutManager(getContext()));
         episodesRecycler.setAdapter(episodeAdapter);
+
+        episodeAdapter.setOnEpisodeClickListener((episode, position) -> {
+            Book book = viewModel.getSelectedBookDetails().getValue();
+            if (playbackService != null && book != null) {
+                playbackService.playBookFromIndex(book, position);
+                new PlayerBottomSheetFragment().show(getParentFragmentManager(), "PlayerBottomSheet");
+            }
+        });
     }
 
     private void setupTabs() {

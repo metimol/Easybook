@@ -23,6 +23,7 @@ import com.metimol.easybook.api.models.response.BooksWithDatesData;
 import com.metimol.easybook.api.models.response.SearchData;
 import com.metimol.easybook.api.models.response.SeriesSearchData;
 import com.metimol.easybook.api.models.response.SourceData;
+import com.metimol.easybook.service.PlaybackService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,10 +58,31 @@ public class MainViewModel extends AndroidViewModel {
     private LiveData<Boolean> isBookFavorite;
     private LiveData<Boolean> isBookFinished;
 
+    private final MutableLiveData<PlaybackService> playbackService = new MutableLiveData<>();
+    private final MutableLiveData<Boolean> isPlayerVisible = new MutableLiveData<>(false);
+
     public MainViewModel(@NonNull Application application) {
         super(application);
         audiobookDao = AppDatabase.getDatabase(application).audiobookDao();
         databaseExecutor = Executors.newSingleThreadExecutor();
+    }
+
+    public void setPlaybackService(PlaybackService service) {
+        playbackService.setValue(service);
+        if (service != null) {
+            isPlayerVisible.setValue(service.currentBook.getValue() != null);
+            service.currentBook.observeForever(book -> isPlayerVisible.postValue(book != null));
+        } else {
+            isPlayerVisible.setValue(false);
+        }
+    }
+
+    public LiveData<PlaybackService> getPlaybackService() {
+        return playbackService;
+    }
+
+    public LiveData<Boolean> getIsPlayerVisible() {
+        return isPlayerVisible;
     }
 
     public void setStatusBarHeight(int height) {

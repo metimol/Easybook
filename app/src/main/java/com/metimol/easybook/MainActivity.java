@@ -2,7 +2,11 @@ package com.metimol.easybook;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.ServiceConnection;
+import android.content.ComponentName;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.IBinder;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.app.AppCompatDelegate;
@@ -12,9 +16,30 @@ import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.metimol.easybook.service.PlaybackService;
+
 public class MainActivity extends AppCompatActivity {
     public static final String APP_PREFERENCES = "MyAppPrefs";
     private MainViewModel mainViewModel;
+
+    private PlaybackService mService;
+    private boolean mBound = false;
+
+    private ServiceConnection connection = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName className, IBinder service) {
+            PlaybackService.PlaybackBinder binder = (PlaybackService.PlaybackBinder) service;
+            mService = binder.getService();
+            mBound = true;
+            mainViewModel.setPlaybackService(mService);
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            mBound = false;
+            mainViewModel.setPlaybackService(null);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +63,19 @@ public class MainActivity extends AppCompatActivity {
             );
             return WindowInsetsCompat.CONSUMED;
         });
+
+        Intent intent = new Intent(this, PlaybackService.class);
+        startService(intent);
+        bindService(intent, connection, Context.BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mBound) {
+            unbindService(connection);
+            mBound = false;
+        }
     }
 
     private void applyTheme() {
