@@ -55,6 +55,8 @@ public class PlaybackService extends MediaSessionService {
     public final MutableLiveData<Long> totalDuration = new MutableLiveData<>(0L);
     public final MutableLiveData<Boolean> hasNext = new MutableLiveData<>(false);
     public final MutableLiveData<Boolean> hasPrevious = new MutableLiveData<>(false);
+    public final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
+    public final MutableLiveData<Long> bufferedPosition = new MutableLiveData<>(0L);
 
     private final Handler progressHandler = new Handler(Looper.getMainLooper());
     private Runnable progressUpdater;
@@ -122,6 +124,7 @@ public class PlaybackService extends MediaSessionService {
                 if (playing) {
                     startProgressUpdater();
                     startForeground(NOTIFICATION_ID, buildNotification());
+                    isLoading.postValue(false);
                 } else {
                     stopProgressUpdater();
                     saveCurrentBookProgress();
@@ -155,14 +158,21 @@ public class PlaybackService extends MediaSessionService {
                     long duration = player.getDuration();
                     totalDuration.postValue(duration > 0 ? duration : 0L);
                     currentPosition.postValue(player.getCurrentPosition() > 0 ? player.getCurrentPosition() : 0L);
+                    bufferedPosition.postValue(player.getBufferedPosition() > 0 ? player.getBufferedPosition() : 0L);
                     hasNext.postValue(player.hasNextMediaItem());
                     hasPrevious.postValue(player.hasPreviousMediaItem());
+                    isLoading.postValue(false);
                 } else if (playbackState == Player.STATE_ENDED) {
                     isPlaying.postValue(false);
                     stopProgressUpdater();
                     if (!player.hasNextMediaItem()) {
                         markCurrentBookAsFinished();
                     }
+                    isLoading.postValue(false);
+                } else if (playbackState == Player.STATE_BUFFERING) {
+                    isLoading.postValue(true);
+                } else if (playbackState == Player.STATE_IDLE) {
+                    isLoading.postValue(false);
                 }
             }
         });
@@ -172,7 +182,9 @@ public class PlaybackService extends MediaSessionService {
             public void run() {
                 if (player.isPlaying()) {
                     long pos = player.getCurrentPosition();
+                    long bufferedPos = player.getBufferedPosition();
                     currentPosition.postValue(pos > 0 ? pos : 0L);
+                    bufferedPosition.postValue(bufferedPos > 0 ? bufferedPos : 0L);
                     progressHandler.postDelayed(this, 500);
                 }
             }
@@ -223,8 +235,8 @@ public class PlaybackService extends MediaSessionService {
 
     private Notification buildNotification() {
         MediaMetadata metadata = player.getMediaMetadata();
-        String title = "Аудиокнига";
-        String artist = "Easybook";
+        String title = getString(R.string.audiobook);
+        String artist = getString(R.string.app_name);
 
         if (metadata.title != null) {
             title = metadata.title.toString();

@@ -4,6 +4,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -132,6 +133,8 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
             public void onStopTrackingTouch(SeekBar seekBar) {
                 if (playbackService != null) {
                     playbackService.seekTo(seekBar.getProgress());
+                    long bufferedPos = playbackService.bufferedPosition.getValue() != null ? playbackService.bufferedPosition.getValue() : 0L;
+                    updateBufferedPosition(bufferedPos);
                 }
                 isUserSeeking = false;
             }
@@ -169,6 +172,8 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
             updatePlayPauseButton(Boolean.TRUE.equals(playbackService.isPlaying.getValue()));
             updateDurationUI(playbackService.totalDuration.getValue() != null ? playbackService.totalDuration.getValue() : 0L);
             updateProgressUI(playbackService.currentPosition.getValue() != null ? playbackService.currentPosition.getValue() : 0L);
+            updateLoadingState(Boolean.TRUE.equals(playbackService.isLoading.getValue()));
+            updateBufferedPosition(playbackService.bufferedPosition.getValue() != null ? playbackService.bufferedPosition.getValue() : 0L);
             controlsViewHolder.btnNextCard.setVisibility(Boolean.TRUE.equals(playbackService.hasNext.getValue()) ? View.VISIBLE : View.INVISIBLE);
             controlsViewHolder.btnPrevCard.setVisibility(Boolean.TRUE.equals(playbackService.hasPrevious.getValue()) ? View.VISIBLE : View.INVISIBLE);
         }
@@ -206,6 +211,8 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
         playbackService.isPlaying.observe(lifecycleOwner, this::updatePlayPauseButton);
         playbackService.totalDuration.observe(lifecycleOwner, this::updateDurationUI);
         playbackService.currentPosition.observe(lifecycleOwner, this::updateProgressUI);
+        playbackService.isLoading.observe(lifecycleOwner, this::updateLoadingState);
+        playbackService.bufferedPosition.observe(lifecycleOwner, this::updateBufferedPosition);
         playbackService.hasNext.observe(lifecycleOwner, hasNext -> {
             if (controlsViewHolder != null) controlsViewHolder.btnNextCard.setVisibility(hasNext ? View.VISIBLE : View.INVISIBLE);
         });
@@ -261,6 +268,22 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
         controlsViewHolder.playerSeekBar.setProgress((int) position);
     }
 
+    private void updateLoadingState(boolean isLoading) {
+        if (controlsViewHolder == null) return;
+        if (isLoading) {
+            controlsViewHolder.btnPlayPause.setVisibility(View.INVISIBLE);
+            controlsViewHolder.loadingProgressBar.setVisibility(View.VISIBLE);
+        } else {
+            controlsViewHolder.btnPlayPause.setVisibility(View.VISIBLE);
+            controlsViewHolder.loadingProgressBar.setVisibility(View.GONE);
+        }
+    }
+
+    private void updateBufferedPosition(long position) {
+        if (isUserSeeking || controlsViewHolder == null) return;
+        controlsViewHolder.playerSeekBar.setSecondaryProgress((int) position);
+    }
+
 
     static class PageViewHolder extends RecyclerView.ViewHolder {
         public PageViewHolder(@NonNull View itemView) {
@@ -275,6 +298,7 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
         FloatingActionButton btnPlayPause;
         CardView btnPrevCard, btnNextCard;
         CircularProgressDrawable progressDrawable;
+        ProgressBar loadingProgressBar;
 
         public ControlsViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -287,6 +311,7 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
             btnPlayPause = itemView.findViewById(R.id.btn_play_pause);
             btnPrevCard = itemView.findViewById(R.id.btn_prev_card);
             btnNextCard = itemView.findViewById(R.id.btn_next_card);
+            loadingProgressBar = itemView.findViewById(R.id.loading_progress_bar);
 
             progressDrawable = new CircularProgressDrawable(itemView.getContext());
             progressDrawable.setStrokeWidth(5f);
