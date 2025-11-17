@@ -348,6 +348,22 @@
             tools:listitem="@layout/item_episode" />
     </FrameLayout>
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/play"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:src="@drawable/ic_player_icon"
+        android:scaleType="center"
+        android:contentDescription="@string/play"
+        app:fabSize="normal"
+        app:maxImageSize="20dp"
+        app:backgroundTint="@color/green"
+        app:tint="@color/white"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <ProgressBar
         android:id="@+id/progressBarBookDetails"
         android:layout_width="wrap_content"
