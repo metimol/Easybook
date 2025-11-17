@@ -27,6 +27,8 @@
         <img src="https://raw.githubusercontent.com/metimol/Easybook/refs/heads/main/mockups/3.png" width="250" />
         <br /><b>Детали книги</b>
       </td>
+    </tr>
+    <tr>
       <td align="center">
         <img src="https://raw.githubusercontent.com/metimol/Easybook/refs/heads/main/mockups/4.png" width="250" />
         <br /><b>Выбор глав</b>
@@ -35,8 +37,6 @@
         <img src="https://raw.githubusercontent.com/metimol/Easybook/refs/heads/main/mockups/5.png" width="250" />
         <br /><b>Удобный плеер</b>
       </td>
-    </tr>
-    <tr>
       <td align="center">
         <img src="https://raw.githubusercontent.com/metimol/Easybook/refs/heads/main/mockups/6.png" width="250" />
         <br /><b>Категории</b>
