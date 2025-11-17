@@ -190,35 +190,40 @@
         </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/empty_player_view"
         android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:orientation="vertical"
-        android:gravity="center"
+        android:layout_height="wrap_content"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/drag_handle"
-        app:layout_constraintBottom_toTopOf="@id/pager_indicator"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
+            android:id="@+id/ivNothingPlaying"
             android:layout_width="80dp"
             android:layout_height="80dp"
+            android:contentDescription="@null"
             android:src="@drawable/ic_player_icon"
-            app:tint="@color/light_grey"
-            android:contentDescription="@null"/>
+            android:layout_marginTop="30dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="@color/light_grey" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
-            android:text="@string/nothing_is_playing"
             android:fontFamily="@font/sf_pro"
+            android:text="@string/nothing_is_playing"
             android:textColor="@color/light_grey"
-            android:textSize="18sp"/>
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ivNothingPlaying" />
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <LinearLayout
         android:id="@+id/pager_indicator"
