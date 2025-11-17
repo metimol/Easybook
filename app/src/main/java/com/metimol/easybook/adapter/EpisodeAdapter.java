@@ -1,10 +1,12 @@
 package com.metimol.easybook.adapter;
 
+import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.DiffUtil;
 import androidx.recyclerview.widget.ListAdapter;
 import androidx.recyclerview.widget.RecyclerView;
@@ -22,9 +24,18 @@ public class EpisodeAdapter extends ListAdapter<BookFile, EpisodeAdapter.Episode
         void onEpisodeClick(BookFile episode, int position);
     }
     private OnEpisodeClickListener clickListener;
+    private String selectedChapterId = null;
 
     public void setOnEpisodeClickListener(OnEpisodeClickListener listener) {
         this.clickListener = listener;
+    }
+
+    public void setSelectedChapterId(String chapterId) {
+        String oldId = selectedChapterId;
+        this.selectedChapterId = chapterId;
+        if (!Objects.equals(oldId, chapterId)) {
+            notifyDataSetChanged();
+        }
     }
 
     public EpisodeAdapter() {
@@ -54,7 +65,8 @@ public class EpisodeAdapter extends ListAdapter<BookFile, EpisodeAdapter.Episode
     @Override
     public void onBindViewHolder(@NonNull EpisodeViewHolder holder, int position) {
         BookFile episode = getItem(position);
-        holder.bind(episode);
+        holder.bind(episode, String.valueOf(episode.getId()).equals(selectedChapterId));
+
         holder.itemView.setOnClickListener(v -> {
             if (clickListener != null) {
                 clickListener.onEpisodeClick(episode, holder.getAdapterPosition());
@@ -74,10 +86,25 @@ public class EpisodeAdapter extends ListAdapter<BookFile, EpisodeAdapter.Episode
             episodeDuration = itemView.findViewById(R.id.episodeDuration);
         }
 
-        public void bind(BookFile episode) {
+        public void bind(BookFile episode, boolean isSelected) {
             episodeIndex.setText(String.format(Locale.getDefault(), "%d.", episode.getIndex() + 1));
             episodeTitle.setText(episode.getTitle());
             episodeDuration.setText(formatDuration(episode.getDuration()));
+
+            if (isSelected) {
+                int activeColor = ContextCompat.getColor(itemView.getContext(), R.color.green);
+                episodeIndex.setTextColor(activeColor);
+                episodeTitle.setTextColor(activeColor);
+                episodeTitle.setTypeface(null, Typeface.BOLD);
+                episodeDuration.setTextColor(activeColor);
+            } else {
+                int defaultColor = ContextCompat.getColor(itemView.getContext(), R.color.black);
+                int lightColor = ContextCompat.getColor(itemView.getContext(), R.color.light_grey);
+                episodeIndex.setTextColor(lightColor);
+                episodeTitle.setTextColor(defaultColor);
+                episodeTitle.setTypeface(null, Typeface.NORMAL);
+                episodeDuration.setTextColor(lightColor);
+            }
         }
 
         private String formatDuration(int totalSeconds) {
