@@ -195,7 +195,7 @@ public class PlayerBottomSheetFragment extends BottomSheetDialogFragment {
         }
 
         Glide.with(requireContext())
-                .load(book.getDefaultPoster())
+                .load(book.getDefaultPosterMain())
                 .placeholder(progressDrawable)
                 .error(R.drawable.ic_placeholder_book)
                 .fallback(R.drawable.ic_placeholder_book)
