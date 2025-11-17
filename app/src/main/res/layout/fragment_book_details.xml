@@ -362,7 +362,7 @@
         android:id="@+id/play"
         android:layout_marginEnd="20dp"
         android:layout_marginBottom="20dp"
-        android:src="@drawable/ic_player_icon"
+        android:src="@drawable/ic_play"
         android:scaleType="center"
         android:contentDescription="@string/play"
         app:fabSize="normal"

@@ -71,7 +71,7 @@
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:contentDescription="@string/globe_icon"
-                android:src="@drawable/ic_player_icon"
+                android:src="@drawable/ic_play"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

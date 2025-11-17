@@ -236,7 +236,7 @@ public class PlaybackService extends MediaSessionService {
         return new NotificationCompat.Builder(this, CHANNEL_ID)
                 .setContentTitle(title)
                 .setContentText(artist)
-                .setSmallIcon(R.drawable.ic_player_icon)
+                .setSmallIcon(R.drawable.ic_play)
                 .setOngoing(true)
                 .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
                 .build();

@@ -138,7 +138,7 @@
             android:layout_weight="0"
             android:contentDescription="@string/play"
             android:stateListAnimator="@null"
-            android:src="@drawable/ic_player_icon"
+            android:src="@drawable/ic_play"
             app:backgroundTint="@color/green"
             app:elevation="0dp"
             app:pressedTranslationZ="0dp"

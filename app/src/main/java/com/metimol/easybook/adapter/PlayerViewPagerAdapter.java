@@ -245,7 +245,7 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
         if (isPlaying) {
             controlsViewHolder.btnPlayPause.setImageResource(R.drawable.ic_pause);
         } else {
-            controlsViewHolder.btnPlayPause.setImageResource(R.drawable.ic_player_icon);
+            controlsViewHolder.btnPlayPause.setImageResource(R.drawable.ic_play);
         }
     }
 
