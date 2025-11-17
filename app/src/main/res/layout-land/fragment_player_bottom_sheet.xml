@@ -126,7 +126,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_weight="0"
-                app:cardBackgroundColor="#F5F5F5"
+                app:cardBackgroundColor="@color/light_grey"
                 app:cardCornerRadius="14dp"
                 app:cardElevation="0dp"
                 android:clickable="true"
@@ -140,7 +140,7 @@
                     android:contentDescription="@string/previous"
                     android:padding="12dp"
                     android:src="@drawable/ic_music_back"
-                    app:tint="@color/light_grey" />
+                    app:tint="@color/white" />
             </androidx.cardview.widget.CardView>
 
             <Space
@@ -170,7 +170,7 @@
                 android:layout_width="48dp"
                 android:layout_height="48dp"
                 android:layout_weight="0"
-                app:cardBackgroundColor="#F5F5F5"
+                app:cardBackgroundColor="@color/light_grey"
                 app:cardCornerRadius="14dp"
                 app:cardElevation="0dp"
                 android:clickable="true"
@@ -184,7 +184,7 @@
                     android:contentDescription="@string/next"
                     android:padding="12dp"
                     android:src="@drawable/ic_music_forward"
-                    app:tint="@color/light_grey" />
+                    app:tint="@color/white" />
             </androidx.cardview.widget.CardView>
 
         </LinearLayout>
