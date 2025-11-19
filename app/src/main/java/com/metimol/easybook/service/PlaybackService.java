@@ -219,7 +219,7 @@ public class PlaybackService extends MediaSessionService {
                 .build();
 
         notificationManager.setPlayer(player);
-        notificationManager.setMediaSessionToken(mediaSession.getSessionCompatToken());
+        notificationManager.setMediaSessionToken(mediaSession.getPlatformToken());
         notificationManager.setUseNextAction(true);
         notificationManager.setUsePreviousAction(true);
         notificationManager.setUsePlayPauseActions(true);
