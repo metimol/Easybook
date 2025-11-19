@@ -5,6 +5,9 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -29,6 +32,9 @@ import androidx.media3.session.MediaSession;
 import androidx.media3.session.MediaSessionService;
 import androidx.media3.ui.PlayerNotificationManager;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.metimol.easybook.MainActivity;
 import com.metimol.easybook.R;
 import com.metimol.easybook.api.models.Book;
@@ -170,6 +176,22 @@ public class PlaybackService extends MediaSessionService {
                             @NonNull Player player,
                             @NonNull PlayerNotificationManager.BitmapCallback callback
                     ) {
+                        Book book = currentBook.getValue();
+                        if (book != null && book.getDefaultPosterMain() != null) {
+                            Glide.with(PlaybackService.this)
+                                    .asBitmap()
+                                    .load(book.getDefaultPosterMain())
+                                    .into(new CustomTarget<Bitmap>() {
+                                        @Override
+                                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                            callback.onBitmap(resource);
+                                        }
+
+                                        @Override
+                                        public void onLoadCleared(@Nullable Drawable placeholder) {
+                                        }
+                                    });
+                        }
                         return null;
                     }
                 })
@@ -455,11 +477,16 @@ public class PlaybackService extends MediaSessionService {
             String artist = (book.getAuthors() != null && !book.getAuthors().isEmpty()) ?
                     book.getAuthors().get(0).getName() + " " + book.getAuthors().get(0).getSurname() : null;
             for (BookFile chapter : chapters) {
-                MediaMetadata mediaMetadata = new MediaMetadata.Builder()
+                MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder()
                         .setTitle(chapter.getTitle())
                         .setAlbumTitle(book.getName())
-                        .setArtist(artist)
-                        .build();
+                        .setArtist(artist);
+
+                if (book.getDefaultPosterMain() != null) {
+                    metadataBuilder.setArtworkUri(Uri.parse(book.getDefaultPosterMain()));
+                }
+
+                MediaMetadata mediaMetadata = metadataBuilder.build();
                 MediaItem mediaItem = new MediaItem.Builder()
                         .setMediaId(String.valueOf(chapter.getId()))
                         .setUri(chapter.getUrl())
