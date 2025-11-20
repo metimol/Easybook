@@ -775,4 +775,23 @@ public class MainViewModel extends AndroidViewModel {
 
         loadMoreBooks();
     }
+
+    public boolean isCurrentRequest(String type, String id) {
+        if (type == null) return false;
+        SourceType targetType = SourceType.NONE;
+        switch (type) {
+            case "GENRE": targetType = SourceType.GENRE; break;
+            case "SERIES": targetType = SourceType.SERIES; break;
+            case "FAVORITES": targetType = SourceType.FAVORITES; break;
+            case "LISTENED": targetType = SourceType.LISTENED; break;
+            case "LISTENING": targetType = SourceType.LISTENING; break;
+        }
+
+        if (currentSourceType != targetType) return false;
+
+        if (id != null && currentSourceId != null) {
+            return id.equals(currentSourceId);
+        }
+        return id == null && currentSourceId == null;
+    }
 }

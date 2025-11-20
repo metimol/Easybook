@@ -138,26 +138,28 @@ public class BooksCollectionFragment extends Fragment {
         });
 
         if (sourceType != null) {
+            boolean isSameRequest = viewModel.isCurrentRequest(sourceType, sourceId);
+
             switch (sourceType) {
                 case "GENRE" -> {
                     isPaginationEnabled = true;
-                    viewModel.fetchBooksByGenre(sourceId);
+                    if (!isSameRequest) viewModel.fetchBooksByGenre(sourceId);
                 }
                 case "SERIES" -> {
                     isPaginationEnabled = true;
-                    viewModel.fetchBooksBySeries(sourceId);
+                    if (!isSameRequest) viewModel.fetchBooksBySeries(sourceId);
                 }
                 case "FAVORITES" -> {
                     isPaginationEnabled = false;
-                    viewModel.fetchFavoriteBooksFromApi();
+                    if (!isSameRequest) viewModel.fetchFavoriteBooksFromApi();
                 }
                 case "LISTENED" -> {
                     isPaginationEnabled = false;
-                    viewModel.fetchListenedBooksFromApi();
+                    if (!isSameRequest) viewModel.fetchListenedBooksFromApi();
                 }
                 case "LISTENING" -> {
                     isPaginationEnabled = false;
-                    viewModel.fetchListeningBooksFromApi();
+                    if (!isSameRequest) viewModel.fetchListeningBooksFromApi();
                 }
             }
         }
@@ -240,6 +242,7 @@ public class BooksCollectionFragment extends Fragment {
 
     private void setupRecyclerView() {
         bookAdapter = new BookAdapter();
+        bookAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
 
         int spanCount = 0;
         RecyclerView.LayoutManager manager = booksCollectionRecyclerView.getLayoutManager();
