@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:orientation="vertical"
-    android:gravity="center_horizontal">
+    android:paddingBottom="8dp">
 
     <com.google.android.material.card.MaterialCardView
-        android:layout_width="120dp"
-        android:layout_height="180dp"
+        android:id="@+id/cvBookCover"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         app:cardCornerRadius="12dp"
-        app:cardElevation="0dp">
+        app:cardElevation="0dp"
+        app:layout_constraintDimensionRatio="H,2:3"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
         <ImageView
             android:id="@+id/bookCover"
@@ -36,21 +40,29 @@
 
     <TextView
         android:id="@+id/bookTitle"
-        android:layout_width="120dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:maxLines="2"
+        android:layout_marginTop="8dp"
         android:ellipsize="end"
+        android:fontFamily="@font/sf_pro"
+        android:maxLines="2"
         android:textColor="@color/black"
         android:textSize="14sp"
-        android:fontFamily="@font/sf_pro"
         android:textStyle="normal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/cvBookCover"
         tools:text="Witcher" />
 
     <LinearLayout
-        android:layout_width="120dp"
+        android:id="@+id/authorContainer"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/bookTitle">
 
         <ImageView
             android:layout_width="15dp"
@@ -59,40 +71,49 @@
 
         <TextView
             android:id="@+id/bookAuthor"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="1dp"
-            android:maxLines="1"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
             android:ellipsize="end"
+            android:fontFamily="@font/sf_pro"
+            android:maxLines="1"
             android:textColor="@color/light_grey"
             android:textSize="14sp"
-            android:fontFamily="@font/sf_pro"
             android:textStyle="normal"
             tools:text="Metimol" />
     </LinearLayout>
 
     <LinearLayout
-        android:layout_width="120dp"
+        android:id="@+id/readerContainer"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/authorContainer">
 
         <ImageView
             android:layout_width="12dp"
             android:layout_height="12dp"
-            android:src="@drawable/ic_reader"/>
+            android:layout_marginStart="1dp"
+            android:src="@drawable/ic_reader" />
 
         <TextView
             android:id="@+id/bookReader"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="3dp"
-            android:maxLines="1"
+            android:layout_marginStart="6dp"
+            android:layout_weight="1"
             android:ellipsize="end"
+            android:fontFamily="@font/sf_pro"
+            android:maxLines="1"
             android:textColor="@color/light_grey"
             android:textSize="14sp"
-            android:fontFamily="@font/sf_pro"
             android:textStyle="normal"
             tools:text="Tallum" />
     </LinearLayout>
-</LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

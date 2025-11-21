@@ -351,7 +351,7 @@ public class MainFragment extends Fragment {
         }
 
         int spacingInPixels = dpToPx(12, requireContext());
-        int edgeSpacingInPixels = dpToPx(10, requireContext());
+        int edgeSpacingInPixels = 0;
 
         booksRecyclerView.setLayoutManager(new GridLayoutManager(getContext(), spanCount));
 
