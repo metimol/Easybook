@@ -3,62 +3,70 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:padding="16dp">
 
     <ImageView
         android:id="@+id/start_screen_image"
         android:layout_width="0dp"
-        android:layout_height="300dp"
+        android:layout_height="0dp"
         android:contentDescription="@string/men_listen_audiobooks"
         android:src="@drawable/ic_start_screen_men"
-        android:layout_marginTop="80dp"
+        app:layout_constraintHeight_percent="0.45"
+        app:layout_constraintWidth_percent="0.8"
+        app:layout_constraintBottom_toTopOf="@+id/start_text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
 
     <TextView
         android:id="@+id/start_text"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
+        android:layout_marginTop="32dp"
+        android:fontFamily="@font/sf_pro"
         android:text="@string/listen_to_your_favourite_books"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="25sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/start_description"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/start_screen_image"
-        android:layout_marginTop="20dp"
-        android:fontFamily="@font/sf_pro"
-        android:textStyle="bold"
-        android:textColor="@color/black"
-        android:textAlignment="center"
-        android:textSize="25sp" />
+        app:layout_constraintTop_toBottomOf="@+id/start_screen_image" />
 
     <TextView
         android:id="@+id/start_description"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="16dp"
+        android:fontFamily="@font/sf_pro"
         android:paddingHorizontal="8dp"
         android:text="@string/with_over_million_volumes_of_spoken_audio_content_such_as_podcasts_audiobooks"
         android:textAlignment="center"
-        android:fontFamily="@font/sf_pro"
+        android:textSize="14sp"
         android:textStyle="normal"
+        app:layout_constraintBottom_toTopOf="@+id/get_started_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/start_text"
-        android:textSize="14sp"/>
+        app:layout_constraintTop_toBottomOf="@+id/start_text" />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/get_started_button"
-        android:layout_width="204dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:paddingVertical="12dp"
-        android:layout_marginTop="50dp"
+        android:layout_marginTop="32dp"
         android:fontFamily="@font/sf_pro"
+        android:paddingVertical="12dp"
         android:text="@string/get_started"
-        android:textStyle="normal"
-        android:textSize="15sp"
         android:textFontWeight="700"
+        android:textSize="15sp"
+        android:textStyle="normal"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/start_description" />
+        app:layout_constraintTop_toBottomOf="@+id/start_description"
+        app:layout_constraintWidth_percent="0.6" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
