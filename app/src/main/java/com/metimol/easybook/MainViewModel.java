@@ -54,6 +54,7 @@ public class MainViewModel extends AndroidViewModel {
     private int currentPage = 0;
     private boolean isLastPage = false;
     private boolean isSearchActive = false;
+    private String currentSearchQuery;
 
     private String currentSourceId = null;
     private SourceType currentSourceType = SourceType.NONE;
@@ -621,6 +622,11 @@ public class MainViewModel extends AndroidViewModel {
             return;
         }
 
+        if (isSearchActive && query.equals(currentSearchQuery)) {
+            return;
+        }
+        currentSearchQuery = query;
+
         isSearchActive = true;
         currentSourceId = null;
         currentSourceType = SourceType.NONE;
@@ -774,6 +780,7 @@ public class MainViewModel extends AndroidViewModel {
 
     public void resetBookList() {
         isSearchActive = false;
+        currentSearchQuery = null;
         currentSourceId = null;
         currentSourceType = SourceType.NONE;
         isLoading.setValue(false);

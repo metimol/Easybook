@@ -343,6 +343,7 @@ public class MainFragment extends Fragment {
 
     private void setupBooksRecyclerView() {
         bookAdapter = new BookAdapter();
+        bookAdapter.setStateRestorationPolicy(RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY);
         RecyclerView.LayoutManager layoutManager = booksRecyclerView.getLayoutManager();
 
         int spanCount = 3;

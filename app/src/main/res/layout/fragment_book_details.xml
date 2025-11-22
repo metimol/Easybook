@@ -323,6 +323,7 @@
                     android:textColor="@color/black"
                     android:textSize="15sp"
                     android:lineSpacingExtra="4dp"
+                    android:layout_marginBottom="100dp"
                     tools:text="I'll be back..."/>
             </LinearLayout>
         </ScrollView>
