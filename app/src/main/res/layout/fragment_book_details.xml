@@ -333,6 +333,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"
+            android:paddingBottom="100dp"
+            android:clipToPadding="false"
             tools:listitem="@layout/item_episode" />
     </FrameLayout>
 

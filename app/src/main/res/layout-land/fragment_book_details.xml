@@ -334,7 +334,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="gone"
-            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            android:paddingBottom="100dp"
+            android:clipToPadding="false"
             tools:listitem="@layout/item_episode" />
     </FrameLayout>
 
