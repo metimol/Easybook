@@ -1,5 +1,6 @@
 package com.metimol.easybook.adapter;
 
+import android.content.res.ColorStateList;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,13 +11,17 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
+import androidx.core.content.ContextCompat;
+import androidx.core.widget.ImageViewCompat;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.swiperefreshlayout.widget.CircularProgressDrawable;
 
 import com.bumptech.glide.Glide;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.metimol.easybook.MainViewModel;
 import com.metimol.easybook.R;
 import com.metimol.easybook.api.models.Author;
 import com.metimol.easybook.api.models.Book;
@@ -24,6 +29,7 @@ import com.metimol.easybook.api.models.BookFile;
 import com.metimol.easybook.service.PlaybackService;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPagerAdapter.PageViewHolder> {
 
@@ -39,10 +45,16 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
     private ChaptersViewHolder chaptersViewHolder;
     private final Runnable onChapterClick;
 
+    private MainViewModel mainViewModel;
+
     public PlayerViewPagerAdapter(LifecycleOwner lifecycleOwner, EpisodeAdapter episodeAdapter, Runnable onChapterClick) {
         this.lifecycleOwner = lifecycleOwner;
         this.episodeAdapter = episodeAdapter;
         this.onChapterClick = onChapterClick;
+    }
+
+    public void setMainViewModel(MainViewModel mainViewModel) {
+        this.mainViewModel = mainViewModel;
     }
 
     public void setPlaybackService(PlaybackService service) {
@@ -128,6 +140,8 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
             }
         });
 
+        holder.btnSleepTimer.setOnClickListener(v -> showSleepTimerDialog(holder.itemView.getContext()));
+
         holder.playerSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -186,6 +200,7 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
             updateProgressUI(playbackService.currentPosition.getValue() != null ? playbackService.currentPosition.getValue() : 0L);
             updateLoadingState(Boolean.TRUE.equals(playbackService.isLoading.getValue()));
             updateBufferedPosition(playbackService.bufferedPosition.getValue() != null ? playbackService.bufferedPosition.getValue() : 0L);
+            updateTimerState(Boolean.TRUE.equals(playbackService.isSleepTimerActive.getValue()));
             controlsViewHolder.btnNextCard.setVisibility(Boolean.TRUE.equals(playbackService.hasNext.getValue()) ? View.VISIBLE : View.GONE);
             controlsViewHolder.btnPrevCard.setVisibility(Boolean.TRUE.equals(playbackService.hasPrevious.getValue()) ? View.VISIBLE : View.GONE);
         }
@@ -225,6 +240,7 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
         playbackService.currentPosition.observe(lifecycleOwner, this::updateProgressUI);
         playbackService.isLoading.observe(lifecycleOwner, this::updateLoadingState);
         playbackService.bufferedPosition.observe(lifecycleOwner, this::updateBufferedPosition);
+        playbackService.isSleepTimerActive.observe(lifecycleOwner, this::updateTimerState);
         playbackService.hasNext.observe(lifecycleOwner, hasNext -> {
             if (controlsViewHolder != null) controlsViewHolder.btnNextCard.setVisibility(hasNext ? View.VISIBLE : View.GONE);
         });
@@ -296,6 +312,68 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
         controlsViewHolder.playerSeekBar.setSecondaryProgress((int) position);
     }
 
+    private void updateTimerState(boolean isActive) {
+        if (controlsViewHolder == null) return;
+        if (isActive) {
+            int activeColor = ContextCompat.getColor(controlsViewHolder.itemView.getContext(), R.color.green);
+            ImageViewCompat.setImageTintList(controlsViewHolder.btnSleepTimer, ColorStateList.valueOf(activeColor));
+        } else {
+            int inactiveColor = ContextCompat.getColor(controlsViewHolder.itemView.getContext(), R.color.light_grey);
+            ImageViewCompat.setImageTintList(controlsViewHolder.btnSleepTimer, ColorStateList.valueOf(inactiveColor));
+        }
+    }
+
+    private void showSleepTimerDialog(android.content.Context context) {
+        BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.CustomBottomSheetDialogTheme);
+        dialog.setContentView(R.layout.fragment_timer_dialog);
+
+        if (mainViewModel == null) return;
+
+        TextView timer_off = dialog.findViewById(R.id.timer_off);
+        Objects.requireNonNull(timer_off).setOnClickListener(v -> {
+            mainViewModel.cancelSleepTimer();
+            dialog.dismiss();
+        });
+
+        TextView timer_5 = dialog.findViewById(R.id.timer_5);
+        Objects.requireNonNull(timer_5).setOnClickListener(v -> {
+            mainViewModel.setSleepTimer(5);
+            dialog.dismiss();
+        });
+
+        TextView timer_15 = dialog.findViewById(R.id.timer_15);
+        Objects.requireNonNull(timer_15).setOnClickListener(v -> {
+            mainViewModel.setSleepTimer(15);
+            dialog.dismiss();
+        });
+
+        TextView timer_30 = dialog.findViewById(R.id.timer_30);
+        Objects.requireNonNull(timer_30).setOnClickListener(v -> {
+            mainViewModel.setSleepTimer(30);
+            dialog.dismiss();
+        });
+
+        TextView timer_45 = dialog.findViewById(R.id.timer_45);
+        Objects.requireNonNull(timer_45).setOnClickListener(v -> {
+            mainViewModel.setSleepTimer(45);
+            dialog.dismiss();
+        });
+
+        TextView timer_60 = dialog.findViewById(R.id.timer_60);
+        Objects.requireNonNull(timer_60).setOnClickListener(v -> {
+            mainViewModel.setSleepTimer(60);
+            dialog.dismiss();
+        });
+
+        TextView timer_end_of_chapter = dialog.findViewById(R.id.timer_end_of_chapter);
+        Objects.requireNonNull(timer_end_of_chapter).setOnClickListener(v -> {
+            mainViewModel.setSleepTimerEndOfChapter();
+            dialog.dismiss();
+        });
+
+        dialog.show();
+    }
+
 
     static class PageViewHolder extends RecyclerView.ViewHolder {
         public PageViewHolder(@NonNull View itemView) {
@@ -312,6 +390,7 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
         ImageView btnRewind, btnForward;
         CircularProgressDrawable progressDrawable;
         ProgressBar loadingProgressBar;
+        ImageView btnSleepTimer;
 
         public ControlsViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -327,6 +406,7 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
             btnRewind = itemView.findViewById(R.id.btn_rewind);
             btnForward = itemView.findViewById(R.id.btn_forward);
             loadingProgressBar = itemView.findViewById(R.id.loading_progress_bar);
+            btnSleepTimer = itemView.findViewById(R.id.btn_sleep_timer);
 
             progressDrawable = new CircularProgressDrawable(itemView.getContext());
             progressDrawable.setStrokeWidth(5f);

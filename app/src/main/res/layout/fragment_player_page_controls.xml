@@ -27,6 +27,20 @@
             android:contentDescription="@null" />
     </androidx.cardview.widget.CardView>
 
+    <ImageView
+        android:id="@+id/btn_sleep_timer"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="16dp"
+        android:contentDescription="@string/sleep_timer"
+        android:src="@drawable/ic_timer"
+        android:clickable="true"
+        android:focusable="true"
+        app:tint="@color/light_grey"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
     <TextView
         android:id="@+id/tv_episode_title"
         android:layout_width="0dp"

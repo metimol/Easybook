@@ -93,6 +93,7 @@ public class PlayerBottomSheetFragment extends BottomSheetDialogFragment {
                 viewPager.setCurrentItem(0, true);
             }
         });
+        pagerAdapter.setMainViewModel(viewModel);
         viewPager.setAdapter(pagerAdapter);
     }
 

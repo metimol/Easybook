@@ -98,6 +98,27 @@ public class MainViewModel extends AndroidViewModel {
         }
     }
 
+    public void setSleepTimer(int minutes) {
+        PlaybackService service = playbackService.getValue();
+        if (service != null) {
+            service.setSleepTimerMinutes(minutes);
+        }
+    }
+
+    public void setSleepTimerEndOfChapter() {
+        PlaybackService service = playbackService.getValue();
+        if (service != null) {
+            service.setSleepTimerEndOfChapter();
+        }
+    }
+
+    public void cancelSleepTimer() {
+        PlaybackService service = playbackService.getValue();
+        if (service != null) {
+            service.cancelSleepTimer();
+        }
+    }
+
     private void restoreLastPlayerState(PlaybackService service) {
         databaseExecutor.execute(() -> {
             com.metimol.easybook.database.Book lastDbBook = audiobookDao.getLastListenedBook();

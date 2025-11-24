@@ -75,6 +75,10 @@ public class PlaybackService extends MediaSessionService {
     public final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     public final MutableLiveData<Long> bufferedPosition = new MutableLiveData<>(0L);
 
+    public final MutableLiveData<Boolean> isSleepTimerActive = new MutableLiveData<>(false);
+    private long sleepTimerEndTime = 0;
+    private boolean sleepTimerEndOfChapter = false;
+
     private final Handler progressHandler = new Handler(Looper.getMainLooper());
     private Runnable progressUpdater;
 
@@ -248,6 +252,11 @@ public class PlaybackService extends MediaSessionService {
 
             @Override
             public void onMediaItemTransition(@Nullable MediaItem mediaItem, int reason) {
+                if (sleepTimerEndOfChapter && reason == Player.MEDIA_ITEM_TRANSITION_REASON_AUTO) {
+                    player.pause();
+                    cancelSleepTimer();
+                }
+
                 saveCurrentBookProgress();
                 if (mediaItem != null && currentBook.getValue() != null) {
                     int newIndex = player.getCurrentMediaItemIndex();
@@ -279,6 +288,10 @@ public class PlaybackService extends MediaSessionService {
                         markCurrentBookAsFinished();
                     }
                     isLoading.postValue(false);
+
+                    if (sleepTimerEndOfChapter) {
+                        cancelSleepTimer();
+                    }
                 } else if (playbackState == Player.STATE_BUFFERING) {
                     isLoading.postValue(true);
                 } else if (playbackState == Player.STATE_IDLE) {
@@ -296,6 +309,11 @@ public class PlaybackService extends MediaSessionService {
                     currentPosition.postValue(pos > 0 ? pos : 0L);
                     bufferedPosition.postValue(bufferedPos > 0 ? bufferedPos : 0L);
 
+                    if (sleepTimerEndTime > 0 && System.currentTimeMillis() >= sleepTimerEndTime) {
+                        player.pause();
+                        cancelSleepTimer();
+                    }
+
                     checkBookFinishedCondition(pos);
 
                     progressHandler.postDelayed(this, 500);
@@ -306,6 +324,24 @@ public class PlaybackService extends MediaSessionService {
         SharedPreferences prefs = getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
         float savedSpeed = prefs.getFloat(SPEED_KEY, 1.0f);
         setPlaybackSpeed(savedSpeed);
+    }
+
+    public void setSleepTimerMinutes(int minutes) {
+        sleepTimerEndTime = System.currentTimeMillis() + (minutes * 60 * 1000L);
+        sleepTimerEndOfChapter = false;
+        isSleepTimerActive.postValue(true);
+    }
+
+    public void setSleepTimerEndOfChapter() {
+        sleepTimerEndTime = 0;
+        sleepTimerEndOfChapter = true;
+        isSleepTimerActive.postValue(true);
+    }
+
+    public void cancelSleepTimer() {
+        sleepTimerEndTime = 0;
+        sleepTimerEndOfChapter = false;
+        isSleepTimerActive.postValue(false);
     }
 
     private void checkBookFinishedCondition(long currentPosition) {
