@@ -247,6 +247,16 @@ public class PlaybackService extends MediaSessionService {
                     isLoading.postValue(false);
                 } else {
                     stopProgressUpdater();
+
+                    if (!player.getPlayWhenReady() && player.getPlaybackState() != Player.STATE_ENDED && player.getPlaybackState() != Player.STATE_IDLE) {
+                        long currentPos = player.getCurrentPosition();
+                        long newPos = currentPos - 2000;
+                        if (newPos < 0) {
+                            newPos = 0;
+                        }
+                        player.seekTo(newPos);
+                    }
+
                     saveCurrentBookProgress();
                 }
             }
