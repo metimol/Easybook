@@ -112,11 +112,8 @@ public class LoginFragment extends Fragment {
             SharedPreferences prefs = requireContext().getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
             SharedPreferences.Editor editor = prefs.edit();
 
-            String name = user.getDisplayName();
-            String photoUrl = user.getPhotoUrl() != null ? user.getPhotoUrl().toString() : "";
-
-            editor.putString(USERNAME_KEY, name != null ? name : getString(R.string.default_username));
-            editor.putString(AVATAR_KEY, photoUrl);
+            editor.putString(USERNAME_KEY, getString(R.string.default_username));
+            editor.putString(AVATAR_KEY, "");
             editor.putBoolean(IS_FIRST_START_KEY, false);
             editor.apply();
 
