@@ -32,6 +32,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 public class FirebaseRepository {
     private final FirebaseAuth auth;
@@ -66,7 +67,7 @@ public class FirebaseRepository {
         return GoogleSignIn.getClient(context, gso);
     }
 
-    public void firebaseAuthWithGoogle(String idToken, Runnable onSuccess, Runnable onFailure) {
+    public void firebaseAuthWithGoogle(String idToken, Runnable onSuccess, Consumer<Exception> onFailure) {
         AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
         auth.signInWithCredential(credential)
                 .addOnCompleteListener(task -> {
@@ -78,12 +79,12 @@ public class FirebaseRepository {
                         onSuccess.run();
                     } else {
                         Log.e(TAG, "firebaseAuthWithGoogle: failure", task.getException());
-                        onFailure.run();
+                        onFailure.accept(task.getException());
                     }
                 });
     }
 
-    public void signInWithGitHub(Activity activity, Runnable onSuccess, Runnable onFailure) {
+    public void signInWithGitHub(Activity activity, Runnable onSuccess, Consumer<Exception> onFailure) {
         OAuthProvider.Builder provider = OAuthProvider.newBuilder("github.com");
         auth.startActivityForSignInWithProvider(activity, provider.build())
                 .addOnSuccessListener(authResult -> {
@@ -95,7 +96,7 @@ public class FirebaseRepository {
                 })
                 .addOnFailureListener(e -> {
                     Log.e(TAG, "signInWithGitHub: failure", e);
-                    onFailure.run();
+                    onFailure.accept(e);
                 });
     }
 

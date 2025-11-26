@@ -28,6 +28,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.metimol.easybook.database.AppDatabase;
 import com.metimol.easybook.firebase.FirebaseRepository;
@@ -83,9 +84,13 @@ public class LoginFragment extends Fragment {
         progressBar.setVisibility(View.VISIBLE);
         firebaseRepository.signInWithGitHub(requireActivity(),
                 this::updateUIAndNavigate,
-                () -> {
+                e -> {
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(requireContext(), getString(R.string.error_auth_firebase), Toast.LENGTH_SHORT).show();
+                    if (e instanceof FirebaseAuthUserCollisionException) {
+                        Toast.makeText(requireContext(), getString(R.string.email_exist), Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(requireContext(), getString(R.string.error_auth_firebase), Toast.LENGTH_SHORT).show();
+                    }
                 }
         );
     }
@@ -95,7 +100,7 @@ public class LoginFragment extends Fragment {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);
             firebaseRepository.firebaseAuthWithGoogle(account.getIdToken(),
                     this::updateUIAndNavigate,
-                    () -> {
+                    e -> {
                         progressBar.setVisibility(View.GONE);
                         Toast.makeText(requireContext(), getString(R.string.error_auth_firebase), Toast.LENGTH_SHORT).show();
                     }
