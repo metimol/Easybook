@@ -1,4 +1,6 @@
 import org.gradle.kotlin.dsl.annotationProcessor
+import java.io.FileInputStream
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -21,6 +23,18 @@ android {
         versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val properties = Properties()
+
+        val localPropertiesFile = rootProject.file("local.properties")
+
+        if (localPropertiesFile.exists()) {
+            properties.load(FileInputStream(localPropertiesFile))
+        }
+
+        val dbUrl = properties.getProperty("FIREBASE_DB_URL") ?: "\"https://placeholder-url\""
+
+        buildConfigField("String", "FIREBASE_DB_URL", dbUrl)
     }
 
     splits {
@@ -39,6 +53,9 @@ android {
                 "proguard-rules.pro"
             )
         }
+    }
+    buildFeatures {
+        buildConfig = true
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21

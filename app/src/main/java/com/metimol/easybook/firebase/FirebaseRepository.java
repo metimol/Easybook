@@ -1,6 +1,7 @@
 package com.metimol.easybook.firebase;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
@@ -18,6 +19,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+
+import com.metimol.easybook.BuildConfig;
 import com.metimol.easybook.R;
 import com.metimol.easybook.database.AudiobookDao;
 import com.metimol.easybook.database.Book;
@@ -36,10 +39,13 @@ public class FirebaseRepository {
     private final MutableLiveData<FirebaseUser> currentUser = new MutableLiveData<>();
 
     private ValueEventListener cloudListener;
+    private static final String TAG = "FirebaseRepository";
 
     public FirebaseRepository(AudiobookDao dao) {
         this.auth = FirebaseAuth.getInstance();
-        this.database = FirebaseDatabase.getInstance().getReference();
+        String databaseUrl = BuildConfig.FIREBASE_DB_URL;
+        this.database = FirebaseDatabase.getInstance(databaseUrl).getReference();
+
         this.audiobookDao = dao;
         this.executorService = Executors.newSingleThreadExecutor();
 
@@ -63,11 +69,13 @@ public class FirebaseRepository {
         auth.signInWithCredential(credential)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
+                        Log.d(TAG, "firebaseAuthWithGoogle: success");
                         currentUser.postValue(auth.getCurrentUser());
                         syncLocalDataToCloud();
                         startSync();
                         onSuccess.run();
                     } else {
+                        Log.e(TAG, "firebaseAuthWithGoogle: failure", task.getException());
                         onFailure.run();
                     }
                 });
@@ -108,14 +116,16 @@ public class FirebaseRepository {
                                 }
 
                             } catch (Exception e) {
-                                e.printStackTrace();
+                                Log.e(TAG, "Error parsing cloud data", e);
                             }
                         }
                     });
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError error) { }
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e(TAG, "startSync cancelled: " + error.getMessage());
+                }
             };
             userBooksRef.addValueEventListener(cloudListener);
         }
@@ -131,7 +141,10 @@ public class FirebaseRepository {
 
     public void updateBookInCloud(Book book) {
         FirebaseUser user = auth.getCurrentUser();
-        if (user == null) return;
+        if (user == null) {
+            Log.w(TAG, "updateBookInCloud: user is null");
+            return;
+        }
 
         Map<String, Object> bookData = new HashMap<>();
         bookData.put("id", book.id);
@@ -142,7 +155,9 @@ public class FirebaseRepository {
         bookData.put("progressPercentage", book.progressPercentage);
         bookData.put("lastListened", book.lastListened);
 
-        database.child("users").child(user.getUid()).child("books").child(book.id).updateChildren(bookData);
+        database.child("users").child(user.getUid()).child("books").child(book.id)
+                .updateChildren(bookData)
+                .addOnFailureListener(e -> Log.e(TAG, "updateBookInCloud failed", e));
     }
 
     public void syncLocalDataToCloud() {
@@ -158,13 +173,13 @@ public class FirebaseRepository {
                     for (Book localBook : localBooks) {
                         if (!snapshot.hasChild(localBook.id)) {
                             Map<String, Object> bookData = getStringObjectMap(localBook);
-
                             updates.put(localBook.id, bookData);
                         }
                     }
 
                     if (!updates.isEmpty()) {
-                        userBooksRef.updateChildren(updates);
+                        userBooksRef.updateChildren(updates)
+                                .addOnFailureListener(e -> Log.e(TAG, "syncLocalDataToCloud failed to update", e));
                     }
                 }
 
@@ -182,7 +197,9 @@ public class FirebaseRepository {
                 }
 
                 @Override
-                public void onCancelled(@NonNull DatabaseError error) {}
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Log.e(TAG, "syncLocalDataToCloud cancelled: " + error.getMessage());
+                }
             });
         });
     }
