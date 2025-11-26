@@ -70,7 +70,7 @@ public class FirebaseRepository {
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Log.d(TAG, "firebaseAuthWithGoogle: success");
-                        currentUser.postValue(auth.getCurrentUser());
+                        currentUser.setValue(auth.getCurrentUser());
                         syncLocalDataToCloud();
                         startSync();
                         onSuccess.run();
