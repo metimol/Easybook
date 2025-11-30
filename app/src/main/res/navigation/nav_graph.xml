@@ -65,9 +65,6 @@
             app:destination="@id/profileFragment"
             app:popUpTo="@id/mainFragment"
             app:popUpToInclusive="true" />
-        <action
-            android:id="@+id/action_mainFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
     </fragment>
 
     <fragment
@@ -159,8 +156,8 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
         <action
-            android:id="@+id/action_profileFragment_to_loginFragment"
-            app:destination="@id/loginFragment" />
+            android:id="@+id/action_profileFragment_to_startScreenFragment"
+            app:destination="@id/startScreenFragment" />
     </fragment>
 
     <fragment

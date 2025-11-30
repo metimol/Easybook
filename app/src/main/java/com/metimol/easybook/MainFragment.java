@@ -47,7 +47,6 @@ import com.metimol.easybook.utils.HorizontalSpacingItemDecoration;
 public class MainFragment extends Fragment {
     TextView tvName;
     EditText search;
-    public static final String IS_FIRST_START_KEY = "is_first_start";
     private ConstraintLayout header;
     private RecyclerView shortCategoriesRecyclerView;
     private ConstraintLayout categoriesHeader;
@@ -112,11 +111,6 @@ public class MainFragment extends Fragment {
         boolean isGuest = sharedPreferences.getBoolean(LoginFragment.IS_GUEST_KEY, false);
 
         if (FirebaseAuth.getInstance().getCurrentUser() == null && !isGuest) {
-            navController.navigate(R.id.action_mainFragment_to_loginFragment);
-            return;
-        }
-
-        if (sharedPreferences.getBoolean(IS_FIRST_START_KEY, true)) {
             navController.navigate(R.id.action_mainFragment_to_startScreenFragment);
             return;
         }

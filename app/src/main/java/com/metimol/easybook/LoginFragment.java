@@ -1,7 +1,6 @@
 package com.metimol.easybook;
 
 import static com.metimol.easybook.MainActivity.APP_PREFERENCES;
-import static com.metimol.easybook.MainFragment.IS_FIRST_START_KEY;
 import static com.metimol.easybook.ProfileFragment.AVATAR_KEY;
 import static com.metimol.easybook.ProfileFragment.USERNAME_KEY;
 
@@ -120,7 +119,6 @@ public class LoginFragment extends Fragment {
         SharedPreferences.Editor editor = prefs.edit();
 
         editor.putBoolean(IS_GUEST_KEY, true);
-        editor.putBoolean(IS_FIRST_START_KEY, false);
         editor.putString(USERNAME_KEY, getString(R.string.default_username));
         editor.putString(AVATAR_KEY, "");
         editor.apply();
@@ -160,7 +158,6 @@ public class LoginFragment extends Fragment {
 
             editor.putString(USERNAME_KEY, getString(R.string.default_username));
             editor.putString(AVATAR_KEY, "");
-            editor.putBoolean(IS_FIRST_START_KEY, false);
             editor.putBoolean(IS_GUEST_KEY, false);
             editor.apply();
 

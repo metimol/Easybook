@@ -105,7 +105,7 @@ public class ProfileFragment extends Fragment {
             editor.remove(IS_GUEST_KEY);
             editor.apply();
 
-            navController.navigate(R.id.action_profileFragment_to_loginFragment, null,
+            navController.navigate(R.id.action_profileFragment_to_startScreenFragment, null,
                     new androidx.navigation.NavOptions.Builder()
                             .setPopUpTo(R.id.nav_graph, true)
                             .build());
