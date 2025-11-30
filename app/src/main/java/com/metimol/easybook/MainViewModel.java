@@ -12,6 +12,7 @@ import androidx.lifecycle.MutableLiveData;
 import com.metimol.easybook.database.AppDatabase;
 import com.metimol.easybook.database.AudiobookDao;
 
+import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -593,7 +594,7 @@ public class MainViewModel extends AndroidViewModel {
 
                 for (Book apiBook : newBooks) {
                     if (dbMap.containsKey(apiBook.getId())) {
-                        updateBookProgress(apiBook, dbMap.get(apiBook.getId()));
+                        updateBookProgress(apiBook, Objects.requireNonNull(dbMap.get(apiBook.getId())));
                     }
                 }
             }
@@ -697,7 +698,7 @@ public class MainViewModel extends AndroidViewModel {
 
                         for (Book apiBook : searchResults) {
                             if (dbMap.containsKey(apiBook.getId())) {
-                                updateBookProgress(apiBook, dbMap.get(apiBook.getId()));
+                                updateBookProgress(apiBook, Objects.requireNonNull(dbMap.get(apiBook.getId())));
                             }
                         }
 
@@ -829,13 +830,14 @@ public class MainViewModel extends AndroidViewModel {
     public boolean isCurrentRequest(String type, String id) {
         if (type == null) return false;
         SourceType targetType = SourceType.NONE;
-        switch (type) {
-            case "GENRE": targetType = SourceType.GENRE; break;
-            case "SERIES": targetType = SourceType.SERIES; break;
-            case "FAVORITES": targetType = SourceType.FAVORITES; break;
-            case "LISTENED": targetType = SourceType.LISTENED; break;
-            case "LISTENING": targetType = SourceType.LISTENING; break;
-        }
+        targetType = switch (type) {
+            case "GENRE" -> SourceType.GENRE;
+            case "SERIES" -> SourceType.SERIES;
+            case "FAVORITES" -> SourceType.FAVORITES;
+            case "LISTENED" -> SourceType.LISTENED;
+            case "LISTENING" -> SourceType.LISTENING;
+            default -> targetType;
+        };
 
         if (currentSourceType != targetType) return false;
 
