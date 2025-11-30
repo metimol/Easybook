@@ -22,8 +22,6 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
 
-import com.google.firebase.auth.FirebaseAuth;
-
 public class ProfileFragment extends Fragment {
     public static final String USERNAME_KEY = "username";
     public static final String AVATAR_KEY = "avatar";

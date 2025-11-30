@@ -32,7 +32,6 @@ public class PlayerBottomSheetFragment extends BottomSheetDialogFragment {
     private PlayerViewPagerAdapter pagerAdapter;
 
     private View emptyPlayerView;
-    private View dragHandle;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -54,7 +53,7 @@ public class PlayerBottomSheetFragment extends BottomSheetDialogFragment {
         viewPager = view.findViewById(R.id.player_view_pager);
         tabLayout = view.findViewById(R.id.tab_indicator);
         emptyPlayerView = view.findViewById(R.id.empty_player_view);
-        dragHandle = view.findViewById(R.id.drag_handle);
+        View dragHandle = view.findViewById(R.id.drag_handle);
 
         setupViewPager();
         setupTabLayout();

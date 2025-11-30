@@ -22,14 +22,13 @@ public class MainActivity extends AppCompatActivity {
     public static final String APP_PREFERENCES = "MyAppPrefs";
     private MainViewModel mainViewModel;
 
-    private PlaybackService mService;
     private boolean mBound = false;
 
-    private ServiceConnection connection = new ServiceConnection() {
+    private final ServiceConnection connection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName className, IBinder service) {
             PlaybackService.PlaybackBinder binder = (PlaybackService.PlaybackBinder) service;
-            mService = binder.getService();
+            PlaybackService mService = binder.getService();
             mBound = true;
             mainViewModel.setPlaybackService(mService);
         }
