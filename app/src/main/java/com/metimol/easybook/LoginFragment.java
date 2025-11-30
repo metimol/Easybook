@@ -42,6 +42,9 @@ public class LoginFragment extends Fragment {
     private ActivityResultLauncher<Intent> signInLauncher;
     private ProgressBar progressBar;
     private NavController navController;
+    private CardView btnGoogle;
+    private CardView btnGithub;
+    private TextView btnAnonymous;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -69,9 +72,9 @@ public class LoginFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         navController = NavHostFragment.findNavController(this);
-        CardView btnGoogle = view.findViewById(R.id.btn_google);
-        CardView btnGithub = view.findViewById(R.id.btn_github);
-        TextView btnAnonymous = view.findViewById(R.id.btn_anonymous);
+        btnGoogle = view.findViewById(R.id.btn_google);
+        btnGithub = view.findViewById(R.id.btn_github);
+        btnAnonymous = view.findViewById(R.id.btn_anonymous);
         progressBar = view.findViewById(R.id.login_progress);
 
         btnGoogle.setOnClickListener(v -> signInWithGoogle());
@@ -81,16 +84,28 @@ public class LoginFragment extends Fragment {
 
     private void signInWithGoogle() {
         progressBar.setVisibility(View.VISIBLE);
+        btnGoogle.setVisibility(View.GONE);
+        btnGithub.setVisibility(View.GONE);
+        btnAnonymous.setVisibility(View.GONE);
+
         Intent signInIntent = firebaseRepository.getGoogleSignInClient(requireContext()).getSignInIntent();
         signInLauncher.launch(signInIntent);
     }
 
     private void signInWithGitHub() {
         progressBar.setVisibility(View.VISIBLE);
+        btnGoogle.setVisibility(View.GONE);
+        btnGithub.setVisibility(View.GONE);
+        btnAnonymous.setVisibility(View.GONE);
+
         firebaseRepository.signInWithGitHub(requireActivity(),
                 this::updateUIAndNavigate,
                 e -> {
                     progressBar.setVisibility(View.GONE);
+                    btnGoogle.setVisibility(View.VISIBLE);
+                    btnGithub.setVisibility(View.VISIBLE);
+                    btnAnonymous.setVisibility(View.VISIBLE);
+
                     if (e instanceof FirebaseAuthUserCollisionException) {
                         Toast.makeText(requireContext(), getString(R.string.email_exist), Toast.LENGTH_LONG).show();
                     } else {
@@ -120,11 +135,19 @@ public class LoginFragment extends Fragment {
                     this::updateUIAndNavigate,
                     e -> {
                         progressBar.setVisibility(View.GONE);
+                        btnGoogle.setVisibility(View.VISIBLE);
+                        btnGithub.setVisibility(View.VISIBLE);
+                        btnAnonymous.setVisibility(View.VISIBLE);
+
                         Toast.makeText(requireContext(), getString(R.string.error_auth_firebase), Toast.LENGTH_SHORT).show();
                     }
             );
         } catch (ApiException e) {
             progressBar.setVisibility(View.GONE);
+            btnGoogle.setVisibility(View.VISIBLE);
+            btnGithub.setVisibility(View.VISIBLE);
+            btnAnonymous.setVisibility(View.VISIBLE);
+
             Toast.makeText(requireContext(), getString(R.string.error_auth_google) + " " + e.getStatusCode(), Toast.LENGTH_SHORT).show();
         }
     }
@@ -142,6 +165,9 @@ public class LoginFragment extends Fragment {
             editor.apply();
 
             progressBar.setVisibility(View.GONE);
+            btnGoogle.setVisibility(View.VISIBLE);
+            btnGithub.setVisibility(View.VISIBLE);
+            btnAnonymous.setVisibility(View.VISIBLE);
             navController.navigate(R.id.action_loginFragment_to_mainFragment);
         }
     }
