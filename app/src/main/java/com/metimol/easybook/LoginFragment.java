@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -34,6 +35,8 @@ import com.metimol.easybook.database.AppDatabase;
 import com.metimol.easybook.firebase.FirebaseRepository;
 
 public class LoginFragment extends Fragment {
+
+    public static final String IS_GUEST_KEY = "is_guest";
 
     private FirebaseRepository firebaseRepository;
     private ActivityResultLauncher<Intent> signInLauncher;
@@ -68,10 +71,12 @@ public class LoginFragment extends Fragment {
         navController = NavHostFragment.findNavController(this);
         CardView btnGoogle = view.findViewById(R.id.btn_google);
         CardView btnGithub = view.findViewById(R.id.btn_github);
+        TextView btnAnonymous = view.findViewById(R.id.btn_anonymous);
         progressBar = view.findViewById(R.id.login_progress);
 
         btnGoogle.setOnClickListener(v -> signInWithGoogle());
         btnGithub.setOnClickListener(v -> signInWithGitHub());
+        btnAnonymous.setOnClickListener(v -> signInAnonymously());
     }
 
     private void signInWithGoogle() {
@@ -93,6 +98,19 @@ public class LoginFragment extends Fragment {
                     }
                 }
         );
+    }
+
+    private void signInAnonymously() {
+        SharedPreferences prefs = requireContext().getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+
+        editor.putBoolean(IS_GUEST_KEY, true);
+        editor.putBoolean(IS_FIRST_START_KEY, false);
+        editor.putString(USERNAME_KEY, getString(R.string.default_username));
+        editor.putString(AVATAR_KEY, "");
+        editor.apply();
+
+        navController.navigate(R.id.action_loginFragment_to_mainFragment);
     }
 
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
@@ -120,6 +138,7 @@ public class LoginFragment extends Fragment {
             editor.putString(USERNAME_KEY, getString(R.string.default_username));
             editor.putString(AVATAR_KEY, "");
             editor.putBoolean(IS_FIRST_START_KEY, false);
+            editor.putBoolean(IS_GUEST_KEY, false);
             editor.apply();
 
             progressBar.setVisibility(View.GONE);

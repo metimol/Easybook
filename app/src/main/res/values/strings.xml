@@ -129,4 +129,5 @@
     <string name="email_exist">Эта почта уже привязана к другому способу входа</string>
     <string name="google">Google</string>
     <string name="github">GitHub</string>
+    <string name="anonimous_login">Войти анонимно</string>
 </resources>

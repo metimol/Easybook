@@ -35,6 +35,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
 
 import com.metimol.easybook.adapter.BookAdapter;
 import com.metimol.easybook.adapter.CategoryAdapter;
@@ -108,7 +109,9 @@ public class MainFragment extends Fragment {
         SharedPreferences sharedPreferences = context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
         NavController navController = NavHostFragment.findNavController(this);
 
-        if (com.google.firebase.auth.FirebaseAuth.getInstance().getCurrentUser() == null) {
+        boolean isGuest = sharedPreferences.getBoolean(LoginFragment.IS_GUEST_KEY, false);
+
+        if (FirebaseAuth.getInstance().getCurrentUser() == null && !isGuest) {
             navController.navigate(R.id.action_mainFragment_to_loginFragment);
             return;
         }
@@ -116,10 +119,6 @@ public class MainFragment extends Fragment {
         if (sharedPreferences.getBoolean(IS_FIRST_START_KEY, true)) {
             navController.navigate(R.id.action_mainFragment_to_startScreenFragment);
             return;
-        }
-
-        if (sharedPreferences.getBoolean(IS_FIRST_START_KEY, true)) {
-            navController.navigate(R.id.action_mainFragment_to_startScreenFragment);
         }
 
         if (header!=null) {

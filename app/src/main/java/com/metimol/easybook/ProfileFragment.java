@@ -1,6 +1,7 @@
 package com.metimol.easybook;
 
 import static com.metimol.easybook.MainActivity.APP_PREFERENCES;
+import static com.metimol.easybook.LoginFragment.IS_GUEST_KEY;
 
 import android.content.Context;
 import android.content.Intent;
@@ -20,6 +21,8 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.NavController;
 import androidx.navigation.fragment.NavHostFragment;
+
+import com.google.firebase.auth.FirebaseAuth;
 
 public class ProfileFragment extends Fragment {
     public static final String USERNAME_KEY = "username";
@@ -52,6 +55,8 @@ public class ProfileFragment extends Fragment {
         ConstraintLayout bookmarks = view.findViewById(R.id.bookmarks);
         ConstraintLayout listening = view.findViewById(R.id.listen);
         ConstraintLayout listened = view.findViewById(R.id.listened);
+
+        boolean isGuest = sharedPreferences.getBoolean(IS_GUEST_KEY, false);
 
         mainViewModel.getStatusBarHeight().observe(getViewLifecycleOwner(), height -> {
             profile_container.setPaddingRelative(
@@ -99,6 +104,7 @@ public class ProfileFragment extends Fragment {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.remove(USERNAME_KEY);
             editor.remove(AVATAR_KEY);
+            editor.remove(IS_GUEST_KEY);
             editor.apply();
 
             navController.navigate(R.id.action_profileFragment_to_loginFragment, null,
