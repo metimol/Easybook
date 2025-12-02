@@ -32,7 +32,7 @@ android {
         }
 
         val dbUrl = properties.getProperty("FIREBASE_DB_URL") ?: "\"https://placeholder-url\""
-        val yandexAuthUrl = properties.getProperty("YANDEX_AUTH_BACKEND_URL") ?: "\"http://10.0.2.2:5000/auth/yandex\""
+        val yandexAuthUrl = properties.getProperty("YANDEX_AUTH_BACKEND_URL") ?: "\"https://placeholder-url\""
         val yandexClientId = properties.getProperty("YANDEX_CLIENT_ID") ?: ""
 
         buildConfigField("String", "FIREBASE_DB_URL", dbUrl)
