@@ -130,4 +130,5 @@
     <string name="google">Google</string>
     <string name="github">GitHub</string>
     <string name="anonimous_login">Войти анонимно</string>
+    <string name="yandex">Яндекс</string>
 </resources>

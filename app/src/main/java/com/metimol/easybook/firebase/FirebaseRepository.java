@@ -27,6 +27,7 @@ import com.metimol.easybook.R;
 import com.metimol.easybook.database.AudiobookDao;
 import com.metimol.easybook.database.Book;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,15 +35,27 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class FirebaseRepository {
     private final FirebaseAuth auth;
     private final DatabaseReference database;
     private final AudiobookDao audiobookDao;
     private final ExecutorService executorService;
     private final MutableLiveData<FirebaseUser> currentUser = new MutableLiveData<>();
+    private final OkHttpClient httpClient;
 
     private ValueEventListener cloudListener;
     private static final String TAG = "FirebaseRepository";
+    private static final String YANDEX_AUTH_BACKEND_URL = BuildConfig.YANDEX_AUTH_BACKEND_URL;
 
     public FirebaseRepository(AudiobookDao dao) {
         this.auth = FirebaseAuth.getInstance();
@@ -51,6 +64,7 @@ public class FirebaseRepository {
 
         this.audiobookDao = dao;
         this.executorService = Executors.newSingleThreadExecutor();
+        this.httpClient = new OkHttpClient();
 
         currentUser.postValue(auth.getCurrentUser());
     }
@@ -72,32 +86,90 @@ public class FirebaseRepository {
         auth.signInWithCredential(credential)
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        Log.d(TAG, "firebaseAuthWithGoogle: success");
                         currentUser.setValue(auth.getCurrentUser());
                         syncLocalDataToCloud();
                         startSync();
                         onSuccess.run();
                     } else {
-                        Log.e(TAG, "firebaseAuthWithGoogle: failure", task.getException());
                         onFailure.accept(task.getException());
                     }
                 });
+    }
+
+    public void firebaseAuthWithYandex(String yandexToken, Runnable onSuccess, Consumer<Exception> onFailure) {
+        MediaType JSON = MediaType.get("application/json; charset=utf-8");
+        JSONObject jsonBody = new JSONObject();
+        try {
+            jsonBody.put("token", yandexToken);
+        } catch (JSONException e) {
+            onFailure.accept(e);
+            return;
+        }
+
+        RequestBody body = RequestBody.create(jsonBody.toString(), JSON);
+        Request request = new Request.Builder()
+                .url(YANDEX_AUTH_BACKEND_URL)
+                .post(body)
+                .build();
+
+        httpClient.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+                onFailure.accept(e);
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                if (!response.isSuccessful()) {
+                    onFailure.accept(new IOException("Server Error: " + response.code()));
+                    return;
+                }
+
+                try {
+                    String responseData = response.body().string();
+                    JSONObject json = new JSONObject(responseData);
+                    String customToken = json.getString("firebase_token");
+
+                    auth.signInWithCustomToken(customToken)
+                            .addOnCompleteListener(task -> {
+                                if (task.isSuccessful()) {
+                                    currentUser.postValue(auth.getCurrentUser());
+                                    syncLocalDataToCloud();
+                                    startSync();
+                                    onSuccess.run();
+                                } else {
+                                    onFailure.accept(task.getException());
+                                }
+                            });
+
+                } catch (JSONException e) {
+                    onFailure.accept(e);
+                }
+            }
+        });
     }
 
     public void signInWithGitHub(Activity activity, Runnable onSuccess, Consumer<Exception> onFailure) {
         OAuthProvider.Builder provider = OAuthProvider.newBuilder("github.com");
         auth.startActivityForSignInWithProvider(activity, provider.build())
                 .addOnSuccessListener(authResult -> {
-                    Log.d(TAG, "signInWithGitHub: success");
                     currentUser.setValue(auth.getCurrentUser());
                     syncLocalDataToCloud();
                     startSync();
                     onSuccess.run();
                 })
-                .addOnFailureListener(e -> {
-                    Log.e(TAG, "signInWithGitHub: failure", e);
-                    onFailure.accept(e);
-                });
+                .addOnFailureListener(onFailure::accept);
+    }
+
+    public void signInAnonymously(Runnable onSuccess, Consumer<Exception> onFailure) {
+        auth.signInAnonymously()
+                .addOnSuccessListener(authResult -> {
+                    currentUser.setValue(auth.getCurrentUser());
+                    syncLocalDataToCloud();
+                    startSync();
+                    onSuccess.run();
+                })
+                .addOnFailureListener(onFailure::accept);
     }
 
     public void startSync() {
@@ -161,7 +233,6 @@ public class FirebaseRepository {
     public void updateBookInCloud(Book book) {
         FirebaseUser user = auth.getCurrentUser();
         if (user == null) {
-            Log.w(TAG, "updateBookInCloud: user is null");
             return;
         }
 
