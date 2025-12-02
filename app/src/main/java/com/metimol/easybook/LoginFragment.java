@@ -12,7 +12,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,6 +34,7 @@ import com.google.firebase.auth.FirebaseAuthUserCollisionException;
 import com.google.firebase.auth.FirebaseUser;
 import com.metimol.easybook.database.AppDatabase;
 import com.metimol.easybook.firebase.FirebaseRepository;
+
 import com.yandex.authsdk.YandexAuthLoginOptions;
 import com.yandex.authsdk.YandexAuthOptions;
 import com.yandex.authsdk.YandexAuthResult;
@@ -45,12 +46,9 @@ public class LoginFragment extends Fragment {
 
     private FirebaseRepository firebaseRepository;
     private ActivityResultLauncher<Intent> signInLauncher;
-    private ProgressBar progressBar;
+    private LinearLayout progressBar;
     private NavController navController;
-    private CardView btnGoogle;
-    private CardView btnGithub;
-    private CardView btnYandex;
-    private TextView btnAnonymous;
+    private LinearLayout buttons_container;
 
     private ActivityResultLauncher<YandexAuthLoginOptions> yandexLauncher;
 
@@ -86,18 +84,18 @@ public class LoginFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        CardView btnGoogle = view.findViewById(R.id.btn_google);
+        CardView btnGithub = view.findViewById(R.id.btn_github);
+        CardView btnYandex = view.findViewById(R.id.btn_yandex);
+        TextView btnAnonymous = view.findViewById(R.id.btn_anonymous);
+
         navController = NavHostFragment.findNavController(this);
-        btnGoogle = view.findViewById(R.id.btn_google);
-        btnGithub = view.findViewById(R.id.btn_github);
-        btnYandex = view.findViewById(R.id.btn_yandex);
-        btnAnonymous = view.findViewById(R.id.btn_anonymous);
+        buttons_container = view.findViewById(R.id.buttons_container);
         progressBar = view.findViewById(R.id.login_progress);
 
         btnGoogle.setOnClickListener(v -> signInWithGoogle());
         btnGithub.setOnClickListener(v -> signInWithGitHub());
-        if (btnYandex != null) {
-            btnYandex.setOnClickListener(v -> signInWithYandex());
-        }
+        btnYandex.setOnClickListener(v -> signInWithYandex());
         btnAnonymous.setOnClickListener(v -> signInAnonymously());
     }
 
@@ -206,16 +204,10 @@ public class LoginFragment extends Fragment {
     private void setLoadingState(boolean isLoading) {
         if (isLoading) {
             progressBar.setVisibility(View.VISIBLE);
-            btnGoogle.setVisibility(View.GONE);
-            btnGithub.setVisibility(View.GONE);
-            btnYandex.setVisibility(View.GONE);
-            btnAnonymous.setVisibility(View.GONE);
+            buttons_container.setVisibility(View.GONE);
         } else {
             progressBar.setVisibility(View.GONE);
-            btnGoogle.setVisibility(View.VISIBLE);
-            btnGithub.setVisibility(View.VISIBLE);
-            btnYandex.setVisibility(View.VISIBLE);
-            btnAnonymous.setVisibility(View.VISIBLE);
+            buttons_container.setVisibility(View.VISIBLE);
         }
     }
 }

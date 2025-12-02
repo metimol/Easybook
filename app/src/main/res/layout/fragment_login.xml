@@ -158,32 +158,52 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <TextView
+            android:id="@+id/btn_anonymous"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="?attr/selectableItemBackground"
+            android:fontFamily="@font/sf_pro"
+            android:padding="8dp"
+            android:text="@string/anonimous_login"
+            android:textColor="@color/light_grey"
+            android:textSize="16sp"
+            android:textAlignment="center"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/buttons_container" />
+
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/btn_anonymous"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:background="?attr/selectableItemBackground"
-        android:fontFamily="@font/sf_pro"
-        android:padding="8dp"
-        android:text="@string/anonimous_login"
-        android:textColor="@color/light_grey"
-        android:textSize="16sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/buttons_container" />
-
-    <ProgressBar
+    <LinearLayout
         android:id="@+id/login_progress"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
         android:visibility="gone"
-        android:indeterminateTint="@color/green"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/buttons_container" />
+        app:layout_constraintTop_toBottomOf="@id/login_subtitle">
+
+        <ProgressBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:indeterminateTint="@color/green" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="?attr/selectableItemBackground"
+            android:fontFamily="@font/sf_pro"
+            android:text="@string/please_wait"
+            android:textAlignment="center"
+            android:textColor="@color/light_grey"
+            android:textSize="16sp" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

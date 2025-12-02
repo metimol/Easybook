@@ -130,4 +130,5 @@
     <string name="github">GitHub</string>
     <string name="anonimous_login">Войти анонимно</string>
     <string name="yandex">Яндекс</string>
+    <string name="please_wait">Подождите минутку...</string>
 </resources>
