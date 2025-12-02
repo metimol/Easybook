@@ -117,7 +117,7 @@ public class LoginFragment extends Fragment {
                     if (e instanceof FirebaseAuthUserCollisionException) {
                         Toast.makeText(requireContext(), getString(R.string.email_exist), Toast.LENGTH_LONG).show();
                     } else {
-                        Toast.makeText(requireContext(), getString(R.string.error_auth_firebase), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), getString(R.string.error_auth), Toast.LENGTH_SHORT).show();
                     }
                 }
         );
@@ -129,7 +129,7 @@ public class LoginFragment extends Fragment {
             yandexLauncher.launch(new YandexAuthLoginOptions());
         } else {
             setLoadingState(false);
-            Toast.makeText(requireContext(), "Yandex SDK Error", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.error_auth), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -141,13 +141,13 @@ public class LoginFragment extends Fragment {
                     e -> {
                         setLoadingState(false);
                         Log.e("AuthError", "Yandex Sign In Error", e);
-                        Toast.makeText(requireContext(), "Yandex Auth Failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(requireContext(), getString(R.string.error_auth), Toast.LENGTH_LONG).show();
                     }
             );
         } else if (result instanceof YandexAuthResult.Failure) {
             setLoadingState(false);
             Log.e("AuthError", "Yandex SDK Result Failure");
-            Toast.makeText(requireContext(), "Yandex Auth Failed", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.error_auth), Toast.LENGTH_SHORT).show();
         } else {
             setLoadingState(false);
         }
@@ -173,13 +173,13 @@ public class LoginFragment extends Fragment {
                     e -> {
                         setLoadingState(false);
                         Log.e("AuthError", "Google Sign In Error", e);
-                        Toast.makeText(requireContext(), getString(R.string.error_auth_firebase), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), getString(R.string.error_auth), Toast.LENGTH_SHORT).show();
                     }
             );
         } catch (ApiException e) {
             setLoadingState(false);
             Log.e("AuthError", "Google API Exception", e);
-            Toast.makeText(requireContext(), getString(R.string.error_auth_google) + " " + e.getStatusCode(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.error_auth), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -199,7 +199,7 @@ public class LoginFragment extends Fragment {
             navController.navigate(R.id.action_loginFragment_to_mainFragment);
         } else {
             setLoadingState(false);
-            Toast.makeText(requireContext(), "User is null after success callback", Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), getString(R.string.error_auth), Toast.LENGTH_SHORT).show();
         }
     }
 
