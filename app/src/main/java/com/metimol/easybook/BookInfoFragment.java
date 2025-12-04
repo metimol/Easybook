@@ -275,16 +275,38 @@ public class BookInfoFragment extends Fragment {
 
         if (book.getAuthors() != null && !book.getAuthors().isEmpty()) {
             Author author = book.getAuthors().get(0);
-            bookAuthor.setText(String.format("%s %s", author.getName(), author.getSurname()));
+            String authorName = String.format("%s %s", author.getName(), author.getSurname());
+            bookAuthor.setText(authorName);
+
+            bookAuthor.setOnClickListener(v -> {
+                Bundle bundle = new Bundle();
+                bundle.putString("sourceType", "AUTHOR");
+                bundle.putString("sourceId", author.getId());
+                bundle.putString("sourceName", authorName);
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.action_bookInfoFragment_to_booksCollectionFragment, bundle);
+            });
         } else {
             bookAuthor.setText(R.string.unknown);
+            bookAuthor.setOnClickListener(null);
         }
 
         if (book.getReaders() != null && !book.getReaders().isEmpty()) {
             Author reader = book.getReaders().get(0);
-            bookReader.setText(String.format("%s %s", reader.getName(), reader.getSurname()));
+            String readerName = String.format("%s %s", reader.getName(), reader.getSurname());
+            bookReader.setText(readerName);
+
+            bookReader.setOnClickListener(v -> {
+                Bundle bundle = new Bundle();
+                bundle.putString("sourceType", "READER");
+                bundle.putString("sourceId", reader.getId());
+                bundle.putString("sourceName", readerName);
+                NavHostFragment.findNavController(this)
+                        .navigate(R.id.action_bookInfoFragment_to_booksCollectionFragment, bundle);
+            });
         } else {
             bookReader.setText(R.string.unknown);
+            bookReader.setOnClickListener(null);
         }
 
         bookDuration.setText(formatTotalDuration(book.getTotalDuration()));

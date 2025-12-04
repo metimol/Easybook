@@ -60,7 +60,35 @@ public class QueryBuilder {
         );
     }
 
+    public static String buildBooksByAuthorQuery(String authorId, int offset, int count, String sort) {
+        String format = "{booksBySource(offset:%1$d, count:%2$d, source:%3$s, id:%4$s, sort:%5$s)" +
+                "{count,items" + BOOK_FRAGMENT_FIELDS + "}}";
+
+        return String.format(Locale.US, format,
+                offset,
+                count,
+                SOURCE_AUTHOR,
+                authorId,
+                sort
+        );
+    }
+
+    public static String buildBooksByReaderQuery(String readerId, int offset, int count, String sort) {
+        String format = "{booksBySource(offset:%1$d, count:%2$d, source:%3$s, id:%4$s, sort:%5$s)" +
+                "{count,items" + BOOK_FRAGMENT_FIELDS + "}}";
+
+        return String.format(Locale.US, format,
+                offset,
+                count,
+                SOURCE_READER,
+                readerId,
+                sort
+        );
+    }
+
     public static final String SOURCE_GENRE = "GENRE";
     public static final String SOURCE_SERIE = "SERIE";
+    public static final String SOURCE_AUTHOR = "AUTHOR";
+    public static final String SOURCE_READER = "READER";
     public static final String SORT_NEW = "NEW";
 }

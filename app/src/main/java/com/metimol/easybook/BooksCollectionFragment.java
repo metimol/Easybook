@@ -149,6 +149,14 @@ public class BooksCollectionFragment extends Fragment {
                     isPaginationEnabled = true;
                     if (!isSameRequest) viewModel.fetchBooksBySeries(sourceId);
                 }
+                case "AUTHOR" -> {
+                    isPaginationEnabled = true;
+                    if (!isSameRequest) viewModel.fetchBooksByAuthor(sourceId);
+                }
+                case "READER" -> {
+                    isPaginationEnabled = true;
+                    if (!isSameRequest) viewModel.fetchBooksByReader(sourceId);
+                }
                 case "FAVORITES" -> {
                     isPaginationEnabled = false;
                     if (!isSameRequest) viewModel.fetchFavoriteBooksFromApi();
@@ -207,6 +215,8 @@ public class BooksCollectionFragment extends Fragment {
                 switch (sourceType) {
                     case "GENRE" -> viewModel.fetchBooksByGenre(sourceId);
                     case "SERIES" -> viewModel.fetchBooksBySeries(sourceId);
+                    case "AUTHOR" -> viewModel.fetchBooksByAuthor(sourceId);
+                    case "READER" -> viewModel.fetchBooksByReader(sourceId);
                     case "FAVORITES" -> viewModel.fetchFavoriteBooksFromApi();
                     case "LISTENED" -> viewModel.fetchListenedBooksFromApi();
                     case "LISTENING" -> viewModel.fetchListeningBooksFromApi();

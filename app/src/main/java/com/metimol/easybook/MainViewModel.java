@@ -42,7 +42,7 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainViewModel extends AndroidViewModel {
-    private enum SourceType { NONE, GENRE, SERIES, FAVORITES, LISTENED, LISTENING }
+    private enum SourceType { NONE, GENRE, SERIES, AUTHOR, READER, FAVORITES, LISTENED, LISTENING }
 
     private final FirebaseRepository firebaseRepository;
     private final MutableLiveData<Integer> statusBarHeight = new MutableLiveData<>();
@@ -519,6 +519,10 @@ public class MainViewModel extends AndroidViewModel {
             query = QueryBuilder.buildBooksByGenreQuery(currentSourceId, currentPage * 60, 60, QueryBuilder.SORT_NEW);
         } else if (currentSourceType == SourceType.SERIES) {
             query = QueryBuilder.buildBooksBySeriesQuery(currentSourceId, currentPage * 60, 60, QueryBuilder.SORT_NEW);
+        } else if (currentSourceType == SourceType.AUTHOR) {
+            query = QueryBuilder.buildBooksByAuthorQuery(currentSourceId, currentPage * 60, 60, QueryBuilder.SORT_NEW);
+        } else if (currentSourceType == SourceType.READER) {
+            query = QueryBuilder.buildBooksByReaderQuery(currentSourceId, currentPage * 60, 60, QueryBuilder.SORT_NEW);
         } else {
             query = QueryBuilder.buildBooksWithDatesQuery(currentPage * 60, 60, QueryBuilder.SORT_NEW);
             Call<ApiResponse<BooksWithDatesData>> call = apiService.getBooksWithDates(query, 1);
@@ -644,6 +648,26 @@ public class MainViewModel extends AndroidViewModel {
     public void fetchBooksBySeries(String seriesId) {
         currentSourceId = seriesId;
         currentSourceType = SourceType.SERIES;
+        isSearchActive = false;
+        clearBookList();
+        loadError.setValue(false);
+
+        loadMoreBooks();
+    }
+
+    public void fetchBooksByAuthor(String authorId) {
+        currentSourceId = authorId;
+        currentSourceType = SourceType.AUTHOR;
+        isSearchActive = false;
+        clearBookList();
+        loadError.setValue(false);
+
+        loadMoreBooks();
+    }
+
+    public void fetchBooksByReader(String readerId) {
+        currentSourceId = readerId;
+        currentSourceType = SourceType.READER;
         isSearchActive = false;
         clearBookList();
         loadError.setValue(false);
@@ -833,6 +857,8 @@ public class MainViewModel extends AndroidViewModel {
         targetType = switch (type) {
             case "GENRE" -> SourceType.GENRE;
             case "SERIES" -> SourceType.SERIES;
+            case "AUTHOR" -> SourceType.AUTHOR;
+            case "READER" -> SourceType.READER;
             case "FAVORITES" -> SourceType.FAVORITES;
             case "LISTENED" -> SourceType.LISTENED;
             case "LISTENING" -> SourceType.LISTENING;
