@@ -1023,7 +1023,7 @@ public class MainViewModel extends AndroidViewModel {
         AtomicInteger downloaded = new AtomicInteger(0);
 
         for (Chapter chapter : chapters) {
-            String fileName = chapter.title.replaceAll("[^a-zA-Z0-9.\\-]", "_") + ".mp3";
+            String fileName = chapter.title.replaceAll("[\\\\/:*?\"<>|]", "_") + ".mp3";
             File targetFile = new File(rootDir, fileName);
 
             if(targetFile.exists()) {
