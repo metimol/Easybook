@@ -247,6 +247,11 @@ public class BookInfoFragment extends Fragment {
     }
 
     private void updateDownloadIconState() {
+        if (viewModel != null && Boolean.TRUE.equals(viewModel.getIsDownloading().getValue())) {
+            ivDownload.setVisibility(View.GONE);
+            return;
+        }
+
         if (currentDbBook != null && currentDbBook.isDownloaded) {
             ivDownload.setImageResource(R.drawable.ic_check);
             ivDownload.setEnabled(true);
