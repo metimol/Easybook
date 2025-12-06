@@ -104,6 +104,47 @@
                     android:textSize="16sp"/>
             </RadioGroup>
 
+            <TextView
+                android:id="@+id/downloads_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="@string/downloads"
+                android:textColor="?attr/textColor"
+                android:textSize="18sp"
+                android:fontFamily="@font/sf_pro"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="8dp">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="@string/download_to_device_folder"
+                    android:textColor="?attr/textColor"
+                    android:fontFamily="@font/sf_pro"
+                    android:textSize="16sp" />
+
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_download_location"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/download_folder_hint"
+                android:textColor="@color/light_grey"
+                android:textSize="12sp"
+                android:layout_marginTop="4dp"/>
+
         </LinearLayout>
     </ScrollView>
 

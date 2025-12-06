@@ -38,6 +38,7 @@ public class BooksCollectionFragment extends Fragment {
     private View no_internet_view_collections;
     private View empty_collection_view;
     private ProgressBar progressBar;
+    private Button btn_go_to_downloads;
 
     private String sourceId;
     private String sourceName;
@@ -59,6 +60,9 @@ public class BooksCollectionFragment extends Fragment {
             } else if ("LISTENING".equals(getArguments().getString("sourceType"))) {
                 sourceType = "LISTENING";
                 sourceName = getString(R.string.listen);
+            } else if ("DOWNLOADED".equals(getArguments().getString("sourceType"))) {
+                sourceType = "DOWNLOADED";
+                sourceName = getString(R.string.downloaded);
             } else if (getArguments().containsKey("categoryId")) {
                 sourceType = "GENRE";
                 sourceId = getArguments().getString("categoryId");
@@ -88,6 +92,7 @@ public class BooksCollectionFragment extends Fragment {
         no_internet_view_collections = view.findViewById(R.id.no_internet_view_collections);
         empty_collection_view = view.findViewById(R.id.empty_collection_view);
         progressBar = view.findViewById(R.id.progressBarCollections);
+        btn_go_to_downloads = view.findViewById(R.id.btn_go_to_downloads);
 
         ImageView ivBack = view.findViewById(R.id.iv_collection_back);
         TextView tvTitle = view.findViewById(R.id.textViewCollectionTitle);
@@ -169,6 +174,10 @@ public class BooksCollectionFragment extends Fragment {
                     isPaginationEnabled = false;
                     if (!isSameRequest) viewModel.fetchListeningBooksFromApi();
                 }
+                case "DOWNLOADED" -> {
+                    isPaginationEnabled = false;
+                    if (!isSameRequest) viewModel.fetchDownloadedBooks();
+                }
             }
         }
 
@@ -220,8 +229,16 @@ public class BooksCollectionFragment extends Fragment {
                     case "FAVORITES" -> viewModel.fetchFavoriteBooksFromApi();
                     case "LISTENED" -> viewModel.fetchListenedBooksFromApi();
                     case "LISTENING" -> viewModel.fetchListeningBooksFromApi();
+                    case "DOWNLOADED" -> viewModel.fetchDownloadedBooks();
                 }
             }
+        });
+
+        btn_go_to_downloads.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("sourceType", "DOWNLOADED");
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_booksCollectionFragment_to_booksCollectionFragment, bundle);
         });
     }
 
@@ -239,6 +256,11 @@ public class BooksCollectionFragment extends Fragment {
             no_internet_view_collections.setVisibility(View.VISIBLE);
             booksCollectionRecyclerView.setVisibility(View.GONE);
             empty_collection_view.setVisibility(View.GONE);
+            if("DOWNLOADED".equals(sourceType)) {
+                btn_go_to_downloads.setVisibility(View.GONE);
+            } else {
+                btn_go_to_downloads.setVisibility(View.VISIBLE);
+            }
         } else if (isListEmpty) {
             no_internet_view_collections.setVisibility(View.GONE);
             booksCollectionRecyclerView.setVisibility(View.GONE);

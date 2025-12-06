@@ -48,8 +48,10 @@ import com.metimol.easybook.api.models.Book;
 import com.metimol.easybook.api.models.BookFile;
 import com.metimol.easybook.database.AppDatabase;
 import com.metimol.easybook.database.AudiobookDao;
+import com.metimol.easybook.database.Chapter;
 import com.metimol.easybook.firebase.FirebaseRepository;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -562,29 +564,55 @@ public class PlaybackService extends MediaSessionService {
         currentChapter.setValue(chapters.get(chapterIndex));
 
         if (!isSameBook) {
-            List<MediaItem> mediaItems = new ArrayList<>();
-            String artist = (book.getAuthors() != null && !book.getAuthors().isEmpty()) ?
-                    book.getAuthors().get(0).getName() + " " + book.getAuthors().get(0).getSurname() : null;
-            for (BookFile chapter : chapters) {
-                MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder()
-                        .setTitle(chapter.getTitle())
-                        .setAlbumTitle(book.getName())
-                        .setArtist(artist);
+            int finalChapterIndex1 = chapterIndex;
+            databaseExecutor.execute(() -> {
+                List<Chapter> dbChapters = audiobookDao.getChaptersForBook(book.getId());
+                List<MediaItem> mediaItems = new ArrayList<>();
+                String artist = (book.getAuthors() != null && !book.getAuthors().isEmpty()) ?
+                        book.getAuthors().get(0).getName() + " " + book.getAuthors().get(0).getSurname() : null;
 
-                if (book.getDefaultPosterMain() != null) {
-                    metadataBuilder.setArtworkUri(Uri.parse(book.getDefaultPosterMain()));
+                for (BookFile chapter : chapters) {
+                    String localPath = null;
+                    if(dbChapters != null) {
+                        for(Chapter dbCh : dbChapters) {
+                            if(String.valueOf(chapter.getId()).equals(dbCh.id)) {
+                                localPath = dbCh.localPath;
+                                break;
+                            }
+                        }
+                    }
+
+                    Uri mediaUri;
+                    if(localPath != null && new File(localPath).exists()) {
+                        mediaUri = Uri.fromFile(new File(localPath));
+                    } else {
+                        mediaUri = Uri.parse(chapter.getUrl());
+                    }
+
+                    MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder()
+                            .setTitle(chapter.getTitle())
+                            .setAlbumTitle(book.getName())
+                            .setArtist(artist);
+
+                    if (book.getDefaultPosterMain() != null) {
+                        metadataBuilder.setArtworkUri(Uri.parse(book.getDefaultPosterMain()));
+                    }
+
+                    MediaMetadata mediaMetadata = metadataBuilder.build();
+                    MediaItem mediaItem = new MediaItem.Builder()
+                            .setMediaId(String.valueOf(chapter.getId()))
+                            .setUri(mediaUri)
+                            .setMediaMetadata(mediaMetadata)
+                            .build();
+                    mediaItems.add(mediaItem);
                 }
 
-                MediaMetadata mediaMetadata = metadataBuilder.build();
-                MediaItem mediaItem = new MediaItem.Builder()
-                        .setMediaId(String.valueOf(chapter.getId()))
-                        .setUri(chapter.getUrl())
-                        .setMediaMetadata(mediaMetadata)
-                        .build();
-                mediaItems.add(mediaItem);
-            }
-            player.setMediaItems(mediaItems, chapterIndex, timestamp);
-            player.prepare();
+                final int finalChapterIndex = finalChapterIndex1;
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    player.setMediaItems(mediaItems, finalChapterIndex, timestamp);
+                    player.prepare();
+                });
+            });
         } else {
             player.seekTo(chapterIndex, timestamp);
             player.prepare();

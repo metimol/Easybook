@@ -11,6 +11,18 @@ public class Book {
     @NonNull
     public String id;
 
+    @ColumnInfo(name = "name")
+    public String name;
+
+    @ColumnInfo(name = "author")
+    public String author;
+
+    @ColumnInfo(name = "coverUrl")
+    public String coverUrl;
+
+    @ColumnInfo(name = "totalDuration")
+    public int totalDuration;
+
     @ColumnInfo(name = "isFavorite")
     public boolean isFavorite;
 
@@ -28,4 +40,7 @@ public class Book {
 
     @ColumnInfo(name = "progressPercentage")
     public int progressPercentage;
+
+    @ColumnInfo(name = "isDownloaded")
+    public boolean isDownloaded;
 }

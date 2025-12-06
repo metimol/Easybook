@@ -31,4 +31,10 @@ public class Chapter {
     public int chapterIndex;
 
     public long duration;
+
+    @ColumnInfo(name = "localPath")
+    public String localPath;
+
+    @ColumnInfo(name = "downloadId")
+    public long downloadId;
 }

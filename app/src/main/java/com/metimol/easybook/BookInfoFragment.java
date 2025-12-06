@@ -14,6 +14,7 @@ import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -58,6 +59,8 @@ public class BookInfoFragment extends Fragment {
     private CardView bookSeriesCard;
     private TextView bookSeriesName;
     private TextView bookSeriesCount;
+    private ImageView ivDownload;
+    private ProgressBar downloadProgress;
 
     private boolean isCurrentlyFinished = false;
     private PlaybackService playbackService;
@@ -99,6 +102,8 @@ public class BookInfoFragment extends Fragment {
         episodesRecycler = view.findViewById(R.id.episodes_recycler);
         ivAddBookToBookmarks = view.findViewById(R.id.iv_add_book_to_bookmarks);
         playFab = view.findViewById(R.id.play);
+        ivDownload = view.findViewById(R.id.iv_download);
+        downloadProgress = view.findViewById(R.id.download_progress);
 
         bookSeriesCard = view.findViewById(R.id.book_series_card);
         bookSeriesName = view.findViewById(R.id.book_series_name);
@@ -146,6 +151,7 @@ public class BookInfoFragment extends Fragment {
         viewModel.loadBookProgress(bookID);
         viewModel.getBookProgress().observe(getViewLifecycleOwner(), dbBook -> {
             this.currentDbBook = dbBook;
+            updateDownloadIconState();
         });
 
         sharedViewModel.getStatusBarHeight().observe(getViewLifecycleOwner(), height -> {
@@ -202,6 +208,44 @@ public class BookInfoFragment extends Fragment {
                 new PlayerBottomSheetFragment().show(getParentFragmentManager(), "PlayerBottomSheet");
             }
         });
+
+        ivDownload.setOnClickListener(v -> {
+            Book book = viewModel.getSelectedBookDetails().getValue();
+            if (book != null) {
+                viewModel.downloadBook(book);
+            }
+        });
+
+        viewModel.getIsDownloading().observe(getViewLifecycleOwner(), isDownloading -> {
+            if (isDownloading) {
+                ivDownload.setVisibility(View.GONE);
+                downloadProgress.setVisibility(View.VISIBLE);
+            } else {
+                downloadProgress.setVisibility(View.GONE);
+                updateDownloadIconState();
+            }
+        });
+
+        viewModel.getDownloadProgress().observe(getViewLifecycleOwner(), progress -> {
+            downloadProgress.setProgress(progress);
+        });
+
+        viewModel.getLiveBookProgress(bookID).observe(getViewLifecycleOwner(), book -> {
+            this.currentDbBook = book;
+            updateDownloadIconState();
+        });
+    }
+
+    private void updateDownloadIconState() {
+        if (currentDbBook != null && currentDbBook.isDownloaded) {
+            ivDownload.setImageResource(R.drawable.ic_check);
+            ivDownload.setEnabled(false);
+            ivDownload.setVisibility(View.VISIBLE);
+        } else {
+            ivDownload.setImageResource(R.drawable.ic_download);
+            ivDownload.setEnabled(true);
+            ivDownload.setVisibility(View.VISIBLE);
+        }
     }
 
     private void observeFavoriteStatus() {

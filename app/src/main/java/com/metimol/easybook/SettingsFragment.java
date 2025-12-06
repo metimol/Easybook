@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
+import android.widget.Switch;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -28,9 +29,11 @@ public class SettingsFragment extends Fragment {
     public static final int THEME_AUTO = 2;
 
     public static final String SPEED_KEY = "playback_speed_pref";
+    public static final String DOWNLOAD_TO_APP_FOLDER_KEY = "download_to_app_folder";
 
     private SharedPreferences sharedPreferences;
     private RadioGroup themeRadioGroup;
+    private Switch downloadLocationSwitch;
 
     @Nullable
     @Override
@@ -49,6 +52,7 @@ public class SettingsFragment extends Fragment {
         ConstraintLayout settingsContainer = view.findViewById(R.id.settings_container);
         ImageView ivBack = view.findViewById(R.id.iv_back);
         themeRadioGroup = view.findViewById(R.id.theme_radio_group);
+        downloadLocationSwitch = view.findViewById(R.id.switch_download_location);
 
         ivBack.setOnClickListener(v -> NavHostFragment.findNavController(this).popBackStack());
 
@@ -61,7 +65,7 @@ public class SettingsFragment extends Fragment {
             );
         });
 
-        loadThemeSettings();
+        loadSettings();
 
         themeRadioGroup.setOnCheckedChangeListener((group, checkedId) -> {
             int themeMode = THEME_AUTO;
@@ -73,9 +77,13 @@ public class SettingsFragment extends Fragment {
 
             saveAndApplyTheme(themeMode);
         });
+
+        downloadLocationSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            sharedPreferences.edit().putBoolean(DOWNLOAD_TO_APP_FOLDER_KEY, !isChecked).apply();
+        });
     }
 
-    private void loadThemeSettings() {
+    private void loadSettings() {
         int currentTheme = sharedPreferences.getInt(THEME_KEY, THEME_AUTO);
         if (currentTheme == THEME_LIGHT) {
             themeRadioGroup.check(R.id.theme_light);
@@ -84,6 +92,9 @@ public class SettingsFragment extends Fragment {
         } else {
             themeRadioGroup.check(R.id.theme_auto);
         }
+
+        boolean useAppFolder = sharedPreferences.getBoolean(DOWNLOAD_TO_APP_FOLDER_KEY, true);
+        downloadLocationSwitch.setChecked(!useAppFolder);
     }
 
     private void saveAndApplyTheme(int themeMode) {

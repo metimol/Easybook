@@ -1,25 +1,25 @@
 package com.metimol.easybook;
 
 import android.app.Application;
+import android.app.DownloadManager;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.net.Uri;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
-import com.metimol.easybook.database.AppDatabase;
-import com.metimol.easybook.database.AudiobookDao;
-
-import java.util.Objects;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import com.metimol.easybook.api.ApiClient;
 import com.metimol.easybook.api.ApiService;
 import com.metimol.easybook.api.QueryBuilder;
 import com.metimol.easybook.api.models.Book;
+import com.metimol.easybook.api.models.BookFile;
 import com.metimol.easybook.api.models.Serie;
 import com.metimol.easybook.api.models.response.ApiResponse;
 import com.metimol.easybook.api.models.response.BookData;
@@ -27,22 +27,29 @@ import com.metimol.easybook.api.models.response.BooksWithDatesData;
 import com.metimol.easybook.api.models.response.SearchData;
 import com.metimol.easybook.api.models.response.SeriesSearchData;
 import com.metimol.easybook.api.models.response.SourceData;
+import com.metimol.easybook.database.AppDatabase;
+import com.metimol.easybook.database.AudiobookDao;
+import com.metimol.easybook.database.Chapter;
 import com.metimol.easybook.firebase.FirebaseRepository;
 import com.metimol.easybook.service.PlaybackService;
 
+import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.Map;
 import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainViewModel extends AndroidViewModel {
-    private enum SourceType { NONE, GENRE, SERIES, AUTHOR, READER, FAVORITES, LISTENED, LISTENING }
+    private enum SourceType { NONE, GENRE, SERIES, AUTHOR, READER, FAVORITES, LISTENED, LISTENING, DOWNLOADED }
 
     private final FirebaseRepository firebaseRepository;
     private final MutableLiveData<Integer> statusBarHeight = new MutableLiveData<>();
@@ -66,12 +73,15 @@ public class MainViewModel extends AndroidViewModel {
     private final ExecutorService databaseExecutor;
     private LiveData<Boolean> isBookFavorite;
     private LiveData<Boolean> isBookFinished;
+    private LiveData<com.metimol.easybook.database.Book> currentDbBookLiveData;
 
     private final MutableLiveData<PlaybackService> playbackService = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isPlayerVisible = new MutableLiveData<>(false);
     private boolean hasRestoreAttempted = false;
 
     private final MutableLiveData<com.metimol.easybook.database.Book> currentDbBookProgress = new MutableLiveData<>();
+    private final MutableLiveData<Integer> downloadProgress = new MutableLiveData<>(0);
+    private final MutableLiveData<Boolean> isDownloading = new MutableLiveData<>(false);
 
     public MainViewModel(@NonNull Application application) {
         super(application);
@@ -129,35 +139,79 @@ public class MainViewModel extends AndroidViewModel {
         databaseExecutor.execute(() -> {
             com.metimol.easybook.database.Book lastDbBook = audiobookDao.getLastListenedBook();
             if (lastDbBook != null && lastDbBook.currentChapterId != null) {
-                ApiService apiService = ApiClient.getClient().create(ApiService.class);
-                try {
-                    String query = QueryBuilder.buildBookDetailsQuery(Integer.parseInt(lastDbBook.id));
-                    Call<ApiResponse<BookData>> call = apiService.getBookDetails(query, 1);
-                    Response<ApiResponse<BookData>> response = call.execute();
-
-                    if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
-                        Book apiBook = response.body().getData().getBook();
-                        if (apiBook != null && apiBook.getFiles() != null && apiBook.getFiles().getFull() != null) {
-                            int chapterIndex = 0;
-                            for (int i = 0; i < apiBook.getFiles().getFull().size(); i++) {
-                                if (String.valueOf(apiBook.getFiles().getFull().get(i).getId()).equals(lastDbBook.currentChapterId)) {
-                                    chapterIndex = i;
-                                    break;
-                                }
-                            }
-
-                            long timestamp = lastDbBook.currentTimestamp;
-                            int finalChapterIndex = chapterIndex;
-                            new Handler(Looper.getMainLooper()).post(() -> {
-                                service.prepareBookFromProgress(apiBook, finalChapterIndex, timestamp);
-                            });
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+                loadBookDetailsForPlayer(lastDbBook, service);
             }
         });
+    }
+
+    private void loadBookDetailsForPlayer(com.metimol.easybook.database.Book dbBook, PlaybackService service) {
+        try {
+            int bookId = Integer.parseInt(dbBook.id);
+            ApiService apiService = ApiClient.getClient().create(ApiService.class);
+            String query = QueryBuilder.buildBookDetailsQuery(bookId);
+            Call<ApiResponse<BookData>> call = apiService.getBookDetails(query, 1);
+            Response<ApiResponse<BookData>> response = call.execute();
+
+            if (response.isSuccessful() && response.body() != null && response.body().getData() != null) {
+                Book apiBook = response.body().getData().getBook();
+                preparePlayerWithBook(apiBook, dbBook, service);
+            } else {
+                restoreFromOfflineIfPossible(dbBook, service);
+            }
+        } catch (Exception e) {
+            restoreFromOfflineIfPossible(dbBook, service);
+        }
+    }
+
+    private void restoreFromOfflineIfPossible(com.metimol.easybook.database.Book dbBook, PlaybackService service) {
+        if (dbBook.isDownloaded) {
+            Book offlineBook = convertDbBookToApiBook(dbBook);
+            preparePlayerWithBook(offlineBook, dbBook, service);
+        }
+    }
+
+    private Book convertDbBookToApiBook(com.metimol.easybook.database.Book dbBook) {
+        Book book = new Book();
+        book.setId(dbBook.id);
+        book.setName(dbBook.name);
+        book.setDefaultPosterMain(dbBook.coverUrl);
+        book.setDefaultPoster(dbBook.coverUrl);
+        book.setTotalDuration(dbBook.totalDuration);
+
+        List<Chapter> dbChapters = audiobookDao.getChaptersForBook(dbBook.id);
+        List<BookFile> apiChapters = new ArrayList<>();
+
+        for (Chapter ch : dbChapters) {
+            BookFile bf = new BookFile();
+            bf.setId(Integer.parseInt(ch.id));
+            bf.setTitle(ch.title);
+            bf.setUrl(ch.url);
+            bf.setDuration((int) ch.duration);
+            bf.setIndex(ch.chapterIndex);
+            apiChapters.add(bf);
+        }
+
+        book.setFiles(new com.metimol.easybook.api.models.BookFiles());
+        book.getFiles().setFull(apiChapters);
+
+        return book;
+    }
+
+    private void preparePlayerWithBook(Book apiBook, com.metimol.easybook.database.Book dbBook, PlaybackService service) {
+        if (apiBook != null && apiBook.getFiles() != null && apiBook.getFiles().getFull() != null) {
+            int chapterIndex = 0;
+            for (int i = 0; i < apiBook.getFiles().getFull().size(); i++) {
+                if (String.valueOf(apiBook.getFiles().getFull().get(i).getId()).equals(dbBook.currentChapterId)) {
+                    chapterIndex = i;
+                    break;
+                }
+            }
+            long timestamp = dbBook.currentTimestamp;
+            int finalChapterIndex = chapterIndex;
+            new Handler(Looper.getMainLooper()).post(() -> {
+                service.prepareBookFromProgress(apiBook, finalChapterIndex, timestamp);
+            });
+        }
     }
 
     public LiveData<PlaybackService> getPlaybackService() {
@@ -216,6 +270,10 @@ public class MainViewModel extends AndroidViewModel {
         return currentDbBookProgress;
     }
 
+    public LiveData<com.metimol.easybook.database.Book> getLiveBookProgress(String bookId) {
+        return audiobookDao.getBookByIdLiveData(bookId);
+    }
+
     public void loadBookProgress(String bookId) {
         databaseExecutor.execute(() -> {
             com.metimol.easybook.database.Book dbBook = audiobookDao.getBookById(bookId);
@@ -250,14 +308,8 @@ public class MainViewModel extends AndroidViewModel {
             boolean bookExists = audiobookDao.bookExists(bookId);
 
             if (!bookExists) {
-                com.metimol.easybook.database.Book dbBook = new com.metimol.easybook.database.Book();
-                dbBook.id = bookId;
+                com.metimol.easybook.database.Book dbBook = createDbBookFromApi(apiBook);
                 dbBook.isFavorite = true;
-                dbBook.isFinished = false;
-                dbBook.currentChapterId = null;
-                dbBook.currentTimestamp = 0;
-                dbBook.lastListened = 0;
-                dbBook.progressPercentage = 0;
                 audiobookDao.insertBook(dbBook);
             } else {
                 Boolean currentStatus = isBookFavorite.getValue();
@@ -282,12 +334,8 @@ public class MainViewModel extends AndroidViewModel {
             long now = System.currentTimeMillis();
 
             if (!bookExists) {
-                com.metimol.easybook.database.Book dbBook = new com.metimol.easybook.database.Book();
-                dbBook.id = bookId;
-                dbBook.isFavorite = false;
+                com.metimol.easybook.database.Book dbBook = createDbBookFromApi(apiBook);
                 dbBook.isFinished = true;
-                dbBook.currentChapterId = null;
-                dbBook.currentTimestamp = 0;
                 dbBook.lastListened = now;
                 dbBook.progressPercentage = 100;
                 audiobookDao.insertBook(dbBook);
@@ -309,6 +357,18 @@ public class MainViewModel extends AndroidViewModel {
         });
     }
 
+    private com.metimol.easybook.database.Book createDbBookFromApi(Book apiBook) {
+        com.metimol.easybook.database.Book dbBook = new com.metimol.easybook.database.Book();
+        dbBook.id = apiBook.getId();
+        dbBook.name = apiBook.getName();
+        if(apiBook.getAuthors() != null && !apiBook.getAuthors().isEmpty()) {
+            dbBook.author = apiBook.getAuthors().get(0).getName() + " " + apiBook.getAuthors().get(0).getSurname();
+        }
+        dbBook.coverUrl = apiBook.getDefaultPosterMain();
+        dbBook.totalDuration = apiBook.getTotalDuration();
+        return dbBook;
+    }
+
     public void fetchListeningBooksFromApi() {
         if (Boolean.TRUE.equals(isLoading.getValue())) return;
         isLoading.setValue(true);
@@ -321,34 +381,7 @@ public class MainViewModel extends AndroidViewModel {
         databaseExecutor.execute(() -> {
             try {
                 List<com.metimol.easybook.database.Book> listeningDbBooks = audiobookDao.getListeningBooksList();
-                if (listeningDbBooks == null || listeningDbBooks.isEmpty()) {
-                    books.postValue(new ArrayList<>());
-                    isLoading.postValue(false);
-                    return;
-                }
-
-                List<Book> apiBooksToShow = new ArrayList<>();
-                ApiService apiService = ApiClient.getClient().create(ApiService.class);
-
-                for (com.metimol.easybook.database.Book dbBook : listeningDbBooks) {
-                    try {
-                        String query = QueryBuilder.buildBookDetailsQuery(Integer.parseInt(dbBook.id));
-                        Call<ApiResponse<BookData>> call = apiService.getBookDetails(query, 1);
-                        Response<ApiResponse<BookData>> response = call.execute();
-
-                        if (response.isSuccessful() && response.body() != null && response.body().getData() != null && response.body().getData().getBook() != null) {
-                            Book apiBook = response.body().getData().getBook();
-                            updateBookProgress(apiBook, dbBook);
-                            apiBooksToShow.add(apiBook);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                books.postValue(apiBooksToShow);
-                isLoading.postValue(false);
-
+                processDbBooksList(listeningDbBooks);
             } catch (Exception e) {
                 e.printStackTrace();
                 books.postValue(new ArrayList<>());
@@ -370,34 +403,7 @@ public class MainViewModel extends AndroidViewModel {
         databaseExecutor.execute(() -> {
             try {
                 List<com.metimol.easybook.database.Book> finishedDbBooks = audiobookDao.getFinishedBooksList();
-                if (finishedDbBooks == null || finishedDbBooks.isEmpty()) {
-                    books.postValue(new ArrayList<>());
-                    isLoading.postValue(false);
-                    return;
-                }
-
-                List<Book> apiBooksToShow = new ArrayList<>();
-                ApiService apiService = ApiClient.getClient().create(ApiService.class);
-
-                for (com.metimol.easybook.database.Book dbBook : finishedDbBooks) {
-                    try {
-                        String query = QueryBuilder.buildBookDetailsQuery(Integer.parseInt(dbBook.id));
-                        Call<ApiResponse<BookData>> call = apiService.getBookDetails(query, 1);
-                        Response<ApiResponse<BookData>> response = call.execute();
-
-                        if (response.isSuccessful() && response.body() != null && response.body().getData() != null && response.body().getData().getBook() != null) {
-                            Book apiBook = response.body().getData().getBook();
-                            updateBookProgress(apiBook, dbBook);
-                            apiBooksToShow.add(apiBook);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                books.postValue(apiBooksToShow);
-                isLoading.postValue(false);
-
+                processDbBooksList(finishedDbBooks);
             } catch (Exception e) {
                 e.printStackTrace();
                 books.postValue(new ArrayList<>());
@@ -420,33 +426,7 @@ public class MainViewModel extends AndroidViewModel {
         databaseExecutor.execute(() -> {
             try {
                 List<com.metimol.easybook.database.Book> favoriteDbBooks = audiobookDao.getFavoriteBooksList();
-                if (favoriteDbBooks == null || favoriteDbBooks.isEmpty()) {
-                    books.postValue(new ArrayList<>());
-                    isLoading.postValue(false);
-                    return;
-                }
-
-                List<Book> apiBooksToShow = new ArrayList<>();
-                ApiService apiService = ApiClient.getClient().create(ApiService.class);
-
-                for (com.metimol.easybook.database.Book dbBook : favoriteDbBooks) {
-                    try {
-                        String query = QueryBuilder.buildBookDetailsQuery(Integer.parseInt(dbBook.id));
-                        Call<ApiResponse<BookData>> call = apiService.getBookDetails(query, 1);
-                        Response<ApiResponse<BookData>> response = call.execute();
-
-                        if (response.isSuccessful() && response.body() != null && response.body().getData() != null && response.body().getData().getBook() != null) {
-                            Book apiBook = response.body().getData().getBook();
-                            updateBookProgress(apiBook, dbBook);
-                            apiBooksToShow.add(apiBook);
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                }
-                books.postValue(apiBooksToShow);
-                isLoading.postValue(false);
-
+                processDbBooksList(favoriteDbBooks);
             } catch (Exception e) {
                 e.printStackTrace();
                 books.postValue(new ArrayList<>());
@@ -454,6 +434,66 @@ public class MainViewModel extends AndroidViewModel {
                 isLoading.postValue(false);
             }
         });
+    }
+
+    public void fetchDownloadedBooks() {
+        if (Boolean.TRUE.equals(isLoading.getValue())) return;
+        isLoading.setValue(true);
+        loadError.setValue(false);
+        clearBookList();
+        isLastPage = true;
+        isSearchActive = false;
+        currentSourceType = SourceType.DOWNLOADED;
+
+        databaseExecutor.execute(() -> {
+            List<com.metimol.easybook.database.Book> downloaded = audiobookDao.getDownloadedBooks();
+            List<Book> result = new ArrayList<>();
+            for(com.metimol.easybook.database.Book db : downloaded) {
+                Book b = convertDbBookToApiBook(db);
+                b.setProgressPercentage(db.progressPercentage);
+                result.add(b);
+            }
+            books.postValue(result);
+            isLoading.postValue(false);
+        });
+    }
+
+    private void processDbBooksList(List<com.metimol.easybook.database.Book> dbBooks) {
+        if (dbBooks == null || dbBooks.isEmpty()) {
+            books.postValue(new ArrayList<>());
+            isLoading.postValue(false);
+            return;
+        }
+
+        List<Book> apiBooksToShow = new ArrayList<>();
+        ApiService apiService = ApiClient.getClient().create(ApiService.class);
+
+        for (com.metimol.easybook.database.Book dbBook : dbBooks) {
+            try {
+                String query = QueryBuilder.buildBookDetailsQuery(Integer.parseInt(dbBook.id));
+                Call<ApiResponse<BookData>> call = apiService.getBookDetails(query, 1);
+                Response<ApiResponse<BookData>> response = call.execute();
+
+                if (response.isSuccessful() && response.body() != null && response.body().getData() != null && response.body().getData().getBook() != null) {
+                    Book apiBook = response.body().getData().getBook();
+                    updateBookProgress(apiBook, dbBook);
+                    apiBooksToShow.add(apiBook);
+                } else if (dbBook.isDownloaded) {
+                    Book offline = convertDbBookToApiBook(dbBook);
+                    offline.setProgressPercentage(dbBook.progressPercentage);
+                    apiBooksToShow.add(offline);
+                }
+            } catch (Exception e) {
+                if (dbBook.isDownloaded) {
+                    Book offline = convertDbBookToApiBook(dbBook);
+                    offline.setProgressPercentage(dbBook.progressPercentage);
+                    apiBooksToShow.add(offline);
+                }
+            }
+        }
+
+        books.postValue(apiBooksToShow);
+        isLoading.postValue(false);
     }
 
 
@@ -797,12 +837,28 @@ public class MainViewModel extends AndroidViewModel {
         isBookFavorite = null;
         isBookFinished = null;
 
+        databaseExecutor.execute(() -> {
+            com.metimol.easybook.database.Book dbBook = audiobookDao.getBookById(bookId);
+            if(dbBook != null && dbBook.isDownloaded) {
+                Book offline = convertDbBookToApiBook(dbBook);
+                new Handler(Looper.getMainLooper()).post(() -> {
+                    selectedBookDetails.setValue(offline);
+                    bookLoadError.setValue(false);
+                    isBookLoading.setValue(false);
+                });
+            } else {
+                fetchBookDetailsNetwork(bookId);
+            }
+        });
+    }
+
+    private void fetchBookDetailsNetwork(String bookId) {
         int id;
         try {
             id = Integer.parseInt(bookId);
         } catch (NumberFormatException e) {
-            isBookLoading.setValue(false);
-            bookLoadError.setValue(true);
+            isBookLoading.postValue(false);
+            bookLoadError.postValue(true);
             return;
         }
 
@@ -862,6 +918,7 @@ public class MainViewModel extends AndroidViewModel {
             case "FAVORITES" -> SourceType.FAVORITES;
             case "LISTENED" -> SourceType.LISTENED;
             case "LISTENING" -> SourceType.LISTENING;
+            case "DOWNLOADED" -> SourceType.DOWNLOADED;
             default -> targetType;
         };
 
@@ -879,5 +936,143 @@ public class MainViewModel extends AndroidViewModel {
         databaseExecutor.execute(() -> {
             AppDatabase.getDatabase(getApplication()).clearAllTables();
         });
+    }
+
+    public LiveData<Boolean> getIsDownloading() {
+        return isDownloading;
+    }
+
+    public LiveData<Integer> getDownloadProgress() {
+        return downloadProgress;
+    }
+
+    public void downloadBook(Book book) {
+        isDownloading.setValue(true);
+        databaseExecutor.execute(() -> {
+            boolean exists = audiobookDao.bookExists(book.getId());
+            if (!exists) {
+                com.metimol.easybook.database.Book dbBook = createDbBookFromApi(book);
+                audiobookDao.insertBook(dbBook);
+            } else {
+                com.metimol.easybook.database.Book dbBook = audiobookDao.getBookById(book.getId());
+                dbBook.name = book.getName();
+                if(book.getAuthors() != null && !book.getAuthors().isEmpty()) {
+                    dbBook.author = book.getAuthors().get(0).getName() + " " + book.getAuthors().get(0).getSurname();
+                }
+                dbBook.coverUrl = book.getDefaultPosterMain();
+                dbBook.totalDuration = book.getTotalDuration();
+                audiobookDao.insertBook(dbBook);
+            }
+
+            List<Chapter> chapters = new ArrayList<>();
+            if(book.getFiles() != null && book.getFiles().getFull() != null) {
+                for(BookFile bf : book.getFiles().getFull()) {
+                    Chapter ch = new Chapter();
+                    ch.id = String.valueOf(bf.getId());
+                    ch.bookOwnerId = book.getId();
+                    ch.url = bf.getUrl();
+                    ch.title = bf.getTitle();
+                    ch.chapterIndex = bf.getIndex();
+                    ch.duration = bf.getDuration();
+                    chapters.add(ch);
+                }
+                audiobookDao.insertChapters(chapters);
+            }
+
+            startDownloadService(book, chapters);
+        });
+    }
+
+    private void startDownloadService(Book book, List<Chapter> chapters) {
+        Context context = getApplication();
+        DownloadManager downloadManager = (DownloadManager) context.getSystemService(Context.DOWNLOAD_SERVICE);
+
+        SharedPreferences prefs = context.getSharedPreferences(MainActivity.APP_PREFERENCES, Context.MODE_PRIVATE);
+        boolean useAppFolder = prefs.getBoolean(SettingsFragment.DOWNLOAD_TO_APP_FOLDER_KEY, true);
+
+        File rootDir;
+        if (useAppFolder) {
+            rootDir = new File(context.getExternalFilesDir(null), "EasyBook/" + book.getId());
+        } else {
+            rootDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "EasyBook/" + book.getName());
+        }
+
+        if (!rootDir.exists()) rootDir.mkdirs();
+
+        int totalChapters = chapters.size();
+        AtomicInteger downloaded = new AtomicInteger(0);
+
+        for (Chapter chapter : chapters) {
+            String fileName = chapter.title.replaceAll("[^a-zA-Z0-9.\\-]", "_") + ".mp3";
+            File targetFile = new File(rootDir, fileName);
+
+            if(targetFile.exists()) {
+                audiobookDao.updateChapterPath(chapter.id, targetFile.getAbsolutePath());
+                int count = downloaded.incrementAndGet();
+                downloadProgress.postValue((count * 100) / totalChapters);
+                if(count == totalChapters) {
+                    audiobookDao.updateBookDownloadStatus(book.getId(), true);
+                    isDownloading.postValue(false);
+                    new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, R.string.download_complete, Toast.LENGTH_SHORT).show());
+                }
+                continue;
+            }
+
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(chapter.url));
+            request.setTitle(book.getName());
+            request.setDescription(chapter.title);
+            request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+
+            if (useAppFolder) {
+                request.setDestinationInExternalFilesDir(context, null, "EasyBook/" + book.getId() + "/" + fileName);
+            } else {
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "EasyBook/" + book.getName() + "/" + fileName);
+            }
+
+            long downloadId = downloadManager.enqueue(request);
+
+            String finalPath;
+            if (useAppFolder) {
+                finalPath = new File(context.getExternalFilesDir(null), "EasyBook/" + book.getId() + "/" + fileName).getAbsolutePath();
+            } else {
+                finalPath = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "EasyBook/" + book.getName() + "/" + fileName).getAbsolutePath();
+            }
+
+            audiobookDao.updateChapterPath(chapter.id, finalPath);
+
+            new Thread(() -> {
+                boolean downloading = true;
+                while (downloading) {
+                    DownloadManager.Query q = new DownloadManager.Query();
+                    q.setFilterById(downloadId);
+                    android.database.Cursor cursor = downloadManager.query(q);
+                    if (cursor.moveToFirst()) {
+                        int statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                        if (statusIndex != -1) {
+                            int status = cursor.getInt(statusIndex);
+                            if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                                downloading = false;
+                                int count = downloaded.incrementAndGet();
+                                downloadProgress.postValue((count * 100) / totalChapters);
+                                if(count == totalChapters) {
+                                    audiobookDao.updateBookDownloadStatus(book.getId(), true);
+                                    isDownloading.postValue(false);
+                                    new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, R.string.download_complete, Toast.LENGTH_SHORT).show());
+                                }
+                            } else if (status == DownloadManager.STATUS_FAILED) {
+                                downloading = false;
+                                isDownloading.postValue(false);
+                            }
+                        }
+                    }
+                    cursor.close();
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }).start();
+        }
     }
 }
