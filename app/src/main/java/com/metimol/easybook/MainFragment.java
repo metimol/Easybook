@@ -217,6 +217,8 @@ public class MainFragment extends Fragment {
         viewCategories.setOnClickListener(v -> navController.navigate(R.id.action_mainFragment_to_categoriesFragment));
 
         btnRetry.setOnClickListener(v -> {
+            noInternetView.setVisibility(View.GONE);
+
             mainViewModel.fetchCategories();
             mainViewModel.loadMoreBooks();
         });
