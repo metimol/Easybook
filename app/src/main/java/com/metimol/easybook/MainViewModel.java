@@ -1075,4 +1075,31 @@ public class MainViewModel extends AndroidViewModel {
             }).start();
         }
     }
+
+    public void deleteBook(String bookId) {
+        databaseExecutor.execute(() -> {
+            com.metimol.easybook.database.Book dbBook = audiobookDao.getBookById(bookId);
+            if (dbBook == null) return;
+
+            List<Chapter> chapters = audiobookDao.getChaptersForBook(bookId);
+            if (chapters != null) {
+                for (Chapter chapter : chapters) {
+                    if (chapter.localPath != null) {
+                        File file = new File(chapter.localPath);
+                        if (file.exists()) {
+                            file.delete();
+                        }
+                        audiobookDao.updateChapterPath(chapter.id, null);
+                    }
+                }
+            }
+
+            audiobookDao.updateBookDownloadStatus(bookId, false);
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (selectedBookDetails.getValue() != null && selectedBookDetails.getValue().getId().equals(bookId)) {
+                    loadBookProgress(bookId);
+                }
+            });
+        });
+    }
 }

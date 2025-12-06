@@ -14,7 +14,6 @@ import android.widget.PopupMenu;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -210,9 +209,20 @@ public class BookInfoFragment extends Fragment {
         });
 
         ivDownload.setOnClickListener(v -> {
-            Book book = viewModel.getSelectedBookDetails().getValue();
-            if (book != null) {
-                viewModel.downloadBook(book);
+            if (currentDbBook != null && currentDbBook.isDownloaded) {
+                new androidx.appcompat.app.AlertDialog.Builder(requireContext())
+                        .setTitle(getString(R.string.delete_book))
+                        .setMessage(getString(R.string.delete_book_sure))
+                        .setPositiveButton(getString(R.string.delete), (dialog, which) -> {
+                            viewModel.deleteBook(bookID);
+                        })
+                        .setNegativeButton(getString(R.string.cancel), null)
+                        .show();
+            } else {
+                Book book = viewModel.getSelectedBookDetails().getValue();
+                if (book != null) {
+                    viewModel.downloadBook(book);
+                }
             }
         });
 
@@ -239,7 +249,7 @@ public class BookInfoFragment extends Fragment {
     private void updateDownloadIconState() {
         if (currentDbBook != null && currentDbBook.isDownloaded) {
             ivDownload.setImageResource(R.drawable.ic_check);
-            ivDownload.setEnabled(false);
+            ivDownload.setEnabled(true);
             ivDownload.setVisibility(View.VISIBLE);
         } else {
             ivDownload.setImageResource(R.drawable.ic_download);

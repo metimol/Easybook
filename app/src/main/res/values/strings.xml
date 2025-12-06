@@ -90,6 +90,10 @@
     <string name="download_folder_hint">Будет скачиваться в папку Download</string>
     <string name="downloaded">Скачанное</string>
     <string name="go_to_downloaded">Открыть скачанное</string>
+    <string name="delete_book">Удалить из скачанного</string>
+    <string name="delete_book_sure">Вы уверены, что хотите удалить эту книгу?</string>
+    <string name="delete">Удалить</string>
+    <string name="cancel">Отмена</string>
 
     <!--Profile Screen-->
     <string name="edit">Редактировать</string>
