@@ -303,17 +303,20 @@ public class MainViewModel extends AndroidViewModel {
         Book apiBook = selectedBookDetails.getValue();
         if (apiBook == null) return;
 
+        Boolean currentStatus = isBookFavorite != null ? isBookFavorite.getValue() : null;
+
         databaseExecutor.execute(() -> {
             String bookId = apiBook.getId();
             boolean bookExists = audiobookDao.bookExists(bookId);
+            boolean newStatus;
 
             if (!bookExists) {
                 com.metimol.easybook.database.Book dbBook = createDbBookFromApi(apiBook);
                 dbBook.isFavorite = true;
                 audiobookDao.insertBook(dbBook);
+                newStatus = true;
             } else {
-                Boolean currentStatus = isBookFavorite.getValue();
-                boolean newStatus = currentStatus == null || !currentStatus;
+                newStatus = currentStatus == null || !currentStatus;
                 audiobookDao.updateFavoriteStatus(bookId, newStatus);
             }
 
@@ -321,6 +324,12 @@ public class MainViewModel extends AndroidViewModel {
             if (updatedBook != null) {
                 firebaseRepository.updateBookInCloud(updatedBook);
             }
+
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (currentSourceType == SourceType.FAVORITES && !newStatus) {
+                    removeBookFromList(bookId);
+                }
+            });
         });
     }
 
@@ -328,10 +337,13 @@ public class MainViewModel extends AndroidViewModel {
         Book apiBook = selectedBookDetails.getValue();
         if (apiBook == null) return;
 
+        Boolean currentStatus = isBookFinished != null ? isBookFinished.getValue() : null;
+
         databaseExecutor.execute(() -> {
             String bookId = apiBook.getId();
             boolean bookExists = audiobookDao.bookExists(bookId);
             long now = System.currentTimeMillis();
+            boolean newStatus;
 
             if (!bookExists) {
                 com.metimol.easybook.database.Book dbBook = createDbBookFromApi(apiBook);
@@ -339,9 +351,9 @@ public class MainViewModel extends AndroidViewModel {
                 dbBook.lastListened = now;
                 dbBook.progressPercentage = 100;
                 audiobookDao.insertBook(dbBook);
+                newStatus = true;
             } else {
-                Boolean currentStatus = isBookFinished.getValue();
-                boolean newStatus = currentStatus == null || !currentStatus;
+                newStatus = currentStatus == null || !currentStatus;
                 audiobookDao.updateFinishedStatus(bookId, newStatus, newStatus ? 100 : 0);
                 if (newStatus) {
                     audiobookDao.updateBookProgress(bookId, null, 0, now, true, 100);
@@ -354,6 +366,14 @@ public class MainViewModel extends AndroidViewModel {
             if (updatedBook != null) {
                 firebaseRepository.updateBookInCloud(updatedBook);
             }
+
+            new Handler(Looper.getMainLooper()).post(() -> {
+                if (currentSourceType == SourceType.LISTENED && !newStatus) {
+                    removeBookFromList(bookId);
+                } else if (currentSourceType == SourceType.LISTENING && newStatus) {
+                    removeBookFromList(bookId);
+                }
+            });
         });
     }
 
@@ -1099,7 +1119,22 @@ public class MainViewModel extends AndroidViewModel {
                 if (selectedBookDetails.getValue() != null && selectedBookDetails.getValue().getId().equals(bookId)) {
                     loadBookProgress(bookId);
                 }
+
+                if (currentSourceType == SourceType.DOWNLOADED) {
+                    removeBookFromList(bookId);
+                }
             });
         });
+    }
+
+    private void removeBookFromList(String bookId) {
+        List<Book> currentList = books.getValue();
+        if (currentList != null) {
+            List<Book> newList = new ArrayList<>(currentList);
+            boolean removed = newList.removeIf(b -> b.getId().equals(bookId));
+            if (removed) {
+                books.setValue(newList);
+            }
+        }
     }
 }
