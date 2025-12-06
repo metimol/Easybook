@@ -469,9 +469,34 @@ public class MainViewModel extends AndroidViewModel {
             List<com.metimol.easybook.database.Book> downloaded = audiobookDao.getDownloadedBooks();
             List<Book> result = new ArrayList<>();
             for(com.metimol.easybook.database.Book db : downloaded) {
-                Book b = convertDbBookToApiBook(db);
-                b.setProgressPercentage(db.progressPercentage);
-                result.add(b);
+                List<Chapter> chapters = audiobookDao.getChaptersForBook(db.id);
+                boolean allFilesExist = true;
+
+                if (chapters == null || chapters.isEmpty()) {
+                    allFilesExist = false;
+                } else {
+                    for (Chapter chapter : chapters) {
+                        if (chapter.localPath == null || !new File(chapter.localPath).exists()) {
+                            allFilesExist = false;
+                            break;
+                        }
+                    }
+                }
+
+                if (allFilesExist) {
+                    Book b = convertDbBookToApiBook(db);
+                    b.setProgressPercentage(db.progressPercentage);
+                    result.add(b);
+                } else {
+                    audiobookDao.updateBookDownloadStatus(db.id, false);
+                    if (chapters != null) {
+                        for (Chapter chapter : chapters) {
+                            if (chapter.localPath != null && !new File(chapter.localPath).exists()) {
+                                audiobookDao.updateChapterPath(chapter.id, null);
+                            }
+                        }
+                    }
+                }
             }
             books.postValue(result);
             isLoading.postValue(false);
