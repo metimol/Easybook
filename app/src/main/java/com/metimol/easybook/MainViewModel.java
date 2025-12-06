@@ -1084,6 +1084,9 @@ public class MainViewModel extends AndroidViewModel {
                                 isDownloading.postValue(false);
                             }
                         }
+                    } else {
+                        downloading = false;
+                        isDownloading.postValue(false);
                     }
                     cursor.close();
                     try {
