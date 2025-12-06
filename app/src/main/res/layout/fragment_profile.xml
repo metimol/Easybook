@@ -79,6 +79,7 @@
                     android:src="@drawable/ic_bookmark"
                     android:background="@drawable/green_circle_background"
                     android:padding="3dp"
+                    app:tint="@color/super_dark_blue"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -95,6 +96,52 @@
                     android:layout_marginStart="10dp"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@id/ivBookmarks"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <ImageView
+                    android:layout_width="30dp"
+                    android:layout_height="21dp"
+                    android:src="@drawable/ic_arrow_right"
+                    app:tint="@color/light_grey"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/downloads"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="15dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:foreground="?attr/selectableItemBackground"
+                android:layout_marginTop="20dp">
+
+                <ImageView
+                    android:id="@+id/ivDownloads"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:src="@drawable/ic_download"
+                    android:background="@drawable/green_circle_background"
+                    android:padding="3dp"
+                    app:tint="@color/super_dark_blue"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvDownloads"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/sf_pro"
+                    android:textColor="@color/black"
+                    android:textSize="18sp"
+                    android:textStyle="normal"
+                    android:text="@string/downloads"
+                    android:layout_marginStart="10dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@id/ivDownloads"
                     app:layout_constraintTop_toTopOf="parent" />
 
                 <ImageView
@@ -216,6 +263,7 @@
                     android:src="@drawable/ic_settings"
                     android:background="@drawable/green_circle_background"
                     android:padding="2dp"
+                    app:tint="@color/super_dark_blue"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -261,6 +309,7 @@
                     android:src="@drawable/ic_share"
                     android:background="@drawable/green_circle_background"
                     android:padding="5dp"
+                    app:tint="@color/super_dark_blue"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />
@@ -306,6 +355,7 @@
                     android:src="@drawable/ic_rate_us"
                     android:background="@drawable/green_circle_background"
                     android:padding="5dp"
+                    app:tint="@color/super_dark_blue"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent" />

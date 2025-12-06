@@ -53,6 +53,7 @@ public class ProfileFragment extends Fragment {
         ConstraintLayout bookmarks = view.findViewById(R.id.bookmarks);
         ConstraintLayout listening = view.findViewById(R.id.listen);
         ConstraintLayout listened = view.findViewById(R.id.listened);
+        ConstraintLayout downloads = view.findViewById(R.id.downloads);
 
         mainViewModel.getStatusBarHeight().observe(getViewLifecycleOwner(), height -> {
             profile_container.setPaddingRelative(
@@ -74,6 +75,13 @@ public class ProfileFragment extends Fragment {
 
         settings.setOnClickListener(v -> {
             navController.navigate(R.id.action_profileFragment_to_SettingsFragment);
+        });
+
+        downloads.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("sourceType", "DOWNLOADED");
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_profileFragment_to_booksCollectionFragment, bundle);
         });
 
         bookmarks.setOnClickListener(v -> {

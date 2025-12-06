@@ -103,6 +103,7 @@ public class MainFragment extends Fragment {
         ConstraintLayout nav_main = view.findViewById(R.id.nav_main);
         ConstraintLayout nav_profile = view.findViewById(R.id.nav_profile);
         ConstraintLayout nav_player = view.findViewById(R.id.nav_player);
+        Button btn_go_to_downloads = view.findViewById(R.id.btn_go_to_downloads);
 
         Context context = requireContext();
         SharedPreferences sharedPreferences = context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
@@ -219,6 +220,14 @@ public class MainFragment extends Fragment {
             mainViewModel.fetchCategories();
             mainViewModel.loadMoreBooks();
         });
+
+        btn_go_to_downloads.setOnClickListener(v -> {
+            Bundle bundle = new Bundle();
+            bundle.putString("sourceType", "DOWNLOADED");
+            NavHostFragment.findNavController(this)
+                    .navigate(R.id.action_mainFragment_to_booksCollectionFragment, bundle);
+            }
+        );
 
         setupCategoriesRecyclerView();
         observeCategories();
