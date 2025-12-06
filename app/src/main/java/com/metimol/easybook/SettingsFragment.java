@@ -11,11 +11,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RadioGroup;
-import android.widget.Switch;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatDelegate;
+import androidx.appcompat.widget.SwitchCompat;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -33,7 +33,7 @@ public class SettingsFragment extends Fragment {
 
     private SharedPreferences sharedPreferences;
     private RadioGroup themeRadioGroup;
-    private Switch downloadLocationSwitch;
+    private SwitchCompat downloadLocationSwitch;
 
     @Nullable
     @Override
