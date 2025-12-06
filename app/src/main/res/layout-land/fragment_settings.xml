@@ -121,7 +121,8 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
-                android:layout_marginTop="8dp">
+                android:layout_marginTop="8dp"
+                android:layout_marginStart="8dp">
 
                 <TextView
                     android:layout_width="0dp"
@@ -141,10 +142,11 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
                 android:text="@string/download_folder_hint"
                 android:textColor="@color/light_grey"
                 android:textSize="12sp"
-                android:layout_marginTop="4dp"/>
+                android:layout_marginTop="-8dp"/>
 
         </LinearLayout>
     </ScrollView>
