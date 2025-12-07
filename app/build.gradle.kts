@@ -19,8 +19,8 @@ android {
         applicationId = "com.metimol.easybook"
         minSdk = 29
         targetSdk = 36
-        versionCode = 12
-        versionName = "1.2.0"
+        versionCode = 13
+        versionName = "1.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -34,9 +34,11 @@ android {
         val dbUrl = properties.getProperty("FIREBASE_DB_URL") ?: "\"https://placeholder-url\""
         val yandexAuthUrl = properties.getProperty("YANDEX_AUTH_BACKEND_URL") ?: "\"https://placeholder-url\""
         val yandexClientId = properties.getProperty("YANDEX_CLIENT_ID") ?: ""
+        val audiobooksBaseUrl = properties.getProperty("AUDIOBOOKS_BASE_URL") ?: "\"https://placeholder-url\""
 
         buildConfigField("String", "FIREBASE_DB_URL", dbUrl)
         buildConfigField("String", "YANDEX_AUTH_BACKEND_URL", yandexAuthUrl)
+        buildConfigField("String", "AUDIOBOOKS_BASE_URL", audiobooksBaseUrl)
 
         manifestPlaceholders["YANDEX_CLIENT_ID"] = yandexClientId
     }

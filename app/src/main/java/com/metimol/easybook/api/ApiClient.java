@@ -1,12 +1,14 @@
 package com.metimol.easybook.api;
 
+import com.metimol.easybook.BuildConfig;
+
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-    private static final String BASE_URL = "https://api.izib.uk/";
+    private static final String BASE_URL = BuildConfig.AUDIOBOOKS_BASE_URL;
 
     private static Retrofit retrofit = null;
 
