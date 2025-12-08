@@ -10,7 +10,6 @@ public class Author {
     @SerializedName("surname")
     private String surname;
 
-    // Getters
     public String getId() { return id; }
     public String getName() { return name; }
     public String getSurname() { return surname; }

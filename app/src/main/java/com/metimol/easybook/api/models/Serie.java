@@ -9,10 +9,9 @@ public class Serie {
     @SerializedName("name")
     private String name;
 
-    @SerializedName("booksCount")
+    @SerializedName("books_count")
     private int booksCount;
 
-    // Getters
     public String getId() { return id; }
     public String getName() { return name; }
     public int getBooksCount() { return booksCount; }

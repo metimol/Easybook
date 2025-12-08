@@ -1,6 +1,7 @@
 package com.metimol.easybook.api.models;
 
 import com.google.gson.annotations.SerializedName;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Book {
@@ -8,81 +9,113 @@ public class Book {
     private String id;
     @SerializedName("name")
     private String name;
-    @SerializedName("urlName")
+    @SerializedName("url_name")
     private String urlName;
     @SerializedName("genre")
     private Genre genre;
     @SerializedName("serie")
     private Serie serie;
-    @SerializedName("serieIndex")
+    @SerializedName("serie_index")
     private String serieIndex;
-    @SerializedName("aboutBb")
+    @SerializedName("description")
     private String description;
-    @SerializedName("authors")
-    private List<Author> authors;
-    @SerializedName("readers")
-    private List<Author> readers;
+    @SerializedName("book_authors")
+    private List<BookAuthorRelation> bookAuthorsRelations;
+    @SerializedName("book_readers")
+    private List<BookReaderRelation> bookReadersRelations;
     @SerializedName("likes")
     private int likes;
     @SerializedName("dislikes")
     private int dislikes;
-    @SerializedName("defaultPoster")
+    @SerializedName("default_poster")
     private String defaultPoster;
-    @SerializedName("defaultPosterMain")
+    @SerializedName("default_poster_main")
     private String defaultPosterMain;
-    @SerializedName("totalDuration")
+    @SerializedName("total_duration")
     private int totalDuration;
-
-    @SerializedName("files")
-    private BookFiles files;
+    @SerializedName("book_files")
+    private List<BookFile> rawFiles;
 
     private int progressPercentage;
 
     public String getId() { return id; }
-    public void setId(String id) { this.id = id; }
-
     public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
     public String getUrlName() { return urlName; }
-    public void setUrlName(String urlName) { this.urlName = urlName; }
-
     public Genre getGenre() { return genre; }
-    public void setGenre(Genre genre) { this.genre = genre; }
-
     public Serie getSerie() { return serie; }
-    public void setSerie(Serie serie) { this.serie = serie; }
-
     public String getSerieIndex() { return serieIndex; }
-    public void setSerieIndex(String serieIndex) { this.serieIndex = serieIndex; }
-
     public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
-
-    public List<Author> getAuthors() { return authors; }
-    public void setAuthors(List<Author> authors) { this.authors = authors; }
-
-    public List<Author> getReaders() { return readers; }
-    public void setReaders(List<Author> readers) { this.readers = readers; }
-
     public int getLikes() { return likes; }
-    public void setLikes(int likes) { this.likes = likes; }
-
     public int getDislikes() { return dislikes; }
-    public void setDislikes(int dislikes) { this.dislikes = dislikes; }
-
     public String getDefaultPoster() { return defaultPoster; }
-    public void setDefaultPoster(String defaultPoster) { this.defaultPoster = defaultPoster; }
-
     public String getDefaultPosterMain() { return defaultPosterMain; }
-    public void setDefaultPosterMain(String defaultPosterMain) { this.defaultPosterMain = defaultPosterMain; }
-
     public int getTotalDuration() { return totalDuration; }
-    public void setTotalDuration(int totalDuration) { this.totalDuration = totalDuration; }
-
-    public BookFiles getFiles() { return files; }
-    public void setFiles(BookFiles files) { this.files = files; }
-
     public int getProgressPercentage() { return progressPercentage; }
     public void setProgressPercentage(int progressPercentage) { this.progressPercentage = progressPercentage; }
+
+    public void setId(String id) { this.id = id; }
+    public void setName(String name) { this.name = name; }
+    public void setDefaultPosterMain(String defaultPosterMain) { this.defaultPosterMain = defaultPosterMain; }
+    public void setDefaultPoster(String defaultPoster) { this.defaultPoster = defaultPoster; }
+    public void setTotalDuration(int totalDuration) { this.totalDuration = totalDuration; }
+
+    public List<Author> getAuthors() {
+        List<Author> authors = new ArrayList<>();
+        if (bookAuthorsRelations != null) {
+            for (BookAuthorRelation relation : bookAuthorsRelations) {
+                if (relation.author != null) authors.add(relation.author);
+            }
+        }
+        return authors;
+    }
+
+    public List<Author> getReaders() {
+        List<Author> readers = new ArrayList<>();
+        if (bookReadersRelations != null) {
+            for (BookReaderRelation relation : bookReadersRelations) {
+                if (relation.reader != null) readers.add(relation.reader);
+            }
+        }
+        return readers;
+    }
+
+    public BookFiles getFiles() {
+        BookFiles files = new BookFiles();
+        List<BookFile> full = new ArrayList<>();
+        List<BookFile> mobile = new ArrayList<>();
+
+        if (rawFiles != null) {
+            for (BookFile file : rawFiles) {
+                if (file.isMobile()) {
+                    mobile.add(file);
+                } else {
+                    full.add(file);
+                }
+            }
+        }
+        full.sort((o1, o2) -> Integer.compare(o1.getIndex(), o2.getIndex()));
+        mobile.sort((o1, o2) -> Integer.compare(o1.getIndex(), o2.getIndex()));
+
+        files.setFull(full);
+        files.setMobile(mobile);
+        return files;
+    }
+
+    public void setFiles(BookFiles files) {
+        this.rawFiles = new ArrayList<>();
+        if (files != null) {
+            if (files.getFull() != null) this.rawFiles.addAll(files.getFull());
+            if (files.getMobile() != null) this.rawFiles.addAll(files.getMobile());
+        }
+    }
+
+    public static class BookAuthorRelation {
+        @SerializedName("authors")
+        public Author author;
+    }
+
+    public static class BookReaderRelation {
+        @SerializedName("readers")
+        public Author reader;
+    }
 }

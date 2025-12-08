@@ -9,7 +9,7 @@ public class BookFile {
     private int index;
     @SerializedName("title")
     private String title;
-    @SerializedName("fileName")
+    @SerializedName("file_name")
     private String fileName;
     @SerializedName("duration")
     private int duration;
@@ -17,6 +17,8 @@ public class BookFile {
     private String url;
     @SerializedName("size")
     private int size;
+    @SerializedName("is_mobile")
+    private boolean isMobile;
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
@@ -38,4 +40,7 @@ public class BookFile {
 
     public int getSize() { return size; }
     public void setSize(int size) { this.size = size; }
+
+    public boolean isMobile() { return isMobile; }
+    public void setMobile(boolean mobile) { isMobile = mobile; }
 }

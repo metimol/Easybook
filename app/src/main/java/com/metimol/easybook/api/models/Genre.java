@@ -8,11 +8,6 @@ public class Genre {
     @SerializedName("name")
     private String name;
 
-    public String getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
+    public String getId() { return id; }
+    public String getName() { return name; }
 }

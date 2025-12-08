@@ -35,10 +35,12 @@ android {
         val yandexAuthUrl = properties.getProperty("YANDEX_AUTH_BACKEND_URL") ?: "\"https://placeholder-url\""
         val yandexClientId = properties.getProperty("YANDEX_CLIENT_ID") ?: ""
         val audiobooksBaseUrl = properties.getProperty("AUDIOBOOKS_BASE_URL") ?: "\"https://placeholder-url\""
+        val audiobooksAnonKey = properties.getProperty("AUDIOBOOKS_ANON_KEY") ?: ""
 
         buildConfigField("String", "FIREBASE_DB_URL", dbUrl)
         buildConfigField("String", "YANDEX_AUTH_BACKEND_URL", yandexAuthUrl)
         buildConfigField("String", "AUDIOBOOKS_BASE_URL", audiobooksBaseUrl)
+        buildConfigField("String", "AUDIOBOOKS_ANON_KEY", "\"" + audiobooksAnonKey + "\"")
 
         manifestPlaceholders["YANDEX_CLIENT_ID"] = yandexClientId
     }
