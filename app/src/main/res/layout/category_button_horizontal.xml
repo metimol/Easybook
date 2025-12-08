@@ -41,7 +41,7 @@
             android:textStyle="normal"
             android:textColor="@color/light_grey"
             android:textSize="13sp"
-            android:maxLines="2"
+            android:maxLines="1"
             android:ellipsize="end"
             android:textAlignment="center"
             app:layout_constraintEnd_toEndOf="parent"
