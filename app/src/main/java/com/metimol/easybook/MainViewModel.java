@@ -537,41 +537,14 @@ public class MainViewModel extends AndroidViewModel {
     public void fetchCategories() {
         SupabaseService apiService = ApiClient.getClient().create(SupabaseService.class);
         Call<List<Genre>> call = apiService.getGenres();
-        call.enqueue(new Callback<List<Genre>>() {
+        call.enqueue(new Callback<>() {
             @Override
-            public void onResponse(@NonNull Call<List<Genre>> call, Response<List<Genre>> response) {
+            public void onResponse(@NonNull Call<List<Genre>> call, @NonNull Response<List<Genre>> response) {
                 if (response.isSuccessful() && response.body() != null) {
                     List<Category> categoryList = new ArrayList<>();
-                    int[] categoryIcons = {
-                            R.drawable.ic_category_fantasy,
-                            R.drawable.ic_category_thriller,
-                            R.drawable.ic_category_drama,
-                            R.drawable.ic_category_business,
-                            R.drawable.ic_category_biography,
-                            R.drawable.ic_category_children,
-                            R.drawable.ic_category_history,
-                            R.drawable.ic_category_classic,
-                            R.drawable.ic_category_health,
-                            R.drawable.ic_globe,
-                            R.drawable.ic_category_nonfiction,
-                            R.drawable.ic_category_education,
-                            R.drawable.ic_category_poetry,
-                            R.drawable.ic_category_adventure,
-                            R.drawable.ic_category_psychology,
-                            R.drawable.ic_category_miscellaneous,
-                            R.drawable.ic_category_ranobe,
-                            R.drawable.ic_category_religion,
-                            R.drawable.ic_category_novel,
-                            R.drawable.ic_category_crime,
-                            R.drawable.ic_category_horror,
-                            R.drawable.ic_category_esoteric,
-                            R.drawable.ic_category_humor
-                    };
 
-                    for (int i = 0; i < response.body().size(); i++) {
-                        Genre g = response.body().get(i);
-                        int icon = R.drawable.ic_globe;
-                        if (i < categoryIcons.length) icon = categoryIcons[i];
+                    for (Genre g : response.body()) {
+                        int icon = getCategoryIcon(g.getId());
                         categoryList.add(new Category(g.getId(), g.getName(), icon));
                     }
                     categories.setValue(categoryList);
@@ -583,6 +556,34 @@ public class MainViewModel extends AndroidViewModel {
 
             }
         });
+    }
+
+    private int getCategoryIcon(String genreId) {
+        return switch (genreId) {
+            case "1" -> R.drawable.ic_category_fantasy;
+            case "4" -> R.drawable.ic_category_thriller;
+            case "7" -> R.drawable.ic_category_drama;
+            case "14" -> R.drawable.ic_category_business;
+            case "22" -> R.drawable.ic_category_biography;
+            case "6" -> R.drawable.ic_category_children;
+            case "12" -> R.drawable.ic_category_history;
+            case "13" -> R.drawable.ic_category_classic;
+            case "21" -> R.drawable.ic_category_health;
+            case "11" -> R.drawable.ic_category_nonfiction;
+            case "17" -> R.drawable.ic_category_education;
+            case "18" -> R.drawable.ic_category_poetry;
+            case "8" -> R.drawable.ic_category_adventure;
+            case "2" -> R.drawable.ic_category_psychology;
+            case "16" -> R.drawable.ic_category_miscellaneous;
+            case "20" -> R.drawable.ic_category_ranobe;
+            case "19" -> R.drawable.ic_category_religion;
+            case "3" -> R.drawable.ic_category_novel;
+            case "24" -> R.drawable.ic_category_crime;
+            case "10" -> R.drawable.ic_category_horror;
+            case "5" -> R.drawable.ic_category_esoteric;
+            case "9" -> R.drawable.ic_category_humor;
+            default -> R.drawable.ic_globe;
+        };
     }
 
     public void clearBookList() {
