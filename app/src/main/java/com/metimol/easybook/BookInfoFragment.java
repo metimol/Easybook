@@ -76,7 +76,8 @@ public class BookInfoFragment extends Fragment {
     }
 
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_book_details, container, false);
     }
 
@@ -158,8 +159,7 @@ public class BookInfoFragment extends Fragment {
                     book_info_main_container.getPaddingStart(),
                     height + dpToPx(20, context),
                     book_info_main_container.getPaddingEnd(),
-                    book_info_main_container.getPaddingBottom()
-            );
+                    book_info_main_container.getPaddingBottom());
         });
 
         observeFavoriteStatus();
@@ -176,7 +176,8 @@ public class BookInfoFragment extends Fragment {
 
             Book playingBook = playbackService.currentBook.getValue();
             Boolean isPlaying = playbackService.isPlaying.getValue();
-            if (isPlaying == null) isPlaying = false;
+            if (isPlaying == null)
+                isPlaying = false;
 
             boolean isThisBookInPlayer = (playingBook != null && displayedBook.getId().equals(playingBook.getId()));
 
@@ -193,9 +194,9 @@ public class BookInfoFragment extends Fragment {
                     timestamp = currentDbBook.currentTimestamp;
                     String chapterId = currentDbBook.currentChapterId;
 
-                    if (displayedBook.getFiles() != null && displayedBook.getFiles().getFull() != null) {
-                        for (int i = 0; i < displayedBook.getFiles().getFull().size(); i++) {
-                            if (String.valueOf(displayedBook.getFiles().getFull().get(i).getId()).equals(chapterId)) {
+                    if (displayedBook.getFiles() != null && !displayedBook.getFiles().isEmpty()) {
+                        for (int i = 0; i < displayedBook.getFiles().size(); i++) {
+                            if (String.valueOf(displayedBook.getFiles().get(i).getIndex()).equals(chapterId)) {
                                 chapterIndex = i;
                                 break;
                             }
@@ -305,7 +306,6 @@ public class BookInfoFragment extends Fragment {
         popup.show();
     }
 
-
     private String formatTotalDuration(int totalSeconds) {
         if (totalSeconds <= 0) {
             return getString(R.string.unknown);
@@ -385,8 +385,7 @@ public class BookInfoFragment extends Fragment {
             String booksCountText;
             try {
                 booksCountText = getResources().getQuantityString(
-                        R.plurals.books_count, serie.getBooksCount(), serie.getBooksCount()
-                );
+                        R.plurals.books_count, serie.getBooksCount(), serie.getBooksCount());
             } catch (Exception e) {
                 booksCountText = serie.getBooksCount() + " " + getString(R.string.books_fallback);
             }
@@ -412,8 +411,8 @@ public class BookInfoFragment extends Fragment {
                 .fallback(R.drawable.ic_placeholder_book)
                 .into(bookCover);
 
-        if (book.getFiles() != null && book.getFiles().getFull() != null) {
-            episodeAdapter.submitList(book.getFiles().getFull());
+        if (book.getFiles() != null && !book.getFiles().isEmpty()) {
+            episodeAdapter.submitList(book.getFiles());
         } else {
             episodeAdapter.submitList(new ArrayList<>());
         }
@@ -447,10 +446,12 @@ public class BookInfoFragment extends Fragment {
             }
 
             @Override
-            public void onTabUnselected(TabLayout.Tab tab) {}
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
 
             @Override
-            public void onTabReselected(TabLayout.Tab tab) {}
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
         });
     }
 

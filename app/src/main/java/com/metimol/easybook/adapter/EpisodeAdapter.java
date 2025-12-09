@@ -23,6 +23,7 @@ public class EpisodeAdapter extends ListAdapter<BookFile, EpisodeAdapter.Episode
     public interface OnEpisodeClickListener {
         void onEpisodeClick(BookFile episode, int position);
     }
+
     private OnEpisodeClickListener clickListener;
     private String selectedChapterId = null;
 
@@ -45,7 +46,7 @@ public class EpisodeAdapter extends ListAdapter<BookFile, EpisodeAdapter.Episode
     private static final DiffUtil.ItemCallback<BookFile> DIFF_CALLBACK = new DiffUtil.ItemCallback<BookFile>() {
         @Override
         public boolean areItemsTheSame(@NonNull BookFile oldItem, @NonNull BookFile newItem) {
-            return oldItem.getId() == newItem.getId();
+            return oldItem.getIndex() == newItem.getIndex();
         }
 
         @Override
@@ -65,7 +66,7 @@ public class EpisodeAdapter extends ListAdapter<BookFile, EpisodeAdapter.Episode
     @Override
     public void onBindViewHolder(@NonNull EpisodeViewHolder holder, int position) {
         BookFile episode = getItem(position);
-        holder.bind(episode, String.valueOf(episode.getId()).equals(selectedChapterId));
+        holder.bind(episode, String.valueOf(episode.getIndex()).equals(selectedChapterId));
 
         holder.itemView.setOnClickListener(v -> {
             if (clickListener != null) {

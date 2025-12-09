@@ -33,37 +33,93 @@ public class Book {
     private String defaultPosterMain;
     @SerializedName("total_duration")
     private int totalDuration;
-    @SerializedName("book_files")
-    private List<BookFile> rawFiles;
+    @SerializedName("files")
+    private List<BookFile> files;
 
     private int progressPercentage;
 
-    public String getId() { return id; }
-    public String getName() { return name; }
-    public String getUrlName() { return urlName; }
-    public Genre getGenre() { return genre; }
-    public Serie getSerie() { return serie; }
-    public String getSerieIndex() { return serieIndex; }
-    public String getDescription() { return description; }
-    public int getLikes() { return likes; }
-    public int getDislikes() { return dislikes; }
-    public String getDefaultPoster() { return defaultPoster; }
-    public String getDefaultPosterMain() { return defaultPosterMain; }
-    public int getTotalDuration() { return totalDuration; }
-    public int getProgressPercentage() { return progressPercentage; }
-    public void setProgressPercentage(int progressPercentage) { this.progressPercentage = progressPercentage; }
+    public String getId() {
+        return id;
+    }
 
-    public void setId(String id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
-    public void setDefaultPosterMain(String defaultPosterMain) { this.defaultPosterMain = defaultPosterMain; }
-    public void setDefaultPoster(String defaultPoster) { this.defaultPoster = defaultPoster; }
-    public void setTotalDuration(int totalDuration) { this.totalDuration = totalDuration; }
+    public String getName() {
+        return name;
+    }
+
+    public String getUrlName() {
+        return urlName;
+    }
+
+    public Genre getGenre() {
+        return genre;
+    }
+
+    public Serie getSerie() {
+        return serie;
+    }
+
+    public String getSerieIndex() {
+        return serieIndex;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public int getLikes() {
+        return likes;
+    }
+
+    public int getDislikes() {
+        return dislikes;
+    }
+
+    public String getDefaultPoster() {
+        return defaultPoster;
+    }
+
+    public String getDefaultPosterMain() {
+        return defaultPosterMain;
+    }
+
+    public int getTotalDuration() {
+        return totalDuration;
+    }
+
+    public int getProgressPercentage() {
+        return progressPercentage;
+    }
+
+    public void setProgressPercentage(int progressPercentage) {
+        this.progressPercentage = progressPercentage;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setDefaultPosterMain(String defaultPosterMain) {
+        this.defaultPosterMain = defaultPosterMain;
+    }
+
+    public void setDefaultPoster(String defaultPoster) {
+        this.defaultPoster = defaultPoster;
+    }
+
+    public void setTotalDuration(int totalDuration) {
+        this.totalDuration = totalDuration;
+    }
 
     public List<Author> getAuthors() {
         List<Author> authors = new ArrayList<>();
         if (bookAuthorsRelations != null) {
             for (BookAuthorRelation relation : bookAuthorsRelations) {
-                if (relation.author != null) authors.add(relation.author);
+                if (relation.author != null)
+                    authors.add(relation.author);
             }
         }
         return authors;
@@ -73,40 +129,22 @@ public class Book {
         List<Author> readers = new ArrayList<>();
         if (bookReadersRelations != null) {
             for (BookReaderRelation relation : bookReadersRelations) {
-                if (relation.reader != null) readers.add(relation.reader);
+                if (relation.reader != null)
+                    readers.add(relation.reader);
             }
         }
         return readers;
     }
 
-    public BookFiles getFiles() {
-        BookFiles files = new BookFiles();
-        List<BookFile> full = new ArrayList<>();
-        List<BookFile> mobile = new ArrayList<>();
-
-        if (rawFiles != null) {
-            for (BookFile file : rawFiles) {
-                if (file.isMobile()) {
-                    mobile.add(file);
-                } else {
-                    full.add(file);
-                }
-            }
-        }
-        full.sort((o1, o2) -> Integer.compare(o1.getIndex(), o2.getIndex()));
-        mobile.sort((o1, o2) -> Integer.compare(o1.getIndex(), o2.getIndex()));
-
-        files.setFull(full);
-        files.setMobile(mobile);
+    public List<BookFile> getFiles() {
+        if (files == null)
+            return new ArrayList<>();
+        files.sort((o1, o2) -> Integer.compare(o1.getIndex(), o2.getIndex()));
         return files;
     }
 
-    public void setFiles(BookFiles files) {
-        this.rawFiles = new ArrayList<>();
-        if (files != null) {
-            if (files.getFull() != null) this.rawFiles.addAll(files.getFull());
-            if (files.getMobile() != null) this.rawFiles.addAll(files.getMobile());
-        }
+    public void setFiles(List<BookFile> files) {
+        this.files = files;
     }
 
     public static class BookAuthorRelation {

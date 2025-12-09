@@ -139,8 +139,7 @@ public class PlaybackService extends MediaSessionService {
                         minBufferMs,
                         maxBufferMs,
                         bufferForPlaybackMs,
-                        bufferForPlaybackAfterRebufferMs
-                )
+                        bufferForPlaybackAfterRebufferMs)
                 .setBackBuffer(10000, true)
                 .build();
 
@@ -164,8 +163,7 @@ public class PlaybackService extends MediaSessionService {
         notificationManager = new PlayerNotificationManager.Builder(
                 this,
                 NOTIFICATION_ID,
-                CHANNEL_ID
-        )
+                CHANNEL_ID)
                 .setMediaDescriptionAdapter(new PlayerNotificationManager.MediaDescriptionAdapter() {
                     @NonNull
                     @Override
@@ -181,8 +179,7 @@ public class PlaybackService extends MediaSessionService {
                                 PlaybackService.this,
                                 0,
                                 intent,
-                                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE
-                        );
+                                PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
                     }
 
                     @Override
@@ -204,8 +201,7 @@ public class PlaybackService extends MediaSessionService {
                     @Override
                     public android.graphics.Bitmap getCurrentLargeIcon(
                             @NonNull Player player,
-                            @NonNull PlayerNotificationManager.BitmapCallback callback
-                    ) {
+                            @NonNull PlayerNotificationManager.BitmapCallback callback) {
                         Book book = currentBook.getValue();
                         if (book != null && book.getDefaultPosterMain() != null) {
                             Glide.with(PlaybackService.this)
@@ -213,7 +209,8 @@ public class PlaybackService extends MediaSessionService {
                                     .load(book.getDefaultPosterMain())
                                     .into(new CustomTarget<Bitmap>() {
                                         @Override
-                                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                        public void onResourceReady(@NonNull Bitmap resource,
+                                                @Nullable Transition<? super Bitmap> transition) {
                                             callback.onBitmap(resource);
                                         }
 
@@ -236,8 +233,7 @@ public class PlaybackService extends MediaSessionService {
                     public void onNotificationPosted(
                             int notificationId,
                             @NonNull Notification notification,
-                            boolean ongoing
-                    ) {
+                            boolean ongoing) {
                         if (ongoing) {
                             startForeground(notificationId, notification);
                         } else {
@@ -265,7 +261,8 @@ public class PlaybackService extends MediaSessionService {
                 } else {
                     stopProgressUpdater();
 
-                    if (!player.getPlayWhenReady() && player.getPlaybackState() != Player.STATE_ENDED && player.getPlaybackState() != Player.STATE_IDLE) {
+                    if (!player.getPlayWhenReady() && player.getPlaybackState() != Player.STATE_ENDED
+                            && player.getPlaybackState() != Player.STATE_IDLE) {
                         long currentPos = player.getCurrentPosition();
                         long newPos = currentPos - 2000;
                         if (newPos < 0) {
@@ -289,7 +286,7 @@ public class PlaybackService extends MediaSessionService {
                 saveCurrentBookProgress();
                 if (mediaItem != null && currentBook.getValue() != null) {
                     int newIndex = player.getCurrentMediaItemIndex();
-                    List<BookFile> chapters = currentBook.getValue().getFiles().getFull();
+                    List<BookFile> chapters = currentBook.getValue().getFiles();
                     if (newIndex >= 0 && newIndex < chapters.size()) {
                         BookFile chapter = chapters.get(newIndex);
                         currentChapter.setValue(chapter);
@@ -438,8 +435,7 @@ public class PlaybackService extends MediaSessionService {
         NotificationChannel serviceChannel = new NotificationChannel(
                 CHANNEL_ID,
                 "Playback Service Channel",
-                NotificationManager.IMPORTANCE_LOW
-        );
+                NotificationManager.IMPORTANCE_LOW);
         serviceChannel.setDescription("Media playback controls");
         serviceChannel.setShowBadge(false);
         serviceChannel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
@@ -460,7 +456,7 @@ public class PlaybackService extends MediaSessionService {
         }
 
         String bookId = book.getId();
-        String chapterId = String.valueOf(chapter.getId());
+        String chapterId = String.valueOf(chapter.getIndex());
         long timestamp = (position > 0) ? position : 0L;
         long lastListened = System.currentTimeMillis();
 
@@ -490,12 +486,12 @@ public class PlaybackService extends MediaSessionService {
     }
 
     private int calculateProgressPercentage(Book book, BookFile currentChapter, long positionMs) {
-        if (book.getTotalDuration() <= 0 || book.getFiles() == null || book.getFiles().getFull() == null) {
+        if (book.getTotalDuration() <= 0 || book.getFiles() == null || book.getFiles().isEmpty()) {
             return 0;
         }
 
         long totalPlayedMs = 0;
-        List<BookFile> files = book.getFiles().getFull();
+        List<BookFile> files = book.getFiles();
 
         for (BookFile file : files) {
             if (file.getIndex() < currentChapter.getIndex()) {
@@ -506,7 +502,8 @@ public class PlaybackService extends MediaSessionService {
         totalPlayedMs += positionMs;
         long totalBookDurationMs = book.getTotalDuration() * 1000L;
 
-        if (totalBookDurationMs <= 0) return 0;
+        if (totalBookDurationMs <= 0)
+            return 0;
 
         int percent = (int) ((totalPlayedMs * 100) / totalBookDurationMs);
         return Math.min(Math.max(percent, 0), 100);
@@ -514,7 +511,8 @@ public class PlaybackService extends MediaSessionService {
 
     private void markCurrentBookAsFinished() {
         Book book = currentBook.getValue();
-        if (book == null || isFinishCheckPending) return;
+        if (book == null || isFinishCheckPending)
+            return;
         isFinishCheckPending = true;
 
         String bookId = book.getId();
@@ -546,17 +544,18 @@ public class PlaybackService extends MediaSessionService {
     }
 
     private void setupPlayerWithBook(Book book, int chapterIndex, long timestamp) {
-        if (book == null || book.getFiles() == null || book.getFiles().getFull() == null) {
+        if (book == null || book.getFiles() == null || book.getFiles().isEmpty()) {
             return;
         }
 
-        boolean isSameBook = book.getId().equals(currentBook.getValue() != null ? currentBook.getValue().getId() : null);
+        boolean isSameBook = book.getId()
+                .equals(currentBook.getValue() != null ? currentBook.getValue().getId() : null);
 
         isFinishCheckPending = false;
         lastPrevClickTime = 0;
 
         currentBook.setValue(book);
-        List<BookFile> chapters = book.getFiles().getFull();
+        List<BookFile> chapters = book.getFiles();
 
         if (chapterIndex < 0 || chapterIndex >= chapters.size()) {
             chapterIndex = 0;
@@ -568,14 +567,15 @@ public class PlaybackService extends MediaSessionService {
             databaseExecutor.execute(() -> {
                 List<Chapter> dbChapters = audiobookDao.getChaptersForBook(book.getId());
                 List<MediaItem> mediaItems = new ArrayList<>();
-                String artist = (book.getAuthors() != null && !book.getAuthors().isEmpty()) ?
-                        book.getAuthors().get(0).getName() + " " + book.getAuthors().get(0).getSurname() : null;
+                String artist = (book.getAuthors() != null && !book.getAuthors().isEmpty())
+                        ? book.getAuthors().get(0).getName() + " " + book.getAuthors().get(0).getSurname()
+                        : null;
 
                 for (BookFile chapter : chapters) {
                     String localPath = null;
-                    if(dbChapters != null) {
-                        for(Chapter dbCh : dbChapters) {
-                            if(String.valueOf(chapter.getId()).equals(dbCh.id)) {
+                    if (dbChapters != null) {
+                        for (Chapter dbCh : dbChapters) {
+                            if (String.valueOf(chapter.getIndex()).equals(dbCh.id)) {
                                 localPath = dbCh.localPath;
                                 break;
                             }
@@ -583,7 +583,7 @@ public class PlaybackService extends MediaSessionService {
                     }
 
                     Uri mediaUri;
-                    if(localPath != null && new File(localPath).exists()) {
+                    if (localPath != null && new File(localPath).exists()) {
                         mediaUri = Uri.fromFile(new File(localPath));
                     } else {
                         mediaUri = Uri.parse(chapter.getUrl());
@@ -600,7 +600,7 @@ public class PlaybackService extends MediaSessionService {
 
                     MediaMetadata mediaMetadata = metadataBuilder.build();
                     MediaItem mediaItem = new MediaItem.Builder()
-                            .setMediaId(String.valueOf(chapter.getId()))
+                            .setMediaId(String.valueOf(chapter.getIndex()))
                             .setUri(mediaUri)
                             .setMediaMetadata(mediaMetadata)
                             .build();
@@ -624,7 +624,7 @@ public class PlaybackService extends MediaSessionService {
     }
 
     public void playBookFromProgress(Book book, int chapterIndex, long timestamp) {
-        if (book == null || book.getFiles() == null || book.getFiles().getFull() == null) {
+        if (book == null || book.getFiles() == null || book.getFiles().isEmpty()) {
             return;
         }
 
@@ -634,7 +634,7 @@ public class PlaybackService extends MediaSessionService {
         databaseExecutor.execute(() -> {
             String bookId = book.getId();
             assert startingChapter != null;
-            String chapterId = String.valueOf(startingChapter.getId());
+            String chapterId = String.valueOf(startingChapter.getIndex());
             long lastListened = System.currentTimeMillis();
 
             int percentage = calculateProgressPercentage(book, startingChapter, timestamp);
@@ -752,8 +752,8 @@ public class PlaybackService extends MediaSessionService {
     private void updateNavigationVisibility() {
         Book book = currentBook.getValue();
         boolean showNav = false;
-        if (book != null && book.getFiles() != null && book.getFiles().getFull() != null) {
-            showNav = book.getFiles().getFull().size() > 1;
+        if (book != null && book.getFiles() != null && !book.getFiles().isEmpty()) {
+            showNav = book.getFiles().size() > 1;
         }
         hasNext.postValue(showNav);
         hasPrevious.postValue(showNav);

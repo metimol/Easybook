@@ -68,7 +68,8 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
     private MainViewModel mainViewModel;
     private int lastSelectedSpeedIndex = -1;
 
-    public PlayerViewPagerAdapter(LifecycleOwner lifecycleOwner, EpisodeAdapter episodeAdapter, Runnable onChapterClick) {
+    public PlayerViewPagerAdapter(LifecycleOwner lifecycleOwner, EpisodeAdapter episodeAdapter,
+            Runnable onChapterClick) {
         this.lifecycleOwner = lifecycleOwner;
         this.episodeAdapter = episodeAdapter;
         this.onChapterClick = onChapterClick;
@@ -182,7 +183,9 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
             public void onStopTrackingTouch(SeekBar seekBar) {
                 if (playbackService != null) {
                     playbackService.seekTo(seekBar.getProgress());
-                    long bufferedPos = playbackService.bufferedPosition.getValue() != null ? playbackService.bufferedPosition.getValue() : 0L;
+                    long bufferedPos = playbackService.bufferedPosition.getValue() != null
+                            ? playbackService.bufferedPosition.getValue()
+                            : 0L;
                     updateBufferedPosition(bufferedPos);
                 }
                 isUserSeeking = false;
@@ -207,7 +210,8 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
 
     private void updateControlsPageUI() {
         if (playbackService == null || controlsViewHolder == null) {
-            if (controlsViewHolder != null) controlsViewHolder.itemView.setVisibility(View.GONE);
+            if (controlsViewHolder != null)
+                controlsViewHolder.itemView.setVisibility(View.GONE);
             return;
         }
 
@@ -219,20 +223,29 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
             updateBookUI(currentBook);
             updateChapterUI(playbackService.currentChapter.getValue());
             updatePlayPauseButton(Boolean.TRUE.equals(playbackService.isPlaying.getValue()));
-            updateDurationUI(playbackService.totalDuration.getValue() != null ? playbackService.totalDuration.getValue() : 0L);
-            updateProgressUI(playbackService.currentPosition.getValue() != null ? playbackService.currentPosition.getValue() : 0L);
+            updateDurationUI(
+                    playbackService.totalDuration.getValue() != null ? playbackService.totalDuration.getValue() : 0L);
+            updateProgressUI(
+                    playbackService.currentPosition.getValue() != null ? playbackService.currentPosition.getValue()
+                            : 0L);
             updateLoadingState(Boolean.TRUE.equals(playbackService.isLoading.getValue()));
-            updateBufferedPosition(playbackService.bufferedPosition.getValue() != null ? playbackService.bufferedPosition.getValue() : 0L);
+            updateBufferedPosition(
+                    playbackService.bufferedPosition.getValue() != null ? playbackService.bufferedPosition.getValue()
+                            : 0L);
             updateTimerState(Boolean.TRUE.equals(playbackService.isSleepTimerActive.getValue()));
-            updateSpeedUI(playbackService.playbackSpeed.getValue() != null ? playbackService.playbackSpeed.getValue() : 1.0f);
-            controlsViewHolder.btnNextCard.setVisibility(Boolean.TRUE.equals(playbackService.hasNext.getValue()) ? View.VISIBLE : View.GONE);
-            controlsViewHolder.btnPrevCard.setVisibility(Boolean.TRUE.equals(playbackService.hasPrevious.getValue()) ? View.VISIBLE : View.GONE);
+            updateSpeedUI(
+                    playbackService.playbackSpeed.getValue() != null ? playbackService.playbackSpeed.getValue() : 1.0f);
+            controlsViewHolder.btnNextCard
+                    .setVisibility(Boolean.TRUE.equals(playbackService.hasNext.getValue()) ? View.VISIBLE : View.GONE);
+            controlsViewHolder.btnPrevCard.setVisibility(
+                    Boolean.TRUE.equals(playbackService.hasPrevious.getValue()) ? View.VISIBLE : View.GONE);
         }
     }
 
     private void updateChaptersPageUI() {
         if (playbackService == null || chaptersViewHolder == null) {
-            if (chaptersViewHolder != null) chaptersViewHolder.itemView.setVisibility(View.GONE);
+            if (chaptersViewHolder != null)
+                chaptersViewHolder.itemView.setVisibility(View.GONE);
             return;
         }
 
@@ -241,8 +254,8 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
             chaptersViewHolder.itemView.setVisibility(View.GONE);
         } else {
             chaptersViewHolder.itemView.setVisibility(View.VISIBLE);
-            if (currentBook.getFiles() != null && currentBook.getFiles().getFull() != null) {
-                episodeAdapter.submitList(currentBook.getFiles().getFull());
+            if (currentBook.getFiles() != null && !currentBook.getFiles().isEmpty()) {
+                episodeAdapter.submitList(currentBook.getFiles());
             } else {
                 episodeAdapter.submitList(new ArrayList<>());
             }
@@ -250,9 +263,9 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
         }
     }
 
-
     private void observeServiceLiveData() {
-        if (playbackService == null) return;
+        if (playbackService == null)
+            return;
 
         playbackService.currentBook.observe(lifecycleOwner, book -> {
             updateControlsPageUI();
@@ -267,15 +280,18 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
         playbackService.isSleepTimerActive.observe(lifecycleOwner, this::updateTimerState);
         playbackService.playbackSpeed.observe(lifecycleOwner, this::updateSpeedUI);
         playbackService.hasNext.observe(lifecycleOwner, hasNext -> {
-            if (controlsViewHolder != null) controlsViewHolder.btnNextCard.setVisibility(hasNext ? View.VISIBLE : View.GONE);
+            if (controlsViewHolder != null)
+                controlsViewHolder.btnNextCard.setVisibility(hasNext ? View.VISIBLE : View.GONE);
         });
         playbackService.hasPrevious.observe(lifecycleOwner, hasPrevious -> {
-            if (controlsViewHolder != null) controlsViewHolder.btnPrevCard.setVisibility(hasPrevious ? View.VISIBLE : View.GONE);
+            if (controlsViewHolder != null)
+                controlsViewHolder.btnPrevCard.setVisibility(hasPrevious ? View.VISIBLE : View.GONE);
         });
     }
 
     private void updateBookUI(Book book) {
-        if (book == null || controlsViewHolder == null) return;
+        if (book == null || controlsViewHolder == null)
+            return;
 
         if (book.getAuthors() != null && !book.getAuthors().isEmpty()) {
             Author author = book.getAuthors().get(0);
@@ -293,15 +309,17 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
     }
 
     private void updateChapterUI(BookFile chapter) {
-        if (chapter == null) return;
+        if (chapter == null)
+            return;
         if (controlsViewHolder != null) {
             controlsViewHolder.tvEpisodeTitle.setText(chapter.getTitle());
         }
-        episodeAdapter.setSelectedChapterId(String.valueOf(chapter.getId()));
+        episodeAdapter.setSelectedChapterId(String.valueOf(chapter.getIndex()));
     }
 
     private void updatePlayPauseButton(boolean isPlaying) {
-        if (controlsViewHolder == null) return;
+        if (controlsViewHolder == null)
+            return;
         if (isPlaying) {
             controlsViewHolder.btnPlayPause.setImageResource(R.drawable.ic_pause);
         } else {
@@ -310,19 +328,22 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
     }
 
     private void updateDurationUI(long duration) {
-        if (duration <= 0 || controlsViewHolder == null) return;
+        if (duration <= 0 || controlsViewHolder == null)
+            return;
         controlsViewHolder.tvTotalTime.setText(PlaybackService.formatDuration(duration));
         controlsViewHolder.playerSeekBar.setMax((int) duration);
     }
 
     private void updateProgressUI(long position) {
-        if (isUserSeeking || controlsViewHolder == null) return;
+        if (isUserSeeking || controlsViewHolder == null)
+            return;
         controlsViewHolder.tvCurrentTime.setText(PlaybackService.formatDuration(position));
         controlsViewHolder.playerSeekBar.setProgress((int) position);
     }
 
     private void updateLoadingState(boolean isLoading) {
-        if (controlsViewHolder == null) return;
+        if (controlsViewHolder == null)
+            return;
         if (isLoading) {
             controlsViewHolder.btnPlayPause.setVisibility(View.INVISIBLE);
             controlsViewHolder.loadingProgressBar.setVisibility(View.VISIBLE);
@@ -333,12 +354,14 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
     }
 
     private void updateBufferedPosition(long position) {
-        if (isUserSeeking || controlsViewHolder == null) return;
+        if (isUserSeeking || controlsViewHolder == null)
+            return;
         controlsViewHolder.playerSeekBar.setSecondaryProgress((int) position);
     }
 
     private void updateTimerState(boolean isActive) {
-        if (controlsViewHolder == null) return;
+        if (controlsViewHolder == null)
+            return;
         if (isActive) {
             int activeColor = ContextCompat.getColor(controlsViewHolder.itemView.getContext(), R.color.green);
             ImageViewCompat.setImageTintList(controlsViewHolder.btnSleepTimer, ColorStateList.valueOf(activeColor));
@@ -349,7 +372,8 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
     }
 
     private void updateSpeedUI(float speed) {
-        if (controlsViewHolder == null) return;
+        if (controlsViewHolder == null)
+            return;
         controlsViewHolder.btnSpeed.setText(String.format(Locale.US, "%.2fx", speed));
     }
 
@@ -357,7 +381,8 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
         BottomSheetDialog dialog = new BottomSheetDialog(context, R.style.CustomBottomSheetDialogTheme);
         dialog.setContentView(R.layout.fragment_timer_dialog);
 
-        if (mainViewModel == null || playbackService == null) return;
+        if (mainViewModel == null || playbackService == null)
+            return;
 
         int currentMode = playbackService.activeSleepTimerMode.getValue() != null
                 ? playbackService.activeSleepTimerMode.getValue()
@@ -434,12 +459,15 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
         LinearLayout container = dialog.findViewById(R.id.speed_container);
         TextView speedValueText = dialog.findViewById(R.id.speed_value_text);
 
-        if (scrollView == null || container == null || speedValueText == null) return;
+        if (scrollView == null || container == null || speedValueText == null)
+            return;
 
         SharedPreferences prefs = context.getSharedPreferences(APP_PREFERENCES, Context.MODE_PRIVATE);
         float currentSpeed = prefs.getFloat(SPEED_KEY, 1.0f);
-        if (currentSpeed < 0.25f) currentSpeed = 0.25f;
-        if (currentSpeed > 5.0f) currentSpeed = 5.0f;
+        if (currentSpeed < 0.25f)
+            currentSpeed = 0.25f;
+        if (currentSpeed > 5.0f)
+            currentSpeed = 5.0f;
 
         List<Float> speedValues = new ArrayList<>();
         for (int i = 25; i <= 500; i += 5) {
@@ -457,8 +485,7 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
             itemLayout.setGravity(Gravity.CENTER_HORIZONTAL);
             LinearLayout.LayoutParams itemParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
 
             if (i < speedValues.size() - 1) {
                 itemParams.setMarginEnd(dpToPx(8));
@@ -478,8 +505,7 @@ public class PlayerViewPagerAdapter extends RecyclerView.Adapter<PlayerViewPager
             TextView text = new TextView(context);
             LinearLayout.LayoutParams textParams = new LinearLayout.LayoutParams(
                     LinearLayout.LayoutParams.WRAP_CONTENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-            );
+                    LinearLayout.LayoutParams.WRAP_CONTENT);
             textParams.topMargin = dpToPx(8);
             text.setLayoutParams(textParams);
             text.setText(String.format(Locale.US, "%.1f", speed));

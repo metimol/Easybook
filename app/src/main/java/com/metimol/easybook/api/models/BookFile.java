@@ -3,44 +3,64 @@ package com.metimol.easybook.api.models;
 import com.google.gson.annotations.SerializedName;
 
 public class BookFile {
-    @SerializedName("id")
-    private int id;
-    @SerializedName("index")
+    @SerializedName("i")
     private int index;
-    @SerializedName("title")
+    @SerializedName("t")
     private String title;
-    @SerializedName("file_name")
+    @SerializedName("f")
     private String fileName;
-    @SerializedName("duration")
+    @SerializedName("d")
     private int duration;
-    @SerializedName("url")
+    @SerializedName("s")
+    private long size;
+    @SerializedName("u")
     private String url;
-    @SerializedName("size")
-    private int size;
-    @SerializedName("is_mobile")
-    private boolean isMobile;
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    public int getIndex() {
+        return index;
+    }
 
-    public int getIndex() { return index; }
-    public void setIndex(int index) { this.index = index; }
+    public void setIndex(int index) {
+        this.index = index;
+    }
 
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public String getTitle() {
+        return title;
+    }
 
-    public String getFileName() { return fileName; }
-    public void setFileName(String fileName) { this.fileName = fileName; }
+    public void setTitle(String title) {
+        this.title = title;
+    }
 
-    public int getDuration() { return duration; }
-    public void setDuration(int duration) { this.duration = duration; }
+    public String getFileName() {
+        return fileName;
+    }
 
-    public String getUrl() { return url; }
-    public void setUrl(String url) { this.url = url; }
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
 
-    public int getSize() { return size; }
-    public void setSize(int size) { this.size = size; }
+    public int getDuration() {
+        return duration;
+    }
 
-    public boolean isMobile() { return isMobile; }
-    public void setMobile(boolean mobile) { isMobile = mobile; }
+    public void setDuration(int duration) {
+        this.duration = duration;
+    }
+
+    public long getSize() {
+        return size;
+    }
+
+    public void setSize(long size) {
+        this.size = size;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
 }

@@ -43,7 +43,9 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainViewModel extends AndroidViewModel {
-    private enum SourceType { NONE, GENRE, SERIES, AUTHOR, READER, FAVORITES, LISTENED, LISTENING, DOWNLOADED }
+    private enum SourceType {
+        NONE, GENRE, SERIES, AUTHOR, READER, FAVORITES, LISTENED, LISTENING, DOWNLOADED
+    }
 
     private final FirebaseRepository firebaseRepository;
     private final MutableLiveData<Integer> statusBarHeight = new MutableLiveData<>();
@@ -175,7 +177,6 @@ public class MainViewModel extends AndroidViewModel {
 
         for (Chapter ch : dbChapters) {
             BookFile bf = new BookFile();
-            bf.setId(Integer.parseInt(ch.id));
             bf.setTitle(ch.title);
             bf.setUrl(ch.url);
             bf.setDuration((int) ch.duration);
@@ -183,18 +184,17 @@ public class MainViewModel extends AndroidViewModel {
             apiChapters.add(bf);
         }
 
-        com.metimol.easybook.api.models.BookFiles bf = new com.metimol.easybook.api.models.BookFiles();
-        bf.setFull(apiChapters);
-        book.setFiles(bf);
+        book.setFiles(apiChapters);
 
         return book;
     }
 
-    private void preparePlayerWithBook(Book apiBook, com.metimol.easybook.database.Book dbBook, PlaybackService service) {
-        if (apiBook != null && apiBook.getFiles() != null && apiBook.getFiles().getFull() != null) {
+    private void preparePlayerWithBook(Book apiBook, com.metimol.easybook.database.Book dbBook,
+            PlaybackService service) {
+        if (apiBook != null && apiBook.getFiles() != null && !apiBook.getFiles().isEmpty()) {
             int chapterIndex = 0;
-            for (int i = 0; i < apiBook.getFiles().getFull().size(); i++) {
-                if (String.valueOf(apiBook.getFiles().getFull().get(i).getId()).equals(dbBook.currentChapterId)) {
+            for (int i = 0; i < apiBook.getFiles().size(); i++) {
+                if (String.valueOf(apiBook.getFiles().get(i).getIndex()).equals(dbBook.currentChapterId)) {
                     chapterIndex = i;
                     break;
                 }
@@ -294,7 +294,8 @@ public class MainViewModel extends AndroidViewModel {
 
     public void toggleFavoriteStatus() {
         Book apiBook = selectedBookDetails.getValue();
-        if (apiBook == null) return;
+        if (apiBook == null)
+            return;
 
         Boolean currentStatus = isBookFavorite != null ? isBookFavorite.getValue() : null;
 
@@ -328,7 +329,8 @@ public class MainViewModel extends AndroidViewModel {
 
     public void toggleFinishedStatus() {
         Book apiBook = selectedBookDetails.getValue();
-        if (apiBook == null) return;
+        if (apiBook == null)
+            return;
 
         Boolean currentStatus = isBookFinished != null ? isBookFinished.getValue() : null;
 
@@ -374,7 +376,7 @@ public class MainViewModel extends AndroidViewModel {
         com.metimol.easybook.database.Book dbBook = new com.metimol.easybook.database.Book();
         dbBook.id = apiBook.getId();
         dbBook.name = apiBook.getName();
-        if(apiBook.getAuthors() != null && !apiBook.getAuthors().isEmpty()) {
+        if (apiBook.getAuthors() != null && !apiBook.getAuthors().isEmpty()) {
             dbBook.author = apiBook.getAuthors().get(0).getName() + " " + apiBook.getAuthors().get(0).getSurname();
         }
         dbBook.coverUrl = apiBook.getDefaultPosterMain();
@@ -383,7 +385,8 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void fetchListeningBooksFromApi() {
-        if (Boolean.TRUE.equals(isLoading.getValue())) return;
+        if (Boolean.TRUE.equals(isLoading.getValue()))
+            return;
         isLoading.setValue(true);
         loadError.setValue(false);
         clearBookList();
@@ -405,7 +408,8 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void fetchListenedBooksFromApi() {
-        if (Boolean.TRUE.equals(isLoading.getValue())) return;
+        if (Boolean.TRUE.equals(isLoading.getValue()))
+            return;
         isLoading.setValue(true);
         loadError.setValue(false);
         clearBookList();
@@ -426,9 +430,9 @@ public class MainViewModel extends AndroidViewModel {
         });
     }
 
-
     public void fetchFavoriteBooksFromApi() {
-        if (Boolean.TRUE.equals(isLoading.getValue())) return;
+        if (Boolean.TRUE.equals(isLoading.getValue()))
+            return;
         isLoading.setValue(true);
         loadError.setValue(false);
         clearBookList();
@@ -450,7 +454,8 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void fetchDownloadedBooks() {
-        if (Boolean.TRUE.equals(isLoading.getValue())) return;
+        if (Boolean.TRUE.equals(isLoading.getValue()))
+            return;
         isLoading.setValue(true);
         loadError.setValue(false);
         clearBookList();
@@ -461,7 +466,7 @@ public class MainViewModel extends AndroidViewModel {
         databaseExecutor.execute(() -> {
             List<com.metimol.easybook.database.Book> downloaded = audiobookDao.getDownloadedBooks();
             List<Book> result = new ArrayList<>();
-            for(com.metimol.easybook.database.Book db : downloaded) {
+            for (com.metimol.easybook.database.Book db : downloaded) {
                 List<Chapter> chapters = audiobookDao.getChaptersForBook(db.id);
                 boolean allFilesExist = true;
 
@@ -532,7 +537,6 @@ public class MainViewModel extends AndroidViewModel {
         books.postValue(apiBooksToShow);
         isLoading.postValue(false);
     }
-
 
     public void fetchCategories() {
         SupabaseService apiService = ApiClient.getClient().create(SupabaseService.class);
@@ -841,7 +845,7 @@ public class MainViewModel extends AndroidViewModel {
 
         databaseExecutor.execute(() -> {
             com.metimol.easybook.database.Book dbBook = audiobookDao.getBookById(bookId);
-            if(dbBook != null && dbBook.isDownloaded) {
+            if (dbBook != null && dbBook.isDownloaded) {
                 Book offline = convertDbBookToApiBook(dbBook);
                 new Handler(Looper.getMainLooper()).post(() -> {
                     selectedBookDetails.setValue(offline);
@@ -900,7 +904,8 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public boolean isCurrentRequest(String type, String id) {
-        if (type == null) return false;
+        if (type == null)
+            return false;
         SourceType targetType = SourceType.NONE;
         switch (type) {
             case "GENRE" -> targetType = SourceType.GENRE;
@@ -913,7 +918,8 @@ public class MainViewModel extends AndroidViewModel {
             case "DOWNLOADED" -> targetType = SourceType.DOWNLOADED;
         }
 
-        if (currentSourceType != targetType) return false;
+        if (currentSourceType != targetType)
+            return false;
 
         if (id != null && currentSourceId != null) {
             return id.equals(currentSourceId);
@@ -947,7 +953,7 @@ public class MainViewModel extends AndroidViewModel {
             } else {
                 com.metimol.easybook.database.Book dbBook = audiobookDao.getBookById(book.getId());
                 dbBook.name = book.getName();
-                if(book.getAuthors() != null && !book.getAuthors().isEmpty()) {
+                if (book.getAuthors() != null && !book.getAuthors().isEmpty()) {
                     dbBook.author = book.getAuthors().get(0).getName() + " " + book.getAuthors().get(0).getSurname();
                 }
                 dbBook.coverUrl = book.getDefaultPosterMain();
@@ -956,10 +962,10 @@ public class MainViewModel extends AndroidViewModel {
             }
 
             List<Chapter> chapters = new ArrayList<>();
-            if(book.getFiles() != null && book.getFiles().getFull() != null) {
-                for(BookFile bf : book.getFiles().getFull()) {
+            if (book.getFiles() != null && !book.getFiles().isEmpty()) {
+                for (BookFile bf : book.getFiles()) {
                     Chapter ch = new Chapter();
-                    ch.id = String.valueOf(bf.getId());
+                    ch.id = String.valueOf(bf.getIndex());
                     ch.bookOwnerId = book.getId();
                     ch.url = bf.getUrl();
                     ch.title = bf.getTitle();
@@ -985,10 +991,12 @@ public class MainViewModel extends AndroidViewModel {
         if (useAppFolder) {
             rootDir = new File(context.getExternalFilesDir(null), "EasyBook/" + book.getId());
         } else {
-            rootDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "EasyBook/" + book.getName());
+            rootDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    "EasyBook/" + book.getName());
         }
 
-        if (!rootDir.exists()) rootDir.mkdirs();
+        if (!rootDir.exists())
+            rootDir.mkdirs();
 
         int totalChapters = chapters.size();
         AtomicInteger downloaded = new AtomicInteger(0);
@@ -997,14 +1005,15 @@ public class MainViewModel extends AndroidViewModel {
             String fileName = chapter.title.replaceAll("[\\\\/:*?\"<>|]", "_") + ".mp3";
             File targetFile = new File(rootDir, fileName);
 
-            if(targetFile.exists()) {
+            if (targetFile.exists()) {
                 audiobookDao.updateChapterPath(chapter.id, targetFile.getAbsolutePath());
                 int count = downloaded.incrementAndGet();
                 downloadProgress.postValue((count * 100) / totalChapters);
-                if(count == totalChapters) {
+                if (count == totalChapters) {
                     audiobookDao.updateBookDownloadStatus(book.getId(), true);
                     isDownloading.postValue(false);
-                    new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, R.string.download_complete, Toast.LENGTH_SHORT).show());
+                    new Handler(Looper.getMainLooper())
+                            .post(() -> Toast.makeText(context, R.string.download_complete, Toast.LENGTH_SHORT).show());
                 }
                 continue;
             }
@@ -1017,16 +1026,19 @@ public class MainViewModel extends AndroidViewModel {
             if (useAppFolder) {
                 request.setDestinationInExternalFilesDir(context, null, "EasyBook/" + book.getId() + "/" + fileName);
             } else {
-                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, "EasyBook/" + book.getName() + "/" + fileName);
+                request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
+                        "EasyBook/" + book.getName() + "/" + fileName);
             }
 
             long downloadId = downloadManager.enqueue(request);
 
             String finalPath;
             if (useAppFolder) {
-                finalPath = new File(context.getExternalFilesDir(null), "EasyBook/" + book.getId() + "/" + fileName).getAbsolutePath();
+                finalPath = new File(context.getExternalFilesDir(null), "EasyBook/" + book.getId() + "/" + fileName)
+                        .getAbsolutePath();
             } else {
-                finalPath = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), "EasyBook/" + book.getName() + "/" + fileName).getAbsolutePath();
+                finalPath = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                        "EasyBook/" + book.getName() + "/" + fileName).getAbsolutePath();
             }
 
             audiobookDao.updateChapterPath(chapter.id, finalPath);
@@ -1045,10 +1057,11 @@ public class MainViewModel extends AndroidViewModel {
                                 downloading = false;
                                 int count = downloaded.incrementAndGet();
                                 downloadProgress.postValue((count * 100) / totalChapters);
-                                if(count == totalChapters) {
+                                if (count == totalChapters) {
                                     audiobookDao.updateBookDownloadStatus(book.getId(), true);
                                     isDownloading.postValue(false);
-                                    new Handler(Looper.getMainLooper()).post(() -> Toast.makeText(context, R.string.download_complete, Toast.LENGTH_SHORT).show());
+                                    new Handler(Looper.getMainLooper()).post(() -> Toast
+                                            .makeText(context, R.string.download_complete, Toast.LENGTH_SHORT).show());
                                 }
                             } else if (status == DownloadManager.STATUS_FAILED) {
                                 downloading = false;
@@ -1073,7 +1086,8 @@ public class MainViewModel extends AndroidViewModel {
     public void deleteBook(String bookId) {
         databaseExecutor.execute(() -> {
             com.metimol.easybook.database.Book dbBook = audiobookDao.getBookById(bookId);
-            if (dbBook == null) return;
+            if (dbBook == null)
+                return;
 
             List<Chapter> chapters = audiobookDao.getChaptersForBook(bookId);
             if (chapters != null) {
