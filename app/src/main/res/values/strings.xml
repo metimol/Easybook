@@ -39,34 +39,7 @@
     <!--Categories Screen-->
     <string name="category_icon">Иконка категории</string>
     <string name="categories_title">Категории</string>
-    <string name="category_image_desc">Изображение категории</string>
     <string name="back">Назад</string>
-
-    <string-array name="category_names">
-        <item>Фэнтези</item>
-        <item>Триллер</item>
-        <item>Драма</item>
-        <item>Бизнес</item>
-        <item>Биографии</item>
-        <item>Детские</item>
-        <item>История и культура</item>
-        <item>Классика</item>
-        <item>Здоровье</item>
-        <item>Иностранные языки</item>
-        <item>Нон-фикшн</item>
-        <item>Образование</item>
-        <item>Поэзия</item>
-        <item>Приключения</item>
-        <item>Психология</item>
-        <item>Разное</item>
-        <item>Ранобэ</item>
-        <item>Религия</item>
-        <item>Роман</item>
-        <item>Криминал</item>
-        <item>Ужасы</item>
-        <item>Эзотерика</item>
-        <item>Юмор</item>
-    </string-array>
 
     <!--Collection Screen-->
     <string name="collection_title">Заголовок коллекции</string>
@@ -74,8 +47,6 @@
 
     <!--Book info Screen-->
     <string name="download">Скачать</string>
-    <string name="add_to_bookmarks">Добавить книгу в закладки</string>
-    <string name="could_not_load_book">Не удалось загрузить книгу</string>
     <string name="info">Информация</string>
     <string name="episodes">Эпизоды</string>
     <string name="author">Автор:</string>
