@@ -9,8 +9,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioGroup;
+import android.widget.Spinner;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -30,14 +34,21 @@ public class SettingsFragment extends Fragment {
 
     public static final String SPEED_KEY = "playback_speed_pref";
     public static final String DOWNLOAD_TO_APP_FOLDER_KEY = "download_to_app_folder";
+    public static final String FOLDER_NAMING_KEY = "folder_naming_pref";
+    public static final int FOLDER_NAMING_TITLE = 0;
+    public static final int FOLDER_NAMING_AUTHOR_TITLE = 1;
+    public static final int FOLDER_NAMING_AUTHOR_TITLE_READER = 2;
 
     private SharedPreferences sharedPreferences;
     private RadioGroup themeRadioGroup;
     private SwitchCompat downloadLocationSwitch;
+    private LinearLayout folderNamingContainer;
+    private Spinner folderNamingSpinner;
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+            @Nullable Bundle savedInstanceState) {
         return inflater.inflate(R.layout.fragment_settings, container, false);
     }
 
@@ -53,6 +64,10 @@ public class SettingsFragment extends Fragment {
         ImageView ivBack = view.findViewById(R.id.iv_back);
         themeRadioGroup = view.findViewById(R.id.theme_radio_group);
         downloadLocationSwitch = view.findViewById(R.id.switch_download_location);
+        folderNamingContainer = view.findViewById(R.id.folder_naming_container);
+        folderNamingSpinner = view.findViewById(R.id.folder_naming_spinner);
+
+        setupFolderNamingSpinner();
 
         ivBack.setOnClickListener(v -> NavHostFragment.findNavController(this).popBackStack());
 
@@ -61,8 +76,7 @@ public class SettingsFragment extends Fragment {
                     settingsContainer.getPaddingStart(),
                     height + dpToPx(20, context),
                     settingsContainer.getPaddingEnd(),
-                    settingsContainer.getPaddingBottom()
-            );
+                    settingsContainer.getPaddingBottom());
         });
 
         loadSettings();
@@ -79,7 +93,27 @@ public class SettingsFragment extends Fragment {
         });
 
         downloadLocationSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
-            sharedPreferences.edit().putBoolean(DOWNLOAD_TO_APP_FOLDER_KEY, !isChecked).apply();
+            boolean useAppFolder = !isChecked;
+            sharedPreferences.edit().putBoolean(DOWNLOAD_TO_APP_FOLDER_KEY, useAppFolder).apply();
+            folderNamingContainer.setVisibility(useAppFolder ? View.GONE : View.VISIBLE);
+        });
+    }
+
+    private void setupFolderNamingSpinner() {
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(requireContext(),
+                R.array.folder_naming_options, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        folderNamingSpinner.setAdapter(adapter);
+
+        folderNamingSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                sharedPreferences.edit().putInt(FOLDER_NAMING_KEY, position).apply();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
         });
     }
 
@@ -95,6 +129,10 @@ public class SettingsFragment extends Fragment {
 
         boolean useAppFolder = sharedPreferences.getBoolean(DOWNLOAD_TO_APP_FOLDER_KEY, true);
         downloadLocationSwitch.setChecked(!useAppFolder);
+        folderNamingContainer.setVisibility(useAppFolder ? View.GONE : View.VISIBLE);
+
+        int folderNamingMode = sharedPreferences.getInt(FOLDER_NAMING_KEY, FOLDER_NAMING_TITLE);
+        folderNamingSpinner.setSelection(folderNamingMode);
     }
 
     private void saveAndApplyTheme(int themeMode) {

@@ -147,6 +147,32 @@
                 android:textSize="12sp"
                 android:layout_marginTop="-8dp"/>
 
+            <LinearLayout
+                android:id="@+id/folder_naming_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                android:layout_marginTop="16dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/folder_naming_title"
+                    android:textColor="?attr/textColor"
+                    android:textSize="18sp"
+                    android:fontFamily="@font/sf_pro"
+                    android:textStyle="bold" />
+
+                <Spinner
+                    android:id="@+id/folder_naming_spinner"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:theme="@style/AppTheme" />
+
+            </LinearLayout>
+
         </LinearLayout>
     </ScrollView>
 

@@ -141,4 +141,12 @@
     <string name="github">GitHub</string>
     <string name="anonimous_login">Войти анонимно</string>
     <string name="yandex">Яндекс</string>
+
+    <!-- Settings Screen -->
+    <string-array name="folder_naming_options">
+        <item>Только название</item>
+        <item>Автор - Название</item>
+        <item>Автор - Название (Чтец)</item>
+    </string-array>
+    <string name="folder_naming_title">Название папок</string>
 </resources>

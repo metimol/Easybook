@@ -1124,13 +1124,17 @@ public class MainViewModel extends AndroidViewModel {
 
         SharedPreferences prefs = context.getSharedPreferences("MyAppPrefs", Context.MODE_PRIVATE);
         boolean useAppFolder = prefs.getBoolean("download_to_app_folder", true);
+        int namingMode = prefs.getInt(SettingsFragment.FOLDER_NAMING_KEY, SettingsFragment.FOLDER_NAMING_TITLE);
 
         File rootDir;
+        String folderName;
         if (useAppFolder) {
-            rootDir = new File(context.getExternalFilesDir(null), "EasyBook/" + book.getId());
+            folderName = book.getId();
+            rootDir = new File(context.getExternalFilesDir(null), "EasyBook/" + folderName);
         } else {
+            folderName = getFolderName(book, namingMode);
             rootDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                    "EasyBook/" + book.getName());
+                    "EasyBook/" + folderName);
         }
 
         if (!rootDir.exists())
@@ -1162,21 +1166,21 @@ public class MainViewModel extends AndroidViewModel {
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
 
             if (useAppFolder) {
-                request.setDestinationInExternalFilesDir(context, null, "EasyBook/" + book.getId() + "/" + fileName);
+                request.setDestinationInExternalFilesDir(context, null, "EasyBook/" + folderName + "/" + fileName);
             } else {
                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
-                        "EasyBook/" + book.getName() + "/" + fileName);
+                        "EasyBook/" + folderName + "/" + fileName);
             }
 
             long downloadId = downloadManager.enqueue(request);
 
             String finalPath;
             if (useAppFolder) {
-                finalPath = new File(context.getExternalFilesDir(null), "EasyBook/" + book.getId() + "/" + fileName)
+                finalPath = new File(context.getExternalFilesDir(null), "EasyBook/" + folderName + "/" + fileName)
                         .getAbsolutePath();
             } else {
                 finalPath = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                        "EasyBook/" + book.getName() + "/" + fileName).getAbsolutePath();
+                        "EasyBook/" + folderName + "/" + fileName).getAbsolutePath();
             }
 
             audiobookDao.updateChapterPath(chapter.id, finalPath);
@@ -1262,5 +1266,37 @@ public class MainViewModel extends AndroidViewModel {
                 books.setValue(newList);
             }
         }
+    }
+
+    private String getFolderName(Book book, int namingMode) {
+        String folderName = book.getName();
+        String author = (book.getAuthors() != null && !book.getAuthors().isEmpty())
+                ? book.getAuthors().get(0).getName() + " " + book.getAuthors().get(0).getSurname()
+                : "";
+        String reader = (book.getReaders() != null && !book.getReaders().isEmpty())
+                ? book.getReaders().get(0).getName() + " " + book.getReaders().get(0).getSurname()
+                : "";
+
+        if (namingMode == SettingsFragment.FOLDER_NAMING_AUTHOR_TITLE) {
+            if (!author.isEmpty()) {
+                folderName = author + " - " + folderName;
+            }
+        } else if (namingMode == SettingsFragment.FOLDER_NAMING_AUTHOR_TITLE_READER) {
+            StringBuilder sb = new StringBuilder();
+            if (!author.isEmpty()) {
+                sb.append(author).append(" - ");
+            }
+            sb.append(folderName);
+            if (!reader.isEmpty()) {
+                sb.append(" (").append(reader).append(")");
+            }
+            folderName = sb.toString();
+        }
+
+        folderName = folderName.replaceAll("[\\\\/:*?\"<>|]", "_");
+        if (folderName.length() > 128) {
+            folderName = folderName.substring(0, 128);
+        }
+        return folderName.trim();
     }
 }
