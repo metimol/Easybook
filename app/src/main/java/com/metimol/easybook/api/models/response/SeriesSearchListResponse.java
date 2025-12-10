@@ -11,7 +11,6 @@ public class SeriesSearchListResponse {
     @SerializedName("items")
     private List<Serie> items;
 
-    // Getters
     public int getCount() { return count; }
     public List<Serie> getItems() { return items; }
 }

@@ -6,6 +6,5 @@ public class ApiResponse<T> {
     @SerializedName("data")
     private T data;
 
-    // Getters
     public T getData() { return data; }
 }

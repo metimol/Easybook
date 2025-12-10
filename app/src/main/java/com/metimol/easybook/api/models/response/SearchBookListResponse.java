@@ -11,7 +11,6 @@ public class SearchBookListResponse {
     @SerializedName("items")
     private List<Book> items;
 
-    // Getters
     public int getCount() { return count; }
     public List<Book> getItems() { return items; }
 }

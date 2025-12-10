@@ -183,7 +183,6 @@ public class MainViewModel extends AndroidViewModel {
                 relation.author.setName(parts[0]);
             if (parts.length > 1)
                 relation.author.setSurname(parts[1]);
-            // Reconstruct minimal author list
             List<Book.BookAuthorRelation> list = new ArrayList<>();
             list.add(relation);
             book.setBookAuthorsRelations(list);
@@ -704,8 +703,6 @@ public class MainViewModel extends AndroidViewModel {
                     handleBookResponse(new ArrayList<>());
                 }
             });
-            // Return early as we handle enqueue manually
-            return;
         } else if (currentSourceType == SourceType.READER) {
             Call<List<BookRelation>> relationsCall = apiService.getReaderBookIds("eq." + currentSourceId, 60,
                     currentPage * 60);
@@ -729,8 +726,6 @@ public class MainViewModel extends AndroidViewModel {
                     handleBookResponse(new ArrayList<>());
                 }
             });
-            // Return early source we handle enqueue manually
-            return;
         } else {
             call = apiService.getBooks("created_at.desc", 60, currentPage * 60);
             enqueueBookCall(call, runningRequests, anyRequestFailed);

@@ -7,6 +7,5 @@ public class BookData {
     @SerializedName("book")
     private Book book;
 
-    // Getters
     public Book getBook() { return book; }
 }

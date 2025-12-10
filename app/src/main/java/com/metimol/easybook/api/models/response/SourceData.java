@@ -6,6 +6,5 @@ public class SourceData {
     @SerializedName("booksBySource")
     private CategoryBookListResponse bookListResponse;
 
-    // Getters
     public CategoryBookListResponse getBookListResponse() { return bookListResponse; }
 }

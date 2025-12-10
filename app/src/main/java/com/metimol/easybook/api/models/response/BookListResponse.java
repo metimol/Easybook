@@ -11,7 +11,6 @@ public class BookListResponse {
     @SerializedName("items")
     private List<BookWithDate> items;
 
-    // Getters
     public int getCount() { return count; }
     public List<BookWithDate> getItems() { return items; }
 }

@@ -6,6 +6,5 @@ public class SearchData {
     @SerializedName("booksSearch")
     private SearchBookListResponse bookListResponse;
 
-    // Getters
     public SearchBookListResponse getBookListResponse() { return bookListResponse; }
 }
