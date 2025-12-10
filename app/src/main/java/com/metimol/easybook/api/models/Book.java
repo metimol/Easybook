@@ -147,6 +147,30 @@ public class Book {
         this.files = files;
     }
 
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public void setBookAuthorsRelations(List<BookAuthorRelation> bookAuthorsRelations) {
+        this.bookAuthorsRelations = bookAuthorsRelations;
+    }
+
+    public void setBookReadersRelations(List<BookReaderRelation> bookReadersRelations) {
+        this.bookReadersRelations = bookReadersRelations;
+    }
+
+    public void setGenre(Genre genre) {
+        this.genre = genre;
+    }
+
+    public void setSerie(Serie serie) {
+        this.serie = serie;
+    }
+
+    public void setSerieIndex(String serieIndex) {
+        this.serieIndex = serieIndex;
+    }
+
     public static class BookAuthorRelation {
         @SerializedName("authors")
         public Author author;

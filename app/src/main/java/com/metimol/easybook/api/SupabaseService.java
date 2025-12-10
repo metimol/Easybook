@@ -1,6 +1,7 @@
 package com.metimol.easybook.api;
 
 import com.metimol.easybook.api.models.Book;
+import com.metimol.easybook.api.models.BookRelation;
 import com.metimol.easybook.api.models.Genre;
 import com.metimol.easybook.api.models.Serie;
 
@@ -35,17 +36,15 @@ public interface SupabaseService {
                         @Query("limit") int limit,
                         @Query("offset") int offset);
 
-        @GET("books?select=*,genre:genres(*),serie:series(*),book_authors(authors(*)),book_readers(readers(*))")
-        Call<List<Book>> getBooksByAuthor(
-                        @Query("book_authors.author_id") String authorId,
-                        @Query("order") String order,
+        @GET("book_authors?select=book_id")
+        Call<List<BookRelation>> getAuthorBookIds(
+                        @Query("author_id") String authorId,
                         @Query("limit") int limit,
                         @Query("offset") int offset);
 
-        @GET("books?select=*,genre:genres(*),serie:series(*),book_authors(authors(*)),book_readers(readers(*))")
-        Call<List<Book>> getBooksByReader(
-                        @Query("book_readers.reader_id") String readerId,
-                        @Query("order") String order,
+        @GET("book_readers?select=book_id")
+        Call<List<BookRelation>> getReaderBookIds(
+                        @Query("reader_id") String readerId,
                         @Query("limit") int limit,
                         @Query("offset") int offset);
 

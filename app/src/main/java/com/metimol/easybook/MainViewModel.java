@@ -17,8 +17,10 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.metimol.easybook.api.ApiClient;
 import com.metimol.easybook.api.SupabaseService;
+import com.metimol.easybook.api.models.Author;
 import com.metimol.easybook.api.models.Book;
 import com.metimol.easybook.api.models.BookFile;
+import com.metimol.easybook.api.models.BookRelation;
 import com.metimol.easybook.api.models.Genre;
 import com.metimol.easybook.api.models.Serie;
 import com.metimol.easybook.database.AppDatabase;
@@ -171,6 +173,49 @@ public class MainViewModel extends AndroidViewModel {
         book.setDefaultPosterMain(dbBook.coverUrl);
         book.setDefaultPoster(dbBook.coverUrl);
         book.setTotalDuration(dbBook.totalDuration);
+        book.setDescription(dbBook.description);
+
+        if (dbBook.author != null) {
+            Book.BookAuthorRelation relation = new Book.BookAuthorRelation();
+            relation.author = new Author();
+            String[] parts = dbBook.author.split(" ", 2);
+            if (parts.length > 0)
+                relation.author.setName(parts[0]);
+            if (parts.length > 1)
+                relation.author.setSurname(parts[1]);
+            // Reconstruct minimal author list
+            List<Book.BookAuthorRelation> list = new ArrayList<>();
+            list.add(relation);
+            book.setBookAuthorsRelations(list);
+        }
+
+        if (dbBook.reader != null) {
+            Book.BookReaderRelation relation = new Book.BookReaderRelation();
+            relation.reader = new Author();
+            String[] parts = dbBook.reader.split(" ", 2);
+            if (parts.length > 0)
+                relation.reader.setName(parts[0]);
+            if (parts.length > 1)
+                relation.reader.setSurname(parts[1]);
+            List<Book.BookReaderRelation> list = new ArrayList<>();
+            list.add(relation);
+            book.setBookReadersRelations(list);
+        }
+
+        if (dbBook.genreId != null && dbBook.genreName != null) {
+            Genre g = new Genre();
+            g.setId(dbBook.genreId);
+            g.setName(dbBook.genreName);
+            book.setGenre(g);
+        }
+
+        if (dbBook.serieId != null && dbBook.serieName != null) {
+            Serie s = new Serie();
+            s.setId(dbBook.serieId);
+            s.setName(dbBook.serieName);
+            book.setSerie(s);
+            book.setSerieIndex(dbBook.serieIndex);
+        }
 
         List<Chapter> dbChapters = audiobookDao.getChaptersForBook(dbBook.id);
         List<BookFile> apiChapters = new ArrayList<>();
@@ -379,8 +424,24 @@ public class MainViewModel extends AndroidViewModel {
         if (apiBook.getAuthors() != null && !apiBook.getAuthors().isEmpty()) {
             dbBook.author = apiBook.getAuthors().get(0).getName() + " " + apiBook.getAuthors().get(0).getSurname();
         }
+        if (apiBook.getReaders() != null && !apiBook.getReaders().isEmpty()) {
+            dbBook.reader = apiBook.getReaders().get(0).getName() + " " + apiBook.getReaders().get(0).getSurname();
+        }
         dbBook.coverUrl = apiBook.getDefaultPosterMain();
         dbBook.totalDuration = apiBook.getTotalDuration();
+        dbBook.description = apiBook.getDescription();
+
+        if (apiBook.getGenre() != null) {
+            dbBook.genreName = apiBook.getGenre().getName();
+            dbBook.genreId = apiBook.getGenre().getId();
+        }
+
+        if (apiBook.getSerie() != null) {
+            dbBook.serieName = apiBook.getSerie().getName();
+            dbBook.serieId = apiBook.getSerie().getId();
+            dbBook.serieIndex = apiBook.getSerieIndex();
+        }
+
         return dbBook;
     }
 
@@ -611,18 +672,84 @@ public class MainViewModel extends AndroidViewModel {
         SupabaseService apiService = ApiClient.getClient().create(SupabaseService.class);
         Call<List<Book>> call;
 
+        AtomicInteger runningRequests = new AtomicInteger(1);
+        AtomicBoolean anyRequestFailed = new AtomicBoolean(false);
+
         if (currentSourceType == SourceType.GENRE) {
             call = apiService.getBooksByGenre("eq." + currentSourceId, "created_at.desc", 60, currentPage * 60);
+            enqueueBookCall(call, runningRequests, anyRequestFailed);
         } else if (currentSourceType == SourceType.SERIES) {
             call = apiService.getBooksBySerie("eq." + currentSourceId, "created_at.desc", 60, currentPage * 60);
+            enqueueBookCall(call, runningRequests, anyRequestFailed);
         } else if (currentSourceType == SourceType.AUTHOR) {
-            call = apiService.getBooksByAuthor("eq." + currentSourceId, "created_at.desc", 60, currentPage * 60);
+            Call<List<BookRelation>> relationsCall = apiService.getAuthorBookIds("eq." + currentSourceId, 60,
+                    currentPage * 60);
+            relationsCall.enqueue(new Callback<>() {
+                @Override
+                public void onResponse(@NonNull Call<List<BookRelation>> call,
+                        @NonNull Response<List<BookRelation>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        List<String> ids = new ArrayList<>();
+                        for (BookRelation br : response.body()) {
+                            ids.add(br.getBookId());
+                        }
+                        fetchBooksByIds(ids, runningRequests, anyRequestFailed);
+                    } else {
+                        handleBookResponse(new ArrayList<>());
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<List<BookRelation>> call, @NonNull Throwable t) {
+                    handleBookResponse(new ArrayList<>());
+                }
+            });
+            // Return early as we handle enqueue manually
+            return;
         } else if (currentSourceType == SourceType.READER) {
-            call = apiService.getBooksByReader("eq." + currentSourceId, "created_at.desc", 60, currentPage * 60);
+            Call<List<BookRelation>> relationsCall = apiService.getReaderBookIds("eq." + currentSourceId, 60,
+                    currentPage * 60);
+            relationsCall.enqueue(new Callback<>() {
+                @Override
+                public void onResponse(@NonNull Call<List<BookRelation>> call,
+                        @NonNull Response<List<BookRelation>> response) {
+                    if (response.isSuccessful() && response.body() != null) {
+                        List<String> ids = new ArrayList<>();
+                        for (BookRelation br : response.body()) {
+                            ids.add(br.getBookId());
+                        }
+                        fetchBooksByIds(ids, runningRequests, anyRequestFailed);
+                    } else {
+                        handleBookResponse(new ArrayList<>());
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull Call<List<BookRelation>> call, @NonNull Throwable t) {
+                    handleBookResponse(new ArrayList<>());
+                }
+            });
+            // Return early source we handle enqueue manually
+            return;
         } else {
             call = apiService.getBooks("created_at.desc", 60, currentPage * 60);
+            enqueueBookCall(call, runningRequests, anyRequestFailed);
+        }
+    }
+
+    private void fetchBooksByIds(List<String> ids, AtomicInteger runningRequests, AtomicBoolean anyRequestFailed) {
+        if (ids.isEmpty()) {
+            handleBookResponse(new ArrayList<>());
+            return;
         }
 
+        SupabaseService apiService = ApiClient.getClient().create(SupabaseService.class);
+        String idsQuery = "in.(" + String.join(",", ids) + ")";
+        Call<List<Book>> call = apiService.getBookDetails(idsQuery);
+        enqueueBookCall(call, runningRequests, anyRequestFailed);
+    }
+
+    private void enqueueBookCall(Call<List<Book>> call, AtomicInteger runningRequests, AtomicBoolean anyRequestFailed) {
         call.enqueue(new Callback<>() {
             @Override
             public void onResponse(@NonNull Call<List<Book>> call, @NonNull Response<List<Book>> response) {
@@ -956,8 +1083,24 @@ public class MainViewModel extends AndroidViewModel {
                 if (book.getAuthors() != null && !book.getAuthors().isEmpty()) {
                     dbBook.author = book.getAuthors().get(0).getName() + " " + book.getAuthors().get(0).getSurname();
                 }
+                if (book.getReaders() != null && !book.getReaders().isEmpty()) {
+                    dbBook.reader = book.getReaders().get(0).getName() + " " + book.getReaders().get(0).getSurname();
+                }
                 dbBook.coverUrl = book.getDefaultPosterMain();
                 dbBook.totalDuration = book.getTotalDuration();
+                dbBook.description = book.getDescription();
+
+                if (book.getGenre() != null) {
+                    dbBook.genreName = book.getGenre().getName();
+                    dbBook.genreId = book.getGenre().getId();
+                }
+
+                if (book.getSerie() != null) {
+                    dbBook.serieName = book.getSerie().getName();
+                    dbBook.serieId = book.getSerie().getId();
+                    dbBook.serieIndex = book.getSerieIndex();
+                }
+
                 audiobookDao.insertBook(dbBook);
             }
 

@@ -43,4 +43,25 @@ public class Book {
 
     @ColumnInfo(name = "isDownloaded")
     public boolean isDownloaded;
+
+    @ColumnInfo(name = "description")
+    public String description;
+
+    @ColumnInfo(name = "genreName")
+    public String genreName;
+
+    @ColumnInfo(name = "genreId")
+    public String genreId;
+
+    @ColumnInfo(name = "serieName")
+    public String serieName;
+
+    @ColumnInfo(name = "serieId")
+    public String serieId;
+
+    @ColumnInfo(name = "serieIndex")
+    public String serieIndex;
+
+    @ColumnInfo(name = "reader")
+    public String reader;
 }

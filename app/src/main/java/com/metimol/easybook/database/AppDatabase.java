@@ -8,7 +8,7 @@ import androidx.room.RoomDatabase;
 import androidx.room.migration.Migration;
 import androidx.sqlite.db.SupportSQLiteDatabase;
 
-@Database(entities = {Book.class, Chapter.class}, version = 4, exportSchema = false)
+@Database(entities = { Book.class, Chapter.class }, version = 5, exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
     public abstract AudiobookDao audiobookDao();
 
@@ -34,13 +34,26 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
+    static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+        @Override
+        public void migrate(@NonNull SupportSQLiteDatabase database) {
+            database.execSQL("ALTER TABLE books ADD COLUMN description TEXT");
+            database.execSQL("ALTER TABLE books ADD COLUMN genreName TEXT");
+            database.execSQL("ALTER TABLE books ADD COLUMN genreId TEXT");
+            database.execSQL("ALTER TABLE books ADD COLUMN serieName TEXT");
+            database.execSQL("ALTER TABLE books ADD COLUMN serieId TEXT");
+            database.execSQL("ALTER TABLE books ADD COLUMN serieIndex TEXT");
+            database.execSQL("ALTER TABLE books ADD COLUMN reader TEXT");
+        }
+    };
+
     public static AppDatabase getDatabase(final Context context) {
         if (INSTANCE == null) {
             synchronized (AppDatabase.class) {
                 if (INSTANCE == null) {
                     INSTANCE = Room.databaseBuilder(context.getApplicationContext(),
-                                    AppDatabase.class, "audiobook_database")
-                            .addMigrations(MIGRATION_2_3, MIGRATION_3_4)
+                            AppDatabase.class, "audiobook_database")
+                            .addMigrations(MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                             .fallbackToDestructiveMigration()
                             .build();
                 }
