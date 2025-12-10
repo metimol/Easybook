@@ -9,7 +9,7 @@
     android:paddingVertical="12dp"
     android:paddingHorizontal="8dp"
     android:gravity="center_vertical"
-    android:background="?attr/selectableItemBackground">
+    android:foreground="?attr/selectableItemBackground">
 
     <TextView
         android:id="@+id/episodeIndex"
