@@ -178,6 +178,7 @@ public class MainViewModel extends AndroidViewModel {
         if (dbBook.author != null) {
             Book.BookAuthorRelation relation = new Book.BookAuthorRelation();
             relation.author = new Author();
+            relation.author.setId(dbBook.authorId);
             String[] parts = dbBook.author.split(" ", 2);
             if (parts.length > 0)
                 relation.author.setName(parts[0]);
@@ -191,6 +192,7 @@ public class MainViewModel extends AndroidViewModel {
         if (dbBook.reader != null) {
             Book.BookReaderRelation relation = new Book.BookReaderRelation();
             relation.reader = new Author();
+            relation.reader.setId(dbBook.readerId);
             String[] parts = dbBook.reader.split(" ", 2);
             if (parts.length > 0)
                 relation.reader.setName(parts[0]);
@@ -422,9 +424,11 @@ public class MainViewModel extends AndroidViewModel {
         dbBook.name = apiBook.getName();
         if (apiBook.getAuthors() != null && !apiBook.getAuthors().isEmpty()) {
             dbBook.author = apiBook.getAuthors().get(0).getName() + " " + apiBook.getAuthors().get(0).getSurname();
+            dbBook.authorId = apiBook.getAuthors().get(0).getId();
         }
         if (apiBook.getReaders() != null && !apiBook.getReaders().isEmpty()) {
             dbBook.reader = apiBook.getReaders().get(0).getName() + " " + apiBook.getReaders().get(0).getSurname();
+            dbBook.readerId = apiBook.getReaders().get(0).getId();
         }
         dbBook.coverUrl = apiBook.getDefaultPosterMain();
         dbBook.totalDuration = apiBook.getTotalDuration();
@@ -1077,9 +1081,11 @@ public class MainViewModel extends AndroidViewModel {
                 dbBook.name = book.getName();
                 if (book.getAuthors() != null && !book.getAuthors().isEmpty()) {
                     dbBook.author = book.getAuthors().get(0).getName() + " " + book.getAuthors().get(0).getSurname();
+                    dbBook.authorId = book.getAuthors().get(0).getId();
                 }
                 if (book.getReaders() != null && !book.getReaders().isEmpty()) {
                     dbBook.reader = book.getReaders().get(0).getName() + " " + book.getReaders().get(0).getSurname();
+                    dbBook.readerId = book.getReaders().get(0).getId();
                 }
                 dbBook.coverUrl = book.getDefaultPosterMain();
                 dbBook.totalDuration = book.getTotalDuration();

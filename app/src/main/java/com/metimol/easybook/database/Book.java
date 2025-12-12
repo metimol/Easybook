@@ -64,4 +64,10 @@ public class Book {
 
     @ColumnInfo(name = "reader")
     public String reader;
+
+    @ColumnInfo(name = "authorId")
+    public String authorId;
+
+    @ColumnInfo(name = "readerId")
+    public String readerId;
 }
