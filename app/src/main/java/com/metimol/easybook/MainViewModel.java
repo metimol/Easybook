@@ -236,7 +236,7 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     private void preparePlayerWithBook(Book apiBook, com.metimol.easybook.database.Book dbBook,
-            PlaybackService service) {
+                                       PlaybackService service) {
         if (apiBook != null && apiBook.getFiles() != null && !apiBook.getFiles().isEmpty()) {
             int chapterIndex = 0;
             for (int i = 0; i < apiBook.getFiles().size(); i++) {
@@ -690,7 +690,7 @@ public class MainViewModel extends AndroidViewModel {
             relationsCall.enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull Call<List<BookRelation>> call,
-                        @NonNull Response<List<BookRelation>> response) {
+                                       @NonNull Response<List<BookRelation>> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         List<String> ids = new ArrayList<>();
                         for (BookRelation br : response.body()) {
@@ -713,7 +713,7 @@ public class MainViewModel extends AndroidViewModel {
             relationsCall.enqueue(new Callback<>() {
                 @Override
                 public void onResponse(@NonNull Call<List<BookRelation>> call,
-                        @NonNull Response<List<BookRelation>> response) {
+                                       @NonNull Response<List<BookRelation>> response) {
                     if (response.isSuccessful() && response.body() != null) {
                         List<String> ids = new ArrayList<>();
                         for (BookRelation br : response.body()) {
@@ -1109,7 +1109,7 @@ public class MainViewModel extends AndroidViewModel {
             if (book.getFiles() != null && !book.getFiles().isEmpty()) {
                 for (BookFile bf : book.getFiles()) {
                     Chapter ch = new Chapter();
-                    ch.id = String.valueOf(bf.getIndex());
+                    ch.id = book.getId() + "_" + bf.getIndex();
                     ch.bookOwnerId = book.getId();
                     ch.url = bf.getUrl();
                     ch.title = bf.getTitle();
