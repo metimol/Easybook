@@ -1170,6 +1170,8 @@ public class MainViewModel extends AndroidViewModel {
             request.setTitle(book.getName());
             request.setDescription(chapter.title);
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+            request.addRequestHeader("User-Agent", ApiClient.REAL_USER_AGENT);
+            request.addRequestHeader("Referer", ApiClient.REFERER);
 
             if (useAppFolder) {
                 request.setDestinationInExternalFilesDir(context, null, "EasyBook/" + folderName + "/" + fileName);

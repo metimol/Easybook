@@ -136,10 +136,6 @@ public class PlaybackService extends MediaSessionService {
         int bufferForPlaybackMs = 5_000;
         int bufferForPlaybackAfterRebufferMs = 10_000;
 
-        OkHttpDataSource.Factory dataSourceFactory = new OkHttpDataSource.Factory(
-                ApiClient.getOkHttpClient(this)
-        );
-
         LoadControl loadControl = new DefaultLoadControl.Builder()
                 .setBufferDurationsMs(
                         minBufferMs,
@@ -155,6 +151,15 @@ public class PlaybackService extends MediaSessionService {
                 .setUsage(C.USAGE_MEDIA)
                 .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
                 .build();
+
+        androidx.media3.datasource.okhttp.OkHttpDataSource.Factory dataSourceFactory =
+                new androidx.media3.datasource.okhttp.OkHttpDataSource.Factory(
+                        com.metimol.easybook.api.ApiClient.getOkHttpClient(this)
+                );
+
+        java.util.Map<String, String> defaultHeaders = new java.util.HashMap<>();
+        defaultHeaders.put("Referer", com.metimol.easybook.api.ApiClient.REFERER);
+        dataSourceFactory.setDefaultRequestProperties(defaultHeaders);
 
         androidx.media3.exoplayer.source.DefaultMediaSourceFactory mediaSourceFactory =
                 new androidx.media3.exoplayer.source.DefaultMediaSourceFactory(dataSourceFactory);
