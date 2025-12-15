@@ -90,6 +90,7 @@ dependencies {
     implementation(libs.glide)
     annotationProcessor(libs.compiler)
     implementation(libs.swiperefreshlayout)
+    implementation(libs.media3.datasource.okhttp)
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.auth)

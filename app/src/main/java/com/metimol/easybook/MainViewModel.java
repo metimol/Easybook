@@ -144,7 +144,7 @@ public class MainViewModel extends AndroidViewModel {
 
     private void loadBookDetailsForPlayer(com.metimol.easybook.database.Book dbBook, PlaybackService service) {
         try {
-            SupabaseService apiService = ApiClient.getClient().create(SupabaseService.class);
+            SupabaseService apiService = ApiClient.getClient(getApplication()).create(SupabaseService.class);
             Call<List<Book>> call = apiService.getBookDetails("eq." + dbBook.id);
             Response<List<Book>> response = call.execute();
 
@@ -573,7 +573,7 @@ public class MainViewModel extends AndroidViewModel {
         }
 
         List<Book> apiBooksToShow = new ArrayList<>();
-        SupabaseService apiService = ApiClient.getClient().create(SupabaseService.class);
+        SupabaseService apiService = ApiClient.getClient(getApplication()).create(SupabaseService.class);
 
         for (com.metimol.easybook.database.Book dbBook : dbBooks) {
             try {
@@ -603,7 +603,7 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     public void fetchCategories() {
-        SupabaseService apiService = ApiClient.getClient().create(SupabaseService.class);
+        SupabaseService apiService = ApiClient.getClient(getApplication()).create(SupabaseService.class);
         Call<List<Genre>> call = apiService.getGenres();
         call.enqueue(new Callback<>() {
             @Override
@@ -672,7 +672,7 @@ public class MainViewModel extends AndroidViewModel {
             loadError.setValue(false);
         }
 
-        SupabaseService apiService = ApiClient.getClient().create(SupabaseService.class);
+        SupabaseService apiService = ApiClient.getClient(getApplication()).create(SupabaseService.class);
         Call<List<Book>> call;
 
         AtomicInteger runningRequests = new AtomicInteger(1);
@@ -742,7 +742,7 @@ public class MainViewModel extends AndroidViewModel {
             return;
         }
 
-        SupabaseService apiService = ApiClient.getClient().create(SupabaseService.class);
+        SupabaseService apiService = ApiClient.getClient(getApplication()).create(SupabaseService.class);
         String idsQuery = "in.(" + String.join(",", ids) + ")";
         Call<List<Book>> call = apiService.getBookDetails(idsQuery);
         enqueueBookCall(call, runningRequests, anyRequestFailed);
@@ -879,7 +879,7 @@ public class MainViewModel extends AndroidViewModel {
         clearBookList();
         loadError.setValue(false);
 
-        SupabaseService apiService = ApiClient.getClient().create(SupabaseService.class);
+        SupabaseService apiService = ApiClient.getClient(getApplication()).create(SupabaseService.class);
 
         AtomicInteger runningRequests = new AtomicInteger(2);
         AtomicBoolean anyRequestFailed = new AtomicBoolean(false);
@@ -985,7 +985,7 @@ public class MainViewModel extends AndroidViewModel {
     }
 
     private void fetchBookDetailsNetwork(String bookId) {
-        SupabaseService apiService = ApiClient.getClient().create(SupabaseService.class);
+        SupabaseService apiService = ApiClient.getClient(getApplication()).create(SupabaseService.class);
         Call<List<Book>> call = apiService.getBookDetails("eq." + bookId);
 
         call.enqueue(new Callback<>() {

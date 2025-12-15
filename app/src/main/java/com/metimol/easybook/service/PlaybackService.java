@@ -29,6 +29,7 @@ import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
+import androidx.media3.datasource.okhttp.OkHttpDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
 import androidx.media3.exoplayer.ExoPlayer;
@@ -44,6 +45,7 @@ import com.bumptech.glide.request.transition.Transition;
 
 import com.metimol.easybook.MainActivity;
 import com.metimol.easybook.R;
+import com.metimol.easybook.api.ApiClient;
 import com.metimol.easybook.api.models.Book;
 import com.metimol.easybook.api.models.BookFile;
 import com.metimol.easybook.database.AppDatabase;
@@ -134,6 +136,10 @@ public class PlaybackService extends MediaSessionService {
         int bufferForPlaybackMs = 5_000;
         int bufferForPlaybackAfterRebufferMs = 10_000;
 
+        OkHttpDataSource.Factory dataSourceFactory = new OkHttpDataSource.Factory(
+                ApiClient.getOkHttpClient(this)
+        );
+
         LoadControl loadControl = new DefaultLoadControl.Builder()
                 .setBufferDurationsMs(
                         minBufferMs,
@@ -150,7 +156,11 @@ public class PlaybackService extends MediaSessionService {
                 .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
                 .build();
 
+        androidx.media3.exoplayer.source.DefaultMediaSourceFactory mediaSourceFactory =
+                new androidx.media3.exoplayer.source.DefaultMediaSourceFactory(dataSourceFactory);
+
         player = new ExoPlayer.Builder(this)
+                .setMediaSourceFactory(mediaSourceFactory)
                 .setLoadControl(loadControl)
                 .setRenderersFactory(renderersFactory)
                 .setAudioAttributes(audioAttributes, true)

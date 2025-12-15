@@ -1,40 +1,53 @@
 package com.metimol.easybook.api;
 
+import android.content.Context;
+import android.webkit.WebSettings;
 import com.metimol.easybook.BuildConfig;
-
+import com.metimol.easybook.utils.WebViewCookieJar;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.logging.HttpLoggingInterceptor;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
     private static final String SUPABASE_URL = BuildConfig.AUDIOBOOKS_BASE_URL;
     private static final String SUPABASE_KEY = BuildConfig.AUDIOBOOKS_ANON_KEY;
-
     private static Retrofit retrofit = null;
+    private static OkHttpClient okHttpClient = null;
 
-    public static Retrofit getClient() {
-        if (retrofit == null) {
-            HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-            logging.setLevel(HttpLoggingInterceptor.Level.BODY);
+    public static synchronized OkHttpClient getOkHttpClient(Context context) {
+        if (okHttpClient == null) {
+            String userAgent;
+            try {
+                userAgent = WebSettings.getDefaultUserAgent(context);
+            } catch (Exception e) {
+                userAgent = "Mozilla/5.0 (Linux; Android 10; Mobile) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Mobile Safari/537.36";
+            }
+            final String finalUserAgent = userAgent;
 
-            OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
-            httpClient.addInterceptor(logging);
-            httpClient.addInterceptor(chain -> {
+            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            builder.cookieJar(new WebViewCookieJar());
+            builder.addInterceptor(new CloudflareInterceptor(context));
+            builder.addInterceptor(chain -> {
                 Request original = chain.request();
                 Request.Builder requestBuilder = original.newBuilder()
+                        .header("User-Agent", finalUserAgent)
                         .header("apikey", SUPABASE_KEY)
                         .header("Authorization", "Bearer " + SUPABASE_KEY)
                         .header("Prefer", "count=exact");
-                Request request = requestBuilder.build();
-                return chain.proceed(request);
+                return chain.proceed(requestBuilder.build());
             });
+            okHttpClient = builder.build();
+        }
+        return okHttpClient;
+    }
 
+    public static Retrofit getClient(Context context) {
+        if (retrofit == null) {
             retrofit = new Retrofit.Builder()
                     .baseUrl(SUPABASE_URL)
+                    .client(getOkHttpClient(context))
                     .addConverterFactory(GsonConverterFactory.create())
-                    .client(httpClient.build())
                     .build();
         }
         return retrofit;
