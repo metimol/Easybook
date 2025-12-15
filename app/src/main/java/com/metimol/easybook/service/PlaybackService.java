@@ -210,7 +210,7 @@ public class PlaybackService extends MediaSessionService {
                                     .into(new CustomTarget<Bitmap>() {
                                         @Override
                                         public void onResourceReady(@NonNull Bitmap resource,
-                                                @Nullable Transition<? super Bitmap> transition) {
+                                                                    @Nullable Transition<? super Bitmap> transition) {
                                             callback.onBitmap(resource);
                                         }
 
@@ -575,7 +575,7 @@ public class PlaybackService extends MediaSessionService {
                     String localPath = null;
                     if (dbChapters != null) {
                         for (Chapter dbCh : dbChapters) {
-                            if (String.valueOf(chapter.getIndex()).equals(dbCh.id)) {
+                            if (chapter.getIndex() == dbCh.chapterIndex) {
                                 localPath = dbCh.localPath;
                                 break;
                             }
