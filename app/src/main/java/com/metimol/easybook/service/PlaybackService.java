@@ -26,10 +26,12 @@ import androidx.media3.common.AudioAttributes;
 import androidx.media3.common.C;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.MediaMetadata;
+import androidx.media3.common.PlaybackException;
 import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
 import androidx.media3.datasource.DefaultDataSource;
+import androidx.media3.datasource.HttpDataSource;
 import androidx.media3.datasource.okhttp.OkHttpDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
@@ -44,6 +46,8 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 
+import com.google.firebase.crashlytics.FirebaseCrashlytics;
+
 import com.metimol.easybook.MainActivity;
 import com.metimol.easybook.R;
 import com.metimol.easybook.api.ApiClient;
@@ -55,6 +59,7 @@ import com.metimol.easybook.database.Chapter;
 import com.metimol.easybook.firebase.FirebaseRepository;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -341,6 +346,46 @@ public class PlaybackService extends MediaSessionService {
                 } else if (playbackState == Player.STATE_IDLE) {
                     isLoading.postValue(false);
                 }
+            }
+
+            @Override
+            public void onPlayerError(@NonNull PlaybackException error) {
+                FirebaseCrashlytics crashlytics = FirebaseCrashlytics.getInstance();
+
+                crashlytics.setCustomKey("player_error_code", error.errorCode);
+                crashlytics.setCustomKey("player_error_name", error.getErrorCodeName());
+                crashlytics.setCustomKey("player_error_message", Objects.requireNonNullElse(error.getMessage(), "No message"));
+
+                Book book = currentBook.getValue();
+                if (book != null) {
+                    crashlytics.setCustomKey("book_id", book.getId());
+                    crashlytics.setCustomKey("book_name", book.getName());
+                }
+
+                BookFile chapter = currentChapter.getValue();
+                if (chapter != null) {
+                    crashlytics.setCustomKey("chapter_url", chapter.getUrl());
+                    crashlytics.setCustomKey("chapter_idx", chapter.getIndex());
+                }
+
+                Throwable cause = error.getCause();
+                if (cause instanceof HttpDataSource.InvalidResponseCodeException responseError) {
+
+                    crashlytics.setCustomKey("http_response_code", responseError.responseCode);
+                    crashlytics.setCustomKey("http_response_message", Objects.requireNonNullElse(responseError.responseMessage, ""));
+
+                    if (!responseError.headerFields.isEmpty()) {
+                        crashlytics.setCustomKey("http_headers", responseError.headerFields.toString());
+                    }
+                } else if (cause instanceof HttpDataSource.HttpDataSourceException) {
+                    crashlytics.setCustomKey("http_data_source_error", "Type: " + ((HttpDataSource.HttpDataSourceException) cause).type);
+                } else if (cause instanceof IOException) {
+                    crashlytics.setCustomKey("io_exception", "General IO Error");
+                }
+
+                crashlytics.recordException(error);
+
+                isLoading.postValue(false);
             }
         });
 
