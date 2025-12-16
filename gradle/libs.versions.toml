@@ -20,6 +20,7 @@ ksp = "2.0.21-1.0.27"
 swiperefreshlayout = "1.1.0"
 firebaseBom = "34.4.0"
 googleServices = "4.4.4"
+firebaseCrashlyticsPlugin = "3.0.6"
 circleimageview = "3.1.0"
 
 [libraries]
@@ -46,6 +47,7 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-auth = { module = "com.google.firebase:firebase-auth" }
 yandex_authsdk = { module = "com.yandex.android:authsdk", version.ref = "yandex_authsdk" }
@@ -57,4 +59,5 @@ android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 google-services = { id = "com.google.gms.google-services", version.ref = "googleServices" }
+crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin"}
 
