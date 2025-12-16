@@ -29,6 +29,7 @@ import androidx.media3.common.MediaMetadata;
 import androidx.media3.common.PlaybackParameters;
 import androidx.media3.common.Player;
 import androidx.media3.common.util.UnstableApi;
+import androidx.media3.datasource.DefaultDataSource;
 import androidx.media3.datasource.okhttp.OkHttpDataSource;
 import androidx.media3.exoplayer.DefaultLoadControl;
 import androidx.media3.exoplayer.DefaultRenderersFactory;
@@ -152,14 +153,15 @@ public class PlaybackService extends MediaSessionService {
                 .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
                 .build();
 
-        androidx.media3.datasource.okhttp.OkHttpDataSource.Factory dataSourceFactory =
-                new androidx.media3.datasource.okhttp.OkHttpDataSource.Factory(
-                        com.metimol.easybook.api.ApiClient.getOkHttpClient(this)
-                );
+        OkHttpDataSource.Factory okHttpFactory =
+                new OkHttpDataSource.Factory(ApiClient.getOkHttpClient(this));
+
+        DefaultDataSource.Factory dataSourceFactory =
+                new DefaultDataSource.Factory(this, okHttpFactory);
 
         java.util.Map<String, String> defaultHeaders = new java.util.HashMap<>();
-        defaultHeaders.put("Referer", com.metimol.easybook.api.ApiClient.REFERER);
-        dataSourceFactory.setDefaultRequestProperties(defaultHeaders);
+        defaultHeaders.put("Referer", ApiClient.REFERER);
+        okHttpFactory.setDefaultRequestProperties(defaultHeaders);
 
         androidx.media3.exoplayer.source.DefaultMediaSourceFactory mediaSourceFactory =
                 new androidx.media3.exoplayer.source.DefaultMediaSourceFactory(dataSourceFactory);

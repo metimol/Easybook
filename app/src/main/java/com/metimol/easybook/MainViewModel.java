@@ -69,6 +69,8 @@ public class MainViewModel extends AndroidViewModel {
 
     private final AudiobookDao audiobookDao;
     private final ExecutorService databaseExecutor;
+    private final ExecutorService downloadExecutor = Executors.newFixedThreadPool(4);
+
     private LiveData<Boolean> isBookFavorite;
     private LiveData<Boolean> isBookFinished;
     private LiveData<com.metimol.easybook.database.Book> currentDbBookLiveData;
@@ -1132,36 +1134,41 @@ public class MainViewModel extends AndroidViewModel {
         boolean useAppFolder = prefs.getBoolean("download_to_app_folder", true);
         int namingMode = prefs.getInt(SettingsFragment.FOLDER_NAMING_KEY, SettingsFragment.FOLDER_NAMING_TITLE);
 
+        String folderName = getFolderName(book, namingMode);
+
         File rootDir;
-        String folderName;
         if (useAppFolder) {
-            folderName = book.getId();
             rootDir = new File(context.getExternalFilesDir(null), "EasyBook/" + folderName);
         } else {
-            folderName = getFolderName(book, namingMode);
             rootDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
                     "EasyBook/" + folderName);
         }
-
-        if (!rootDir.exists())
+        if (!rootDir.exists()) {
             rootDir.mkdirs();
+        }
 
         int totalChapters = chapters.size();
         AtomicInteger downloaded = new AtomicInteger(0);
 
         for (Chapter chapter : chapters) {
-            String fileName = chapter.title.replaceAll("[\\\\/:*?\"<>|]", "_") + ".mp3";
-            File targetFile = new File(rootDir, fileName);
-
-            if (targetFile.exists()) {
-                audiobookDao.updateChapterPath(chapter.id, targetFile.getAbsolutePath());
+            if (chapter.localPath != null && new File(chapter.localPath).exists()) {
                 int count = downloaded.incrementAndGet();
                 downloadProgress.postValue((count * 100) / totalChapters);
                 if (count == totalChapters) {
-                    audiobookDao.updateBookDownloadStatus(book.getId(), true);
-                    isDownloading.postValue(false);
-                    new Handler(Looper.getMainLooper())
-                            .post(() -> Toast.makeText(context, R.string.download_complete, Toast.LENGTH_SHORT).show());
+                    updateDownloadComplete(context, book.getId());
+                }
+                continue;
+            }
+
+            String safeFileName = chapter.title.replaceAll("[\\\\/:*?\"<>|]", "_") + ".mp3";
+
+            File expectedFile = new File(rootDir, safeFileName);
+            if (expectedFile.exists()) {
+                audiobookDao.updateChapterPath(chapter.id, expectedFile.getAbsolutePath());
+                int count = downloaded.incrementAndGet();
+                downloadProgress.postValue((count * 100) / totalChapters);
+                if (count == totalChapters) {
+                    updateDownloadComplete(context, book.getId());
                 }
                 continue;
             }
@@ -1174,63 +1181,84 @@ public class MainViewModel extends AndroidViewModel {
             request.addRequestHeader("Referer", ApiClient.REFERER);
 
             if (useAppFolder) {
-                request.setDestinationInExternalFilesDir(context, null, "EasyBook/" + folderName + "/" + fileName);
+                request.setDestinationInExternalFilesDir(context, null, "EasyBook/" + folderName + "/" + safeFileName);
             } else {
                 request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS,
-                        "EasyBook/" + folderName + "/" + fileName);
+                        "EasyBook/" + folderName + "/" + safeFileName);
+            }
+
+            File destinationFile;
+            if (useAppFolder) {
+                destinationFile = new File(context.getExternalFilesDir(null), "EasyBook/" + folderName + "/" + safeFileName);
+            } else {
+                destinationFile = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                        "EasyBook/" + folderName + "/" + safeFileName);
             }
 
             long downloadId = downloadManager.enqueue(request);
 
-            String finalPath;
-            if (useAppFolder) {
-                finalPath = new File(context.getExternalFilesDir(null), "EasyBook/" + folderName + "/" + fileName)
-                        .getAbsolutePath();
-            } else {
-                finalPath = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
-                        "EasyBook/" + folderName + "/" + fileName).getAbsolutePath();
-            }
-
-            audiobookDao.updateChapterPath(chapter.id, finalPath);
-
-            new Thread(() -> {
+            downloadExecutor.execute(() -> {
                 boolean downloading = true;
                 while (downloading) {
                     DownloadManager.Query q = new DownloadManager.Query();
                     q.setFilterById(downloadId);
                     android.database.Cursor cursor = downloadManager.query(q);
-                    if (cursor.moveToFirst()) {
-                        int statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
-                        if (statusIndex != -1) {
-                            int status = cursor.getInt(statusIndex);
-                            if (status == DownloadManager.STATUS_SUCCESSFUL) {
-                                downloading = false;
-                                int count = downloaded.incrementAndGet();
-                                downloadProgress.postValue((count * 100) / totalChapters);
-                                if (count == totalChapters) {
-                                    audiobookDao.updateBookDownloadStatus(book.getId(), true);
+                    if (cursor != null) {
+                        if (cursor.moveToFirst()) {
+                            int statusIndex = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+                            if (statusIndex != -1) {
+                                int status = cursor.getInt(statusIndex);
+                                if (status == DownloadManager.STATUS_SUCCESSFUL) {
+                                    downloading = false;
+
+                                    String finalPath = destinationFile.getAbsolutePath();
+
+                                    if (!destinationFile.exists()) {
+                                        int localUriIndex = cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI);
+                                        if (localUriIndex != -1) {
+                                            String localUri = cursor.getString(localUriIndex);
+                                            if (localUri != null) {
+                                                finalPath = Uri.parse(localUri).getPath();
+                                            }
+                                        }
+                                    }
+
+                                    audiobookDao.updateChapterPath(chapter.id, finalPath);
+
+                                    int count = downloaded.incrementAndGet();
+                                    downloadProgress.postValue((count * 100) / totalChapters);
+                                    if (count == totalChapters) {
+                                        updateDownloadComplete(context, book.getId());
+                                    }
+                                } else if (status == DownloadManager.STATUS_FAILED) {
+                                    downloading = false;
                                     isDownloading.postValue(false);
-                                    new Handler(Looper.getMainLooper()).post(() -> Toast
-                                            .makeText(context, R.string.download_complete, Toast.LENGTH_SHORT).show());
                                 }
-                            } else if (status == DownloadManager.STATUS_FAILED) {
-                                downloading = false;
-                                isDownloading.postValue(false);
                             }
                         }
+                        cursor.close();
                     } else {
                         downloading = false;
                         isDownloading.postValue(false);
                     }
-                    cursor.close();
+
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        Thread.currentThread().interrupt();
+                        downloading = false;
                     }
                 }
-            }).start();
+            });
         }
+    }
+
+    private void updateDownloadComplete(Context context, String bookId) {
+        audiobookDao.updateBookDownloadStatus(bookId, true);
+        isDownloading.postValue(false);
+        new Handler(Looper.getMainLooper()).post(() ->
+                Toast.makeText(context, R.string.download_complete, Toast.LENGTH_SHORT).show()
+        );
     }
 
     public void deleteBook(String bookId) {
