@@ -64,7 +64,6 @@ public class MainActivity extends AppCompatActivity {
         });
 
         Intent intent = new Intent(this, PlaybackService.class);
-        startService(intent);
         bindService(intent, connection, Context.BIND_AUTO_CREATE);
     }
 
