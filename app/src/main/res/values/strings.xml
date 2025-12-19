@@ -120,4 +120,5 @@
         <item>Автор - Название (Чтец)</item>
     </string-array>
     <string name="folder_naming_title">Название папок</string>
+    <string name="found_in_authors">Найдено авторов</string>
 </resources>

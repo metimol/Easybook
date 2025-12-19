@@ -54,6 +54,7 @@ public class MainViewModel extends AndroidViewModel {
     private final MutableLiveData<List<Category>> categories = new MutableLiveData<>();
     private final MutableLiveData<List<Book>> books = new MutableLiveData<>();
     private final MutableLiveData<List<Serie>> series = new MutableLiveData<>();
+    private final MutableLiveData<List<Author>> authors = new MutableLiveData<>();
     private final MutableLiveData<Boolean> isLoading = new MutableLiveData<>(false);
     private final MutableLiveData<Boolean> loadError = new MutableLiveData<>(false);
     private final MutableLiveData<Book> selectedBookDetails = new MutableLiveData<>();
@@ -282,6 +283,8 @@ public class MainViewModel extends AndroidViewModel {
     public LiveData<List<Serie>> getSeries() {
         return series;
     }
+
+    public LiveData<List<Author>> getAuthors() { return authors; }
 
     public LiveData<Boolean> getIsLoading() {
         return isLoading;
@@ -659,6 +662,7 @@ public class MainViewModel extends AndroidViewModel {
     public void clearBookList() {
         books.setValue(new ArrayList<>());
         series.setValue(new ArrayList<>());
+        authors.setValue(new ArrayList<>());
         currentPage = 0;
         isLastPage = false;
     }
@@ -883,7 +887,7 @@ public class MainViewModel extends AndroidViewModel {
 
         SupabaseService apiService = ApiClient.getClient(getApplication()).create(SupabaseService.class);
 
-        AtomicInteger runningRequests = new AtomicInteger(2);
+        AtomicInteger runningRequests = new AtomicInteger(3);
         AtomicBoolean anyRequestFailed = new AtomicBoolean(false);
 
         Call<List<Book>> booksCall = apiService.searchBooks("ilike.*" + query + "*", 50);
@@ -947,6 +951,31 @@ public class MainViewModel extends AndroidViewModel {
             @Override
             public void onFailure(@NonNull Call<List<Serie>> call, @NonNull Throwable t) {
                 series.setValue(new ArrayList<>());
+                if (runningRequests.decrementAndGet() == 0) {
+                    onAllSearchRequestsFinished(anyRequestFailed.get());
+                }
+            }
+        });
+
+        String authorQuery = "(name.ilike.*" + query + "*,surname.ilike.*" + query + "*)";
+        Call<List<Author>> authorsCall = apiService.searchAuthors(authorQuery, 5);
+        authorsCall.enqueue(new Callback<>() {
+            @Override
+            public void onResponse(@NonNull Call<List<Author>> call, @NonNull Response<List<Author>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    authors.setValue(response.body());
+                } else {
+                    authors.setValue(new ArrayList<>());
+                }
+
+                if (runningRequests.decrementAndGet() == 0) {
+                    onAllSearchRequestsFinished(anyRequestFailed.get());
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<List<Author>> call, @NonNull Throwable t) {
+                authors.setValue(new ArrayList<>());
                 if (runningRequests.decrementAndGet() == 0) {
                     onAllSearchRequestsFinished(anyRequestFailed.get());
                 }

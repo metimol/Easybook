@@ -193,6 +193,37 @@
                 tools:listitem="@layout/category_button_horizontal" />
 
             <TextView
+                android:id="@+id/authors_header"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/found_in_authors"
+                android:textColor="@color/black"
+                android:fontFamily="@font/sf_pro"
+                android:textSize="20sp"
+                android:textStyle="normal"
+                android:textFontWeight="500"
+                android:paddingHorizontal="10dp"
+                android:layout_marginTop="15dp"
+                android:visibility="gone"
+                app:layout_scrollFlags="scroll"
+                tools:visibility="visible" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/authorsRecyclerView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:orientation="horizontal"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="3dp"
+                android:clipToPadding="false"
+                android:visibility="gone"
+                app:layout_scrollFlags="scroll"
+                tools:orientation="horizontal"
+                tools:listitem="@layout/item_serie"
+                tools:visibility="visible" />
+
+            <TextView
                 android:id="@+id/series_header"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
