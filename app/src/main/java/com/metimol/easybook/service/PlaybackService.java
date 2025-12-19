@@ -671,8 +671,10 @@ public class PlaybackService extends MediaSessionService {
 
                 final int finalChapterIndex = finalChapterIndex1;
                 new Handler(Looper.getMainLooper()).post(() -> {
-                    player.setMediaItems(mediaItems, finalChapterIndex, timestamp);
-                    player.prepare();
+                    if (player != null) {
+                        player.setMediaItems(mediaItems, finalChapterIndex, timestamp);
+                        player.prepare();
+                    }
                 });
             });
         } else {
