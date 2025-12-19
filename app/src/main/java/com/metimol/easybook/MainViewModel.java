@@ -1160,7 +1160,11 @@ public class MainViewModel extends AndroidViewModel {
                 continue;
             }
 
-            String safeFileName = chapter.title.replaceAll("[\\\\/:*?\"<>|]", "_") + ".mp3";
+            String safeFileName = chapter.title.replaceAll("[\\\\/:*?\"<>|]", "_");
+            if (safeFileName.length() > 128) {
+                safeFileName = safeFileName.substring(0, 128);
+            }
+            safeFileName += ".mp3";
 
             File expectedFile = new File(rootDir, safeFileName);
             if (expectedFile.exists()) {
