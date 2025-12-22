@@ -12,9 +12,6 @@ public class ApiClient {
     private static final String SUPABASE_URL = BuildConfig.AUDIOBOOKS_BASE_URL;
     private static final String SUPABASE_KEY = BuildConfig.AUDIOBOOKS_ANON_KEY;
 
-    public static final String REAL_USER_AGENT = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Mobile Safari/537.36";
-    public static final String REFERER = "https://izib.uk/";
-
     private static Retrofit retrofit = null;
     private static OkHttpClient okHttpClient = null;
 
@@ -28,18 +25,13 @@ public class ApiClient {
 
             builder.addInterceptor(chain -> {
                 Request original = chain.request();
-                Request.Builder requestBuilder = original.newBuilder()
-                        .header("User-Agent", REAL_USER_AGENT);
+                Request.Builder requestBuilder = original.newBuilder();
 
                 if (original.url().toString().contains("supabase")) {
                     requestBuilder
                             .header("apikey", SUPABASE_KEY)
                             .header("Authorization", "Bearer " + SUPABASE_KEY)
                             .header("Prefer", "count=exact");
-                }
-
-                if (original.url().toString().contains("izib.uk")) {
-                    requestBuilder.header("Referer", REFERER);
                 }
 
                 return chain.proceed(requestBuilder.build());

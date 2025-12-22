@@ -165,7 +165,6 @@ public class PlaybackService extends MediaSessionService {
                 new DefaultDataSource.Factory(this, okHttpFactory);
 
         java.util.Map<String, String> defaultHeaders = new java.util.HashMap<>();
-        defaultHeaders.put("Referer", ApiClient.REFERER);
         okHttpFactory.setDefaultRequestProperties(defaultHeaders);
 
         androidx.media3.exoplayer.source.DefaultMediaSourceFactory mediaSourceFactory =
