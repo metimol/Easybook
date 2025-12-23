@@ -22,17 +22,13 @@ public class MirrorManager {
     private final List<String> dbMirrors;
     private final List<String> filesMirrors;
 
-    private int selectedIndex = 0;
+    private volatile int selectedIndex = 0;
+    private final CountDownLatch initializationLatch = new CountDownLatch(1);
 
     private MirrorManager() {
         authMirrors = parseConfig(BuildConfig.YANDEX_AUTH_BACKEND_URL);
         dbMirrors = parseConfig(BuildConfig.AUDIOBOOKS_BASE_URL);
         filesMirrors = parseConfig(BuildConfig.FILES_BASE_URL);
-
-        Log.d(TAG, "Initialized with mirrors: " +
-                "Auth=" + authMirrors.size() + ", " +
-                "DB=" + dbMirrors.size() + ", " +
-                "Files=" + filesMirrors.size());
     }
 
     public static synchronized MirrorManager getInstance() {
@@ -61,59 +57,68 @@ public class MirrorManager {
     }
 
     public void selectBestMirror() {
-        boolean isInitialized = false;
-        if (filesMirrors.isEmpty()) {
-            selectedIndex = 0;
-            isInitialized = true;
-            return;
-        }
-
-        ExecutorService executor = Executors.newFixedThreadPool(filesMirrors.size());
-        OkHttpClient client = new OkHttpClient.Builder()
-                .connectTimeout(5, TimeUnit.SECONDS)
-                .readTimeout(5, TimeUnit.SECONDS)
-                .build();
-
-        int[] healthStatus = new int[filesMirrors.size()];
-        CountDownLatch latch = new CountDownLatch(filesMirrors.size());
-
-        for (int i = 0; i < filesMirrors.size(); i++) {
-            final int index = i;
-            final String url = filesMirrors.get(i);
-            executor.execute(() -> {
-                boolean healthy = checkHealth(client, url);
-                healthStatus[index] = healthy ? 1 : -1;
-                latch.countDown();
-            });
-        }
-
         try {
-            latch.await(6, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            Log.e(TAG, "Interrupted while checking mirrors", e);
-        } finally {
-            executor.shutdownNow();
-        }
-
-        int bestIndex = 0;
-        boolean found = false;
-        for (int i = 0; i < filesMirrors.size(); i++) {
-            if (healthStatus[i] == 1) {
-                bestIndex = i;
-                found = true;
-                break;
+            boolean isInitialized = false;
+            if (filesMirrors.isEmpty()) {
+                selectedIndex = 0;
+                isInitialized = true;
+                return;
             }
-        }
 
-        if (!found) {
-            Log.w(TAG, "No healthy mirrors found. Defaulting to index 0.");
-            bestIndex = 0;
-        }
+            ExecutorService executor = Executors.newFixedThreadPool(filesMirrors.size());
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(5, TimeUnit.SECONDS)
+                    .readTimeout(5, TimeUnit.SECONDS)
+                    .build();
 
-        selectedIndex = bestIndex;
-        isInitialized = true;
-        Log.i(TAG, "Selected mirror index: " + selectedIndex +
-                " (" + filesMirrors.get(selectedIndex) + ")");
+            int[] healthStatus = new int[filesMirrors.size()];
+            CountDownLatch latch = new CountDownLatch(filesMirrors.size());
+
+            for (int i = 0; i < filesMirrors.size(); i++) {
+                final int index = i;
+                final String url = filesMirrors.get(i);
+                executor.execute(() -> {
+                    boolean healthy = checkHealth(client, url);
+                    healthStatus[index] = healthy ? 1 : -1;
+                    latch.countDown();
+                });
+            }
+
+            try {
+                latch.await(6, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                Log.e(TAG, "Interrupted while checking mirrors", e);
+            } finally {
+                executor.shutdownNow();
+            }
+
+            int bestIndex = 0;
+            boolean found = false;
+            for (int i = 0; i < filesMirrors.size(); i++) {
+                if (healthStatus[i] == 1) {
+                    bestIndex = i;
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                bestIndex = 0;
+            }
+
+            selectedIndex = bestIndex;
+            isInitialized = true;
+        } finally {
+            initializationLatch.countDown();
+        }
+    }
+
+    public void ensureInitialized() {
+        try {
+            initializationLatch.await(10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
     private boolean checkHealth(OkHttpClient client, String baseUrl) {

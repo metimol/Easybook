@@ -58,6 +58,7 @@ import com.metimol.easybook.database.AppDatabase;
 import com.metimol.easybook.database.AudiobookDao;
 import com.metimol.easybook.database.Chapter;
 import com.metimol.easybook.firebase.FirebaseRepository;
+import com.metimol.easybook.utils.MirrorManager;
 
 import java.io.File;
 import java.io.IOException;
@@ -159,7 +160,7 @@ public class PlaybackService extends MediaSessionService {
                 .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
                 .build();
 
-        OkHttpDataSource.Factory okHttpFactory = new OkHttpDataSource.Factory(ApiClient.getOkHttpClient(this));
+        OkHttpDataSource.Factory okHttpFactory = new OkHttpDataSource.Factory(ApiClient.getFileOkHttpClient(this));
 
         DefaultDataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(this, okHttpFactory);
 
@@ -230,7 +231,7 @@ public class PlaybackService extends MediaSessionService {
                                     .into(new CustomTarget<Bitmap>() {
                                         @Override
                                         public void onResourceReady(@NonNull Bitmap resource,
-                                                @Nullable Transition<? super Bitmap> transition) {
+                                                                    @Nullable Transition<? super Bitmap> transition) {
                                             callback.onBitmap(resource);
                                         }
 
@@ -628,6 +629,8 @@ public class PlaybackService extends MediaSessionService {
         if (!isSameBook) {
             int finalChapterIndex1 = chapterIndex;
             databaseExecutor.execute(() -> {
+                MirrorManager.getInstance().ensureInitialized();
+
                 List<Chapter> dbChapters = audiobookDao.getChaptersForBook(book.getId());
                 List<MediaItem> mediaItems = new ArrayList<>();
                 String artist = (book.getAuthors() != null && !book.getAuthors().isEmpty())
