@@ -8,5 +8,9 @@ public class EasyBookApplication extends Application {
     public void onCreate() {
         super.onCreate();
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+
+        new Thread(() -> {
+            com.metimol.easybook.utils.MirrorManager.getInstance().selectBestMirror();
+        }).start();
     }
 }

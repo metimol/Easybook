@@ -106,9 +106,14 @@ public class FirebaseRepository {
             return;
         }
 
+        String authUrl = com.metimol.easybook.utils.MirrorManager.getInstance().getAuthUrl();
+        if (authUrl.isEmpty()) {
+            authUrl = BuildConfig.YANDEX_AUTH_BACKEND_URL;
+        }
+
         RequestBody body = RequestBody.create(jsonBody.toString(), JSON);
         Request request = new Request.Builder()
-                .url(YANDEX_AUTH_BACKEND_URL)
+                .url(authUrl)
                 .post(body)
                 .build();
 
@@ -174,7 +179,8 @@ public class FirebaseRepository {
 
     public void startSync() {
         FirebaseUser user = auth.getCurrentUser();
-        if (user == null) return;
+        if (user == null)
+            return;
 
         DatabaseReference userBooksRef = database.child("users").child(user.getUid()).child("books");
 
@@ -186,13 +192,17 @@ public class FirebaseRepository {
                         for (DataSnapshot bookSnapshot : snapshot.getChildren()) {
                             try {
                                 String id = bookSnapshot.child("id").getValue(String.class);
-                                if (id == null) continue;
+                                if (id == null)
+                                    continue;
 
                                 Book cloudBook = new Book();
                                 cloudBook.id = id;
-                                cloudBook.isFavorite = Boolean.TRUE.equals(bookSnapshot.child("isFavorite").getValue(Boolean.class));
-                                cloudBook.isFinished = Boolean.TRUE.equals(bookSnapshot.child("isFinished").getValue(Boolean.class));
-                                cloudBook.currentChapterId = bookSnapshot.child("currentChapterId").getValue(String.class);
+                                cloudBook.isFavorite = Boolean.TRUE
+                                        .equals(bookSnapshot.child("isFavorite").getValue(Boolean.class));
+                                cloudBook.isFinished = Boolean.TRUE
+                                        .equals(bookSnapshot.child("isFinished").getValue(Boolean.class));
+                                cloudBook.currentChapterId = bookSnapshot.child("currentChapterId")
+                                        .getValue(String.class);
                                 Long ts = bookSnapshot.child("currentTimestamp").getValue(Long.class);
                                 cloudBook.currentTimestamp = ts != null ? ts : 0;
                                 Long lastListened = bookSnapshot.child("lastListened").getValue(Long.class);
@@ -252,7 +262,8 @@ public class FirebaseRepository {
 
     public void syncLocalDataToCloud() {
         FirebaseUser user = auth.getCurrentUser();
-        if (user == null) return;
+        if (user == null)
+            return;
         executorService.execute(() -> {
             List<Book> localBooks = audiobookDao.getAllBooksProgress();
             DatabaseReference userBooksRef = database.child("users").child(user.getUid()).child("books");

@@ -48,6 +48,7 @@ import com.bumptech.glide.request.transition.Transition;
 
 import com.google.firebase.crashlytics.FirebaseCrashlytics;
 
+import com.metimol.easybook.BuildConfig;
 import com.metimol.easybook.MainActivity;
 import com.metimol.easybook.R;
 import com.metimol.easybook.api.ApiClient;
@@ -158,17 +159,15 @@ public class PlaybackService extends MediaSessionService {
                 .setContentType(C.AUDIO_CONTENT_TYPE_SPEECH)
                 .build();
 
-        OkHttpDataSource.Factory okHttpFactory =
-                new OkHttpDataSource.Factory(ApiClient.getOkHttpClient(this));
+        OkHttpDataSource.Factory okHttpFactory = new OkHttpDataSource.Factory(ApiClient.getOkHttpClient(this));
 
-        DefaultDataSource.Factory dataSourceFactory =
-                new DefaultDataSource.Factory(this, okHttpFactory);
+        DefaultDataSource.Factory dataSourceFactory = new DefaultDataSource.Factory(this, okHttpFactory);
 
         java.util.Map<String, String> defaultHeaders = new java.util.HashMap<>();
         okHttpFactory.setDefaultRequestProperties(defaultHeaders);
 
-        androidx.media3.exoplayer.source.DefaultMediaSourceFactory mediaSourceFactory =
-                new androidx.media3.exoplayer.source.DefaultMediaSourceFactory(dataSourceFactory);
+        androidx.media3.exoplayer.source.DefaultMediaSourceFactory mediaSourceFactory = new androidx.media3.exoplayer.source.DefaultMediaSourceFactory(
+                dataSourceFactory);
 
         player = new ExoPlayer.Builder(this)
                 .setMediaSourceFactory(mediaSourceFactory)
@@ -231,7 +230,7 @@ public class PlaybackService extends MediaSessionService {
                                     .into(new CustomTarget<Bitmap>() {
                                         @Override
                                         public void onResourceReady(@NonNull Bitmap resource,
-                                                                    @Nullable Transition<? super Bitmap> transition) {
+                                                @Nullable Transition<? super Bitmap> transition) {
                                             callback.onBitmap(resource);
                                         }
 
@@ -353,7 +352,8 @@ public class PlaybackService extends MediaSessionService {
 
                 crashlytics.setCustomKey("player_error_code", error.errorCode);
                 crashlytics.setCustomKey("player_error_name", error.getErrorCodeName());
-                crashlytics.setCustomKey("player_error_message", Objects.requireNonNullElse(error.getMessage(), "No message"));
+                crashlytics.setCustomKey("player_error_message",
+                        Objects.requireNonNullElse(error.getMessage(), "No message"));
 
                 Book book = currentBook.getValue();
                 if (book != null) {
@@ -371,13 +371,15 @@ public class PlaybackService extends MediaSessionService {
                 if (cause instanceof HttpDataSource.InvalidResponseCodeException responseError) {
 
                     crashlytics.setCustomKey("http_response_code", responseError.responseCode);
-                    crashlytics.setCustomKey("http_response_message", Objects.requireNonNullElse(responseError.responseMessage, ""));
+                    crashlytics.setCustomKey("http_response_message",
+                            Objects.requireNonNullElse(responseError.responseMessage, ""));
 
                     if (!responseError.headerFields.isEmpty()) {
                         crashlytics.setCustomKey("http_headers", responseError.headerFields.toString());
                     }
                 } else if (cause instanceof HttpDataSource.HttpDataSourceException) {
-                    crashlytics.setCustomKey("http_data_source_error", "Type: " + ((HttpDataSource.HttpDataSourceException) cause).type);
+                    crashlytics.setCustomKey("http_data_source_error",
+                            "Type: " + ((HttpDataSource.HttpDataSourceException) cause).type);
                 } else if (cause instanceof IOException) {
                     crashlytics.setCustomKey("io_exception", "General IO Error");
                 }
@@ -647,7 +649,18 @@ public class PlaybackService extends MediaSessionService {
                     if (localPath != null && new File(localPath).exists()) {
                         mediaUri = Uri.fromFile(new File(localPath));
                     } else {
-                        mediaUri = Uri.parse(chapter.getUrl());
+                        String url = chapter.getUrl();
+                        if (url != null && url.startsWith("/")) {
+                            String baseUrl = com.metimol.easybook.utils.MirrorManager.getInstance().getFilesUrl();
+                            if (baseUrl.isEmpty()) {
+                                baseUrl = BuildConfig.AUDIOBOOKS_BASE_URL;
+                            }
+                            if (baseUrl.endsWith("/")) {
+                                baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+                            }
+                            url = baseUrl + url;
+                        }
+                        mediaUri = Uri.parse(url);
                     }
 
                     MediaMetadata.Builder metadataBuilder = new MediaMetadata.Builder()

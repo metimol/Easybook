@@ -26,8 +26,10 @@ public class ApiClient {
             builder.addInterceptor(chain -> {
                 Request original = chain.request();
                 Request.Builder requestBuilder = original.newBuilder();
+                String url = original.url().toString();
+                String dbUrl = com.metimol.easybook.utils.MirrorManager.getInstance().getDbUrl();
 
-                if (original.url().toString().contains("supabase")) {
+                if (url.contains("supabase") || (!dbUrl.isEmpty() && url.startsWith(dbUrl))) {
                     requestBuilder
                             .header("apikey", SUPABASE_KEY)
                             .header("Authorization", "Bearer " + SUPABASE_KEY)
@@ -44,8 +46,16 @@ public class ApiClient {
 
     public static Retrofit getClient(Context context) {
         if (retrofit == null) {
+            String baseUrl = com.metimol.easybook.utils.MirrorManager.getInstance().getDbUrl();
+            if (baseUrl.isEmpty()) {
+                baseUrl = BuildConfig.AUDIOBOOKS_BASE_URL;
+            }
+            if (!baseUrl.endsWith("/")) {
+                baseUrl += "/";
+            }
+
             retrofit = new Retrofit.Builder()
-                    .baseUrl(SUPABASE_URL)
+                    .baseUrl(baseUrl)
                     .addConverterFactory(GsonConverterFactory.create())
                     .client(getOkHttpClient(context))
                     .build();

@@ -20,8 +20,8 @@ android {
         applicationId = "com.metimol.easybook"
         minSdk = 26
         targetSdk = 36
-        versionCode = 20
-        versionName = "1.3.7"
+        versionCode = 21
+        versionName = "1.3.8"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -32,16 +32,38 @@ android {
             properties.load(FileInputStream(localPropertiesFile))
         }
 
-        val dbUrl = properties.getProperty("FIREBASE_DB_URL") ?: "\"https://placeholder-url\""
-        val yandexAuthUrl = properties.getProperty("YANDEX_AUTH_BACKEND_URL") ?: "\"https://placeholder-url\""
+        val dbUrlVal = properties.getProperty("FIREBASE_DB_URL")
+        val dbUrlStr = if (dbUrlVal != null) {
+            val t = dbUrlVal.trim()
+            if (t.startsWith("\"") && t.endsWith("\"")) t else "\"$t\""
+        } else "\"https://placeholder-url\""
+
+        val yandexAuthUrlVal = properties.getProperty("YANDEX_AUTH_BACKEND_URL")
+        val yandexAuthUrlStr = if (yandexAuthUrlVal != null) {
+            val t = yandexAuthUrlVal.trim()
+            if (t.startsWith("\"") && t.endsWith("\"")) t else "\"$t\""
+        } else "\"https://placeholder-url\""
+
+        val audiobooksBaseUrlVal = properties.getProperty("AUDIOBOOKS_BASE_URL")
+        val audiobooksBaseUrlStr = if (audiobooksBaseUrlVal != null) {
+            val t = audiobooksBaseUrlVal.trim()
+            if (t.startsWith("\"") && t.endsWith("\"")) t else "\"$t\""
+        } else "\"https://placeholder-url\""
+        
+        val filesBaseUrlVal = properties.getProperty("FILES_BASE_URL")
+        val filesBaseUrlStr = if (filesBaseUrlVal != null) {
+            val t = filesBaseUrlVal.trim()
+            if (t.startsWith("\"") && t.endsWith("\"")) t else "\"$t\""
+        } else "\"https://placeholder-url\""
+
         val yandexClientId = properties.getProperty("YANDEX_CLIENT_ID") ?: ""
-        val audiobooksBaseUrl = properties.getProperty("AUDIOBOOKS_BASE_URL") ?: "\"https://placeholder-url\""
         val audiobooksAnonKey = properties.getProperty("AUDIOBOOKS_ANON_KEY") ?: ""
 
-        buildConfigField("String", "FIREBASE_DB_URL", dbUrl)
-        buildConfigField("String", "YANDEX_AUTH_BACKEND_URL", yandexAuthUrl)
-        buildConfigField("String", "AUDIOBOOKS_BASE_URL", audiobooksBaseUrl)
+        buildConfigField("String", "FIREBASE_DB_URL", dbUrlStr)
+        buildConfigField("String", "YANDEX_AUTH_BACKEND_URL", yandexAuthUrlStr)
+        buildConfigField("String", "AUDIOBOOKS_BASE_URL", audiobooksBaseUrlStr)
         buildConfigField("String", "AUDIOBOOKS_ANON_KEY", "\"" + audiobooksAnonKey + "\"")
+        buildConfigField("String", "FILES_BASE_URL", filesBaseUrlStr)
 
         manifestPlaceholders["YANDEX_CLIENT_ID"] = yandexClientId
     }
