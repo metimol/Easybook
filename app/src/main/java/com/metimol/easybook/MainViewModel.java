@@ -1176,6 +1176,8 @@ public class MainViewModel extends AndroidViewModel {
             rootDir.mkdirs();
         }
 
+        com.metimol.easybook.utils.MirrorManager.getInstance().ensureInitialized();
+
         int totalChapters = chapters.size();
         AtomicInteger downloaded = new AtomicInteger(0);
 
@@ -1206,10 +1208,23 @@ public class MainViewModel extends AndroidViewModel {
                 continue;
             }
 
-            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(chapter.url));
+            String downloadUrl = chapter.url;
+            if (downloadUrl != null && downloadUrl.startsWith("/")) {
+                String baseUrl = com.metimol.easybook.utils.MirrorManager.getInstance().getFilesUrl();
+                if (baseUrl.isEmpty()) {
+                    baseUrl = BuildConfig.AUDIOBOOKS_BASE_URL;
+                }
+                if (baseUrl.endsWith("/")) {
+                    baseUrl = baseUrl.substring(0, baseUrl.length() - 1);
+                }
+                downloadUrl = baseUrl + downloadUrl;
+            }
+
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(downloadUrl));
             request.setTitle(book.getName());
             request.setDescription(chapter.title);
             request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE);
+            request.setAllowedNetworkTypes(DownloadManager.Request.NETWORK_WIFI | DownloadManager.Request.NETWORK_MOBILE);
 
             if (useAppFolder) {
                 request.setDestinationInExternalFilesDir(context, null, "EasyBook/" + folderName + "/" + safeFileName);
