@@ -9,8 +9,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ApiClient {
-    private static final String SUPABASE_URL = BuildConfig.AUDIOBOOKS_BASE_URL;
-    private static final String SUPABASE_KEY = BuildConfig.AUDIOBOOKS_ANON_KEY;
+    private static final String DATABASE_KEY = BuildConfig.AUDIOBOOKS_ANON_KEY;
 
     private static Retrofit retrofit = null;
     private static OkHttpClient okHttpClient = null;
@@ -29,10 +28,10 @@ public class ApiClient {
                 String url = original.url().toString();
                 String dbUrl = com.metimol.easybook.utils.MirrorManager.getInstance().getDbUrl();
 
-                if (url.contains("supabase") || (!dbUrl.isEmpty() && url.startsWith(dbUrl))) {
+                if (!dbUrl.isEmpty() && url.startsWith(dbUrl)) {
                     requestBuilder
-                            .header("apikey", SUPABASE_KEY)
-                            .header("Authorization", "Bearer " + SUPABASE_KEY)
+                            .header("apikey", DATABASE_KEY)
+                            .header("Authorization", "Bearer " + DATABASE_KEY)
                             .header("Prefer", "count=exact");
                 }
 
