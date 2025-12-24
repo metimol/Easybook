@@ -1,4 +1,6 @@
-# 🎧 EasyBook
+# PROJECT IS DEAD. NO SUPPORT.
+
+## 🎧 EasyBook
 
 ![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)
 ![Java](https://img.shields.io/badge/Java-ED8B00?style=for-the-badge&logo=openjdk&logoColor=white)
